@@ -16,6 +16,9 @@ Big things
 - response types (data, action)
 - blink1 support
 - compound commands
+- some way to show information
+- plenty of training data
+- plenty of testing data
 
 Commands
 ========
@@ -28,3 +31,4 @@ Commands
 - wemo stuff
 - list files
 - show pictures
+- media control
