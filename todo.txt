@@ -1,0 +1,30 @@
+The to-do list
+
+Key
+===
+
+- = incomplete
+* = partial
++ = complete
+
+Big things
+==========
+
+- real time speech recognition
+- command classifier
+- commands
+- response types (data, action)
+- blink1 support
+- compound commands
+
+Commands
+========
+
+- date and time
+- volume control
+- audio device switching
+- switch workspace
+- run programs
+- wemo stuff
+- list files
+- show pictures
