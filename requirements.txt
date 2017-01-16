@@ -1,0 +1,15 @@
+cloudpickle==0.2.2
+cymem==1.31.2
+murmurhash==0.26.4
+numpy==1.11.3
+pathlib==1.0.1
+plac==0.9.6
+preshed==0.46.4
+scikit-learn==0.18.1
+scipy==0.18.1
+semver==2.7.3
+six==1.10.0
+spacy==1.5.1
+sputnik==0.9.3
+thinc==5.0.8
+ujson==1.35
