@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python -m unittest -c discovery -s "tests/" -p "test_*"
+python -m unittest -c tests/*
