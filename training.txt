@@ -1,0 +1,27 @@
+what time is it,time
+what's the time,time
+what time is it in eastern standard time,time
+what time is it on the west coast,time
+what's the current military time,time
+is it still morning,time
+what is today's date,date
+give me the date,date
+what day of the week is it,date
+what's the date,date
+what day of the month is it,date
+what month is it,date
+what year is it,date
+is tomorrow monday,date
+is today tuesday,date
+is today wednesday,date
+was yesterday thursday,date
+is today friday,date
+pause the video,media-pause
+play media,media-play
+resume playback,media-play
+suspend playback,media-pause
+stop the video,media-pause
+play video,media-play
+stop playback,media-pause
+stop playing music,media-pause
+set volume to 100%,volume-set
