@@ -15,7 +15,7 @@ class TestCommandClassifier(unittest.TestCase):
 	def test_commandClassifier(self):
 		cmdClassifier = classifier.CommandClassifier(nlp)
 
-		# TODO: load training data from file 
+		# TODO: load training data from file
 		train = ["what time is it", "what is today's date", "what's the time", "what time is it in eastern standard time",
 				"is today friday", "give me the date", "what day of the week is it", "what time is it on the west coast",
 				"is tomorrow monday", "what year is it", "what's the date", "is today tuesday", "is today wednesday",
@@ -30,16 +30,13 @@ class TestCommandClassifier(unittest.TestCase):
 				"what time is it in pacific standard time", "pause music", "play the video", "stop playing that"]
 		labelsTest = ["time", "date", "date", "time", "time", "media-pause", "media-play", "media-pause"]
 
-		print("Training...")
 		cmdClassifier.fit(train, labelsTrain)
 
-		print("Testing...")
 		preds = cmdClassifier.predict(test)
 
-		print("----------------------------------------------------------------------------------------------")
-		print("results:")
-		for (sample, pred) in zip(test, preds):
-			print(sample, ":", pred)
+		# print("results:")
+		# for (sample, pred) in zip(test, preds):
+		# 	print(sample, ":", pred)
 		accuracy = accuracy_score(labelsTest, preds)
 		print("accuracy:", accuracy)
 		assert accuracy >= 1.0
