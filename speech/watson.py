@@ -62,6 +62,11 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		while self.isRunning:
 			received = websockets.recv()
 			print("received:",received)
+			result = json.loads(received)
+			if not result.results[0].final:
+				self.onSpeech.fire(result.results[0].alternatives[0].transcript)
+			else:
+				self.onFinish.fire(result.results[0].alternatives[0].transcript)
 
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
