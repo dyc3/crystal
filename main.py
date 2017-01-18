@@ -4,10 +4,12 @@ import spacy
 from sklearn.metrics import accuracy_score
 import classifier
 from datautil import DataUtil
+import speech
 
 print("Loading...")
 nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
+recognizer = speech.base.BaseSpeechRecognizer() # placeholder
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
