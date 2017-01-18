@@ -4,7 +4,8 @@ import spacy
 from sklearn.metrics import accuracy_score
 import classifier
 from datautil import DataUtil
-from speech.base import BaseSpeechRecognizer
+# from speech.base import BaseSpeechRecognizer
+from speech.watson import WatsonSpeechRecognizer
 import audio
 import audioop
 import time
@@ -14,7 +15,8 @@ import sys
 print("Loading...")
 nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
-recognizer = BaseSpeechRecognizer() # placeholder
+# recognizer = BaseSpeechRecognizer() # placeholder
+recognizer = WatsonSpeechRecognizer()
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
