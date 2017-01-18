@@ -36,7 +36,7 @@ def consoleVisualizer(frame, width):
 	_max = audioop.max(frame, width)
 	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6)
 	print("rms/avg/max: ", info, end='\r')
-	recognizer.GiveFrame(frame) # TODO: move somewhere else
+	recognizer.GiveFrame(frame, micIn.powerThreshold) # TODO: move somewhere else
 
 micIn.onFrame += consoleVisualizer
 print("Calibrating...")
