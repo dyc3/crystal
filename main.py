@@ -31,16 +31,3 @@ print("Listening...")
 micIn.Start()
 while micIn.isRunning:
 	time.sleep(0.25)
-
-test = ["give me the time", "is today monday", "give me the date", "what time is it on the east coast in military time",
-		"what time is it in pacific standard time", "pause music", "play the video", "stop playing that"]
-labelsTest = ["time", "date", "date", "time", "time", "media-pause", "media-play", "media-pause"]
-
-print("Testing...")
-preds = cmdClassifier.predict(test)
-
-print("----------------------------------------------------------------------------------------------")
-print("results:")
-for (sample, pred) in zip(test, preds):
-	print(sample, ":", pred)
-print("accuracy:", accuracy_score(labelsTest, preds))
