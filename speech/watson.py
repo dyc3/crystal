@@ -46,7 +46,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.websocket.send('{action:"start", content-type="audio/flac"}')
 
 		if self.status == "speaking":
-			self.websocket.send(frame)
+			yield from self.websocket.send(frame)
 			if frame_power >= speaking_power:
 				self._notSpeakingTicks = 0
 			else:
@@ -60,7 +60,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	def _doThreadReceiver(self):
 
 		while self.isRunning:
-			received = self.websocket.recv()
+			received = yield from self.websocket.recv()
 			print("received:",received)
 			result = json.loads(received)
 			if not result.results[0].final:
