@@ -31,6 +31,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.isRunning = False
 			self.threadReceiver.join()
 
+	def GiveFrame(self, frame):
+		pass
+
 	def _doThreadReceiver(self):
 
 		while self.isRunning:
