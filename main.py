@@ -50,7 +50,6 @@ def signal_handler(signum, frame):
 	quit()
 
 signal.signal(signal.SIGTERM, signal_handler)
-signal.signal(signal.SIGKILL, signal_handler)
 
 while micIn.isRunning:
 	time.sleep(0.25)
