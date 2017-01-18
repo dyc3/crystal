@@ -38,7 +38,7 @@ class MicrophoneInput(object):
 							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
-			self.onFrame.fire(frame)
+			self.onFrame.fire(frame, 1)
 
 		stream.stop_stream()
 		stream.close()
