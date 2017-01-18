@@ -72,8 +72,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
-		uri = hostname + "/authorization/api/v1/token?url=" + hostname + '/' \
-			  + serviceName + "/api"
+		uri = hostname + "/authorization/api/v1/token?url=" + hostname + '/' + \
+			  serviceName + "/api"
 		uri = uri.replace("wss://", "https://")
 		uri = uri.replace("ws://", "https://")
 		print(uri)
