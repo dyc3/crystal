@@ -4,6 +4,7 @@ import json
 import requests
 import websockets
 import threading
+import audioop
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	"""docstring for WatsonSpeechRecognizer."""
@@ -22,10 +23,11 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			headers = {}
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://stream.watsonplatform.net","speech-to-text",self.username,self.password)
 			self.websocket = websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers)
-			self.websocket.send()
 			self.threadReceiver = threading.Thread(name="watson-receiver")
 			self.threadReceiver.run = self._doThreadReceiver
 			self.isRunning = True
+			self.status = "not-speaking"
+			self._notSpeakingTicks = 0
 			self.threadReceiver.Start()
 
 	def Stop(self):
@@ -33,8 +35,24 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.isRunning = False
 			self.threadReceiver.join()
 
-	def GiveFrame(self, frame):
-		pass
+	def GiveFrame(self, frame, speaking_power=200):
+		frame_power = audioop.rms(frame, 2)
+		if self.status == "not-speaking" and frame_power >= speaking_power:
+			self.status = "speaking"
+			self._notSpeakingTicks = 0
+			self.websocket.send('{action:"start", content-type="audio/flac"}')
+
+		if self.status == "speaking":
+			self.websocket.send(frame)
+			if frame_power >= speaking_power:
+				self._notSpeakingTicks = 0
+			else:
+				self._notSpeakingTicks += 1
+
+		if self._notSpeakingTicks >= 80:
+			self.status = "not-speaking"
+			self.websocket.send('{action:"stop"}')
+
 
 	def _doThreadReceiver(self):
 
