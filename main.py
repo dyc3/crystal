@@ -21,9 +21,11 @@ cmdClassifier.fit(train, labelsTrain)
 # testing to see if MicrophoneInput works
 micIn = audio.MicrophoneInput()
 def consoleVisualizer(frame, width):
+	rms = audioop.rms(frame, width)
 	avg = audioop.avg(frame, width)
 	_max = audioop.max(frame, width)
-	print("avg:",avg,"max:",_max, end='\r')
+	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6)
+	print("rms/avg/max: ", info, end='\r')
 micIn.onFrame += consoleVisualizer
 print("Listening...")
 micIn.Start()
