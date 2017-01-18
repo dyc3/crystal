@@ -25,3 +25,8 @@ play video,media-play
 stop playback,media-pause
 stop playing music,media-pause
 set volume to 100%,volume-set
+set volume to 20%,volume-set
+turn down the volume to 50%,volume-set
+turn up the volume by 10%,volume-set
+increase the volume by 25%,volume-set
+decrease volume by 15%,volume-set
