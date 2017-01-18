@@ -41,6 +41,10 @@ def consoleVisualizer(frame, width):
 micIn.onFrame += consoleVisualizer
 print("Calibrating...")
 micIn.Calibrate()
+
+# start recognizer
+recognizer.Start()
+
 print("Listening...")
 micIn.Start()
 
