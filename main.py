@@ -8,6 +8,8 @@ from speech.base import BaseSpeechRecognizer
 import audio
 import audioop
 import time
+import signal
+import sys
 
 print("Loading...")
 nlp = spacy.load('en')
@@ -29,5 +31,18 @@ def consoleVisualizer(frame, width):
 micIn.onFrame += consoleVisualizer
 print("Listening...")
 micIn.Start()
+
+def quit():
+	print("Quitting...")
+	recognizer.Stop()
+	micIn.Stop()
+	sys.exit(0)
+
+def signal_handler(signum, frame):
+	quit()
+
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGKILL, signal_handler)
+
 while micIn.isRunning:
 	time.sleep(0.25)
