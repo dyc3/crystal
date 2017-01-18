@@ -4,16 +4,28 @@ import spacy
 from sklearn.metrics import accuracy_score
 import classifier
 from datautil import DataUtil
-from speech.watson import WatsonSpeechRecognizer
+from speech.base import BaseSpeechRecognizer
+import audio
+import audioop
 
 print("Loading...")
 nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
-recognizer = WatsonSpeechRecognizer() # placeholder
+recognizer = BaseSpeechRecognizer() # placeholder
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
 cmdClassifier.fit(train, labelsTrain)
+
+# testing to see if MicrophoneInput works
+micIn = audio.MicrophoneInput()
+def consoleVisualizer(frame):
+	print("\r",frame)
+micIn.onFrame += consoleVisualizer
+print("Listening...")
+micIn.Start()
+while micIn.isRunning:
+	pass
 
 test = ["give me the time", "is today monday", "give me the date", "what time is it on the east coast in military time",
 		"what time is it in pacific standard time", "pause music", "play the video", "stop playing that"]
