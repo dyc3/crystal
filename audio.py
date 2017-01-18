@@ -7,7 +7,7 @@ from eventhook import EventHook
 
 class MicrophoneInput(object):
 	"""docstring for MicrophoneInput."""
-	def __init__(self, chunk=1024, audioformat=pyaudio.paInt16, channels=2, rate=44100):
+	def __init__(self, chunk=1024, audioformat=pyaudio.paInt16, channels=2, rate=44100, dynamic_power_threshold=True):
 		super(MicrophoneInput, self).__init__()
 		self.CHUNK = chunk
 		self.FORMAT = audioformat
@@ -16,6 +16,7 @@ class MicrophoneInput(object):
 		self.p = pyaudio.PyAudio()
 		self.isRunning = False
 		self.powerThreshold = -100
+		self.dynamic_power_threshold = dynamic_power_threshold
 
 		self.onFrame = EventHook()
 
@@ -57,6 +58,17 @@ class MicrophoneInput(object):
 							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
+
+			if self.dynamic_power_threshold:
+				dynamic_power_adjustment_damping = 0.15
+				dynamic_power_ratio = 1.5
+				seconds_per_buffer = (self.CHUNK + 0.0) + self.RATE
+				power = audioop.rms(frame, 2)
+
+				damping = dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
+				target_power = power * dynamic_power_ratio
+				self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
+
 			self.onFrame.fire(frame, 2)
 
 		stream.stop_stream()
