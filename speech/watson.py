@@ -76,8 +76,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		uri = uri.replace("ws://", "https://")
 		print(uri)
 		resp = requests.get(uri, auth=(username, password), verify=False,
-							headers={'Accept': 'application/json'},
-							timeout=(30, 30))
+							headers={'Accept': 'application/json'}, timeout=(30, 30))
 		print(resp.text)
 		jsonObject = resp.json()
 		return jsonObject['token']
