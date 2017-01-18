@@ -16,6 +16,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		self.username = username
 		self.password = password
 
+		self.status = "not-speaking"
 		self.isRunning = False
 
 	def Start(self):
