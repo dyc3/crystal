@@ -19,6 +19,7 @@ class MicrophoneInput(object):
 	def Start(self):
 		if not self.isRunning:
 			self.threadRecord = threading.Thread(name="threadRecord")
+			self.threadRecord.run = self._doThreadRecord
 			self.isRunning = True
 			self.threadRecord.start()
 		else:
@@ -32,9 +33,12 @@ class MicrophoneInput(object):
 		else:
 			print("Recording thread was not running")
 
-	def _doThreadRecord():
-		stream = p.open(format=self.FORMAT, channels=self.CHANNELS,
+	def _doThreadRecord(self):
+		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
 						rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
 			self.onFrame.fire(frame)
+
+		stream.stop_stream()
+		stream.close()
