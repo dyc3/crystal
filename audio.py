@@ -35,7 +35,7 @@ class MicrophoneInput(object):
 
 	def _doThreadRecord(self):
 		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
-						rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
+							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
 			self.onFrame.fire(frame)
