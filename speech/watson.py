@@ -22,7 +22,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	def Start(self):
 		if not self.isRunning:
 			headers = {}
+			print("Watson: getting token...")
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://stream.watsonplatform.net","speech-to-text",self.username,self.password)
+			print("Watson: connecting...")
 			self.websocket = websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers)
 			self.threadReceiver = threading.Thread(name="watson-receiver")
 			self.threadReceiver.run = self._doThreadReceiver
