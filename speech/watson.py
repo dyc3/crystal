@@ -60,7 +60,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	def _doThreadReceiver(self):
 
 		while self.isRunning:
-			received = websockets.recv()
+			received = self.websocket.recv()
 			print("received:",received)
 			result = json.loads(received)
 			if not result.results[0].final:
