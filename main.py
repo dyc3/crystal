@@ -34,7 +34,7 @@ def consoleVisualizer(frame, width):
 	rms = audioop.rms(frame, width)
 	avg = audioop.avg(frame, width)
 	_max = audioop.max(frame, width)
-	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6)
+	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6) + " | threshold: " + str(micIn.powerThreshold)
 	print("rms/avg/max: ", info, end='\r')
 	if recognizer.isRunning:
 		recognizer.GiveFrame(frame, micIn.powerThreshold) # TODO: move somewhere else
