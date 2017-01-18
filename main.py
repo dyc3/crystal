@@ -39,6 +39,8 @@ def consoleVisualizer(frame, width):
 	recognizer.GiveFrame(frame) # TODO: move somewhere else
 
 micIn.onFrame += consoleVisualizer
+print("Calibrating...")
+micIn.Calibrate()
 print("Listening...")
 micIn.Start()
 
