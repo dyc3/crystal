@@ -31,7 +31,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.isRunning = True
 			self.status = "not-speaking"
 			self._notSpeakingTicks = 0
-			self.threadReceiver.Start()
+			self.threadReceiver.start()
 
 	def Stop(self):
 		if self.isRunning:
