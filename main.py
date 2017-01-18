@@ -7,6 +7,7 @@ from datautil import DataUtil
 from speech.base import BaseSpeechRecognizer
 import audio
 import audioop
+import time
 
 print("Loading...")
 nlp = spacy.load('en')
@@ -25,7 +26,7 @@ micIn.onFrame += consoleVisualizer
 print("Listening...")
 micIn.Start()
 while micIn.isRunning:
-	pass
+	time.sleep(0.25)
 
 test = ["give me the time", "is today monday", "give me the date", "what time is it on the east coast in military time",
 		"what time is it in pacific standard time", "pause music", "play the video", "stop playing that"]
