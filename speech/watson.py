@@ -57,7 +57,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	def _doThreadReceiver(self):
 
 		while self.isRunning:
-			pass
+			received = websockets.recv()
+			print("received:",received)
 
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
