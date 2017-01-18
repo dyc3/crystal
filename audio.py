@@ -1,6 +1,8 @@
 import pyaudio
 import wave
 import threading
+import numpy
+import audioop
 from eventhook import EventHook
 
 class MicrophoneInput(object):
@@ -13,6 +15,7 @@ class MicrophoneInput(object):
 		self.RATE = rate
 		self.p = pyaudio.PyAudio()
 		self.isRunning = False
+		self.powerThreshold = -100
 
 		self.onFrame = EventHook()
 
@@ -34,7 +37,20 @@ class MicrophoneInput(object):
 			print("Recording thread was not running")
 
 	def Calibrate(self):
-		pass
+		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
+							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
+
+		RECORD_SECONDS = 1
+		frames = []
+
+		for i in range(0, int(self.RATE / self.CHUNK * RECORD_SECONDS)):
+			data = stream.read(self.CHUNK)
+			frames.append(audioop.rms(data, 2))
+
+		stream.stop_stream()
+		stream.close()
+
+		self.powerThreshold = numpy.mean(frames)
 
 	def _doThreadRecord(self):
 		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
