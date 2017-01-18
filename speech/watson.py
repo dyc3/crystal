@@ -68,6 +68,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			else:
 				self.onFinish.fire(result.results[0].alternatives[0].transcript)
 
+		self.websocket.close()
+
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
 		uri = hostname + "/authorization/api/v1/token?url=" + hostname + '/' \
