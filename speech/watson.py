@@ -2,6 +2,7 @@ from eventhook import EventHook
 from speech.base import BaseSpeechRecognizer
 import json
 import requests
+import websockets
 import threading
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
@@ -21,6 +22,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			headers = {}
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://stream.watsonplatform.net","speech-to-text",self.username,self.password)
 			self.websocket = websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers)
+			self.websocket.send()
 			self.threadReceiver = threading.Thread(name="watson-receiver")
 			self.threadReceiver.run = self._doThreadReceiver
 			self.isRunning = True
