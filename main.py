@@ -13,10 +13,16 @@ import signal
 import sys
 
 print("Loading...")
+config = {}
+with open("config.txt", "r") as f:
+	for line in f:
+		spl = line.split("=")
+		config[spl[0]] = spl[1]
+
 nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
 # recognizer = BaseSpeechRecognizer() # placeholder
-recognizer = WatsonSpeechRecognizer()
+recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
