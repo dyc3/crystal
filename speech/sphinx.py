@@ -24,9 +24,9 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 				buffer_size=buffer_size,
 				no_search=False,
 				full_utt=False,
-				hmm=os.path.join(model_path, 'en-us'),
-				lm=os.path.join(model_path, 'en-us.lm.bin'),
-				dic=os.path.join(model_path, 'cmudict-en-us.dict')
+				hmm=os.path.join(self.model_path, 'en-us'),
+				lm=os.path.join(self.model_path, 'en-us.lm.bin'),
+				dic=os.path.join(self.model_path, 'cmudict-en-us.dict')
 			)
 			self.isRunning = True
 
