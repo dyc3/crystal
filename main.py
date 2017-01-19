@@ -34,13 +34,15 @@ cmdClassifier.fit(train, labelsTrain)
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, width):
 	rms = audioop.rms(frame, width)
-	avg = audioop.avg(frame, width)
-	_max = audioop.max(frame, width)
-	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6) + \
-		"  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(5) + "\033[0m"
+	info = "power: " + str(rms).rjust(6)
+	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(5) + "\033[0m"
 	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
 	info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
-	print("rms/avg/max: ", info, end='\r')
+	if recognizer.websocket != None:
+		info += "  |  websocket is " + ("\033[32m" if recognizer.websocket.open else "\033[31m") + recognizer.websocket.state_name + "\033[0m"
+	else:
+		info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
+	print(info, end='\r')
 
 def sendToRecognizer(frame, width):
 	# print(recognizer.websocket.__dict__)
