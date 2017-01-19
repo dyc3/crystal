@@ -38,16 +38,16 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.isRunning = False
 			self.threadReceiver.join()
 
-	def GiveFrame(self, frame, speaking_power=200):
+	def GiveFrame(self, frame, power_threshold=300):
 		frame_power = audioop.rms(frame, 2)
-		if self.status == "not-speaking" and frame_power >= speaking_power:
+		if self.status == "not-speaking" and frame_power >= power_threshold:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
-			self.websocket.send('{action:"start", content-type="audio/flac"}')
+			yield from self.websocket.send('{action:"start", content-type="audio/flac"}')
 
 		if self.status == "speaking":
 			yield from self.websocket.send(frame)
-			if frame_power >= speaking_power:
+			if frame_power >= power_threshold:
 				self._notSpeakingTicks = 0
 			else:
 				self._notSpeakingTicks += 1
