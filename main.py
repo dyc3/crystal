@@ -35,12 +35,18 @@ def consoleVisualizer(frame, width):
 	avg = audioop.avg(frame, width)
 	_max = audioop.max(frame, width)
 	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6) + \
-		" | threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(5) + "\033[0m"
+		"  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(5) + "\033[0m"
+	info += "  |  " + recognizer.status + " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	print("rms/avg/max: ", info, end='\r')
+
+def sendToRecognizer(frame, width):
 	if recognizer.isRunning:
-		recognizer.GiveFrame(frame, micIn.powerThreshold) # TODO: move somewhere else
+		recognizer.GiveFrame(frame, micIn.powerThreshold)
+	else:
+		print("ERROR: recognizer not running ")
 
 micIn.onFrame += consoleVisualizer
+micIn.onFrame += sendToRecognizer
 print("Calibrating...")
 micIn.Calibrate()
 
@@ -61,5 +67,5 @@ def signal_handler(signum, frame):
 
 signal.signal(signal.SIGTERM, signal_handler)
 
-while micIn.isRunning:
-	time.sleep(0.25)
+# while micIn.isRunning:
+# 	time.sleep(0.25)

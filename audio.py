@@ -15,7 +15,7 @@ class MicrophoneInput(object):
 		self.RATE = rate
 		self.p = pyaudio.PyAudio()
 		self.isRunning = False
-		self.powerThreshold = -100
+		self.powerThreshold = 300
 		self.dynamic_power_threshold = dynamic_power_threshold
 
 		self.onFrame = EventHook()
@@ -51,19 +51,19 @@ class MicrophoneInput(object):
 		stream.stop_stream()
 		stream.close()
 
-		self.powerThreshold = numpy.mean(frames)
+		self.powerThreshold = numpy.max(frames)
 
 	def _doThreadRecord(self):
 		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
 							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
+			power = audioop.rms(frame, 2)
 
-			if self.dynamic_power_threshold:
-				dynamic_power_adjustment_damping = 0.05
-				dynamic_power_ratio = 1.1
+			if self.dynamic_power_threshold and power < self.powerThreshold:
+				dynamic_power_adjustment_damping = 0.15
+				dynamic_power_ratio = 1.5
 				seconds_per_buffer = (self.CHUNK + 0.0) + self.RATE
-				power = audioop.rms(frame, 2)
 
 				damping = dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
 				target_power = power * dynamic_power_ratio
