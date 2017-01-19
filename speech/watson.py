@@ -5,6 +5,7 @@ import requests
 import websockets
 import threading
 import audioop
+import asyncio
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	"""docstring for WatsonSpeechRecognizer."""
@@ -26,7 +27,10 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			print("Watson: getting token...")
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://stream.watsonplatform.net","speech-to-text",self.username,self.password)
 			print("Watson: connecting...")
-			self.websocket = yield from websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers)
+			with websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers) as ws:
+				self.websocket = ws
+				print(ws)
+			# self.websocket = yield from websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers)
 			self.threadReceiver = threading.Thread(name="watson-receiver")
 			self.threadReceiver.run = self._doThreadReceiver
 			self.isRunning = True
@@ -56,7 +60,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self._notSpeakingTicks >= 280:
 			self.status = "not-speaking"
-			self.websocket.send('{action:"stop"}')
+			yield from self.websocket.send('{action:"stop"}')
 
 
 	def _doThreadReceiver(self):
