@@ -21,8 +21,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		self._notSpeakingTicks = 0
 		self.isRunning = False
 
-		# self.hostname = "stream.watsonplatform.net"
-		self.hostname = "general-cardude419.c9users.io"
+		self.hostname = "stream.watsonplatform.net"
+		# self.hostname = "general-cardude419.c9users.io"
 
 	def Start(self):
 		if not self.isRunning:
@@ -88,6 +88,6 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		# print(uri)
 		resp = requests.get(uri, auth=(username, password), verify=False,
 							headers={'Accept': 'application/json'}, timeout=(30, 30))
-		# print(resp.text)
+		print(resp.text)
 		jsonObject = resp.json()
 		return jsonObject['token']
