@@ -38,7 +38,7 @@ def consoleVisualizer(frame, width):
 	_max = audioop.max(frame, width)
 	info = str(rms).rjust(6)+"/"+str(avg).rjust(6)+"/"+str(_max).rjust(6) + \
 		"  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(5) + "\033[0m"
-	info += "  |  " + recognizer.status + " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
+	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m" + " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	print("rms/avg/max: ", info, end='\r')
 
 def sendToRecognizer(frame, width):
