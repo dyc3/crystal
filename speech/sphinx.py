@@ -14,6 +14,8 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 		self.status = "not-speaking"
 		self._notSpeakingTicks = 0
 		self.custom_model = custom_model
+		self.sampling_rate = rate
+		self.buffer_size = buffer_size
 		if custom_model:
 			self.model_path = get_model_path()
 		self.currentUtterance = ""
@@ -22,8 +24,8 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 		if not self.isRunning:
 			self.speech = LiveSpeech(
 				verbose=False,
-				sampling_rate=rate,
-				buffer_size=buffer_size,
+				sampling_rate=self.sampling_rate,
+				buffer_size=self.buffer_size,
 				no_search=False,
 				full_utt=False
 			)
