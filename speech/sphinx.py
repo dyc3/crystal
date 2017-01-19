@@ -6,7 +6,7 @@ from pocketsphinx import LiveSpeech, get_model_path
 
 class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 	"""docstring for SphinxSpeechRecognizer."""
-	def __init__(self, rate=44100, buffer_size=2048, custom_model=false):
+	def __init__(self, rate=44100, buffer_size=2048, custom_model=False):
 		super(BaseSpeechRecognizer, self).__init__()
 		self.onSpeech = EventHook() # called while speaking, but not finished with request (only usable with speech streaming)
 		self.onFinish = EventHook() # called when speaking is finished
