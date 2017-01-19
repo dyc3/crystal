@@ -43,10 +43,13 @@ def consoleVisualizer(frame, width):
 	print("rms/avg/max: ", info, end='\r')
 
 def sendToRecognizer(frame, width):
+	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
 		recognizer.GiveFrame(frame, micIn.powerThreshold)
 	else:
 		print("ERROR: recognizer not running ")
+		print("starting recognizer...")
+		recognizer.Start()
 
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer
