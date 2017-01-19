@@ -45,6 +45,7 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 		frame_power = audioop.rms(frame, 2)
 		if self.status == "not-speaking" and frame_power >= speaking_power:
 			self.status = "speaking"
+			self.speech.start_utterance()
 			self._notSpeakingTicks = 0
 
 		if self.status == "speaking":
@@ -54,11 +55,18 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 			else:
 				self._notSpeakingTicks += 1
 
-		if self._notSpeakingTicks >= 80:
+		if self._notSpeakingTicks >= 50:
 			self.status = "not-speaking"
+			self.speech.end_utterance()
 
 	def _getSpeech(self):
-		phrase = next(self.speech)
+		phrase = self.speech.best(count=10)
+		# print("\n")
+		# print(phrase)
+		if len(phrase) == 0:
+			return
+		phrase = phrase[0]
+		print(phrase)
 		self.currentUtterance += phrase
 		if self.status == "speaking":
 			self.onSpeech.fire(self.currentUtterance)
