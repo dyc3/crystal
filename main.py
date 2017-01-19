@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score
 import classifier
 from datautil import DataUtil
 # from speech.base import BaseSpeechRecognizer
-# from speech.watson import WatsonSpeechRecognizer
+from speech.watson import WatsonSpeechRecognizer
 from speech.sphinx import SphinxSpeechRecognizer
 import audio
 import audioop
@@ -23,8 +23,8 @@ with open("config.txt", "r") as f:
 nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
 # recognizer = BaseSpeechRecognizer() # placeholder
-# recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
-recognizer = SphinxSpeechRecognizer()
+recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
+# recognizer = SphinxSpeechRecognizer()
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
