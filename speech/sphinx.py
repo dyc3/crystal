@@ -46,6 +46,7 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 			self._notSpeakingTicks = 0
 
 		if self.status == "speaking":
+			self._getSpeech()
 			if frame_power >= speaking_power:
 				self._notSpeakingTicks = 0
 			else:
