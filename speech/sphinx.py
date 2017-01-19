@@ -13,8 +13,10 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 		self.isRunning = False
 		self.status = "not-speaking"
 		self._notSpeakingTicks = 0
+		self.custom_model = custom_model
 		if custom_model:
 			self.model_path = get_model_path()
+		self.currentUtterance = ""
 
 	def Start(self):
 		if not self.isRunning:
@@ -23,12 +25,14 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 				sampling_rate=rate,
 				buffer_size=buffer_size,
 				no_search=False,
-				full_utt=False,
-				hmm=os.path.join(self.model_path, 'en-us'),
-				lm=os.path.join(self.model_path, 'en-us.lm.bin'),
-				dic=os.path.join(self.model_path, 'cmudict-en-us.dict')
+				full_utt=False
 			)
+			if self.custom_model:
+				self.speech.hmm = os.path.join(self.model_path, 'en-us'),
+				self.speech.lm = os.path.join(self.model_path, 'en-us.lm.bin'),
+				self.speech.dic = os.path.join(self.model_path, 'cmudict-en-us.dict')
 			self.isRunning = True
+			self.currentUtterance = ""
 
 	def Stop(self):
 		if self.isRunning:
@@ -49,3 +53,12 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self._notSpeakingTicks >= 80:
 			self.status = "not-speaking"
+
+	def _getSpeech():
+		phrase = next(self.speech)
+		self.currentUtterance += phrase
+		if self.status == "speaking":
+			self.onSpeech.fire(self.currentUtterance)
+		else:
+			self.onFinish.fire(self.currentUtterance)
+			self.currentUtterance = ""
