@@ -57,7 +57,7 @@ class SphinxSpeechRecognizer(BaseSpeechRecognizer):
 		if self._notSpeakingTicks >= 80:
 			self.status = "not-speaking"
 
-	def _getSpeech():
+	def _getSpeech(self):
 		phrase = next(self.speech)
 		self.currentUtterance += phrase
 		if self.status == "speaking":
