@@ -57,6 +57,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		self.websocket_factory = WebSocketClientFactory("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize")
 		self.websocket_factory.protocol = WatsonSpeechClientProtocol
+		self.websocket_connector = None
 		self.websocket = None
 
 		if not WatsonSpeechRecognizer.singleton:
