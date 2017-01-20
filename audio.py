@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import os
 import stat
+import io
 from eventhook import EventHook
 
 class MicrophoneInput(object):
