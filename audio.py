@@ -202,3 +202,22 @@ class ConvertToFlacStream(object):
 		self.sample_rate = sample_rate
 		self.sample_width = sample_width
 		self.flac_converter = get_flac_converter()
+		self.started = False
+
+	def Start(self):
+		if not self.started:
+			self.process = subprocess.Popen([
+				flac_converter,
+				"--stdout", "--totally-silent",  # put the resulting FLAC file in stdout, and make sure it's not mixed with any program output
+				"--best",  # highest level of compression available
+				"-",  # the input FLAC file contents will be given in stdin
+			], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+			self.started = True
+
+	def Stop(self):
+		if self.started:
+			self.process.kill()
+			self.started = False
+
+	def GetFlacData(frame):
+		pass
