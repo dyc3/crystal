@@ -77,7 +77,7 @@ class MicrophoneInput(object):
 				target_power = power * self.dynamic_power_ratio
 				self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
 
-			self.onFrame.fire(frame, self.sample_width)
+			self.onFrame.fire(frame, self.RATE, self.sample_width)
 
 		stream.stop_stream()
 		stream.close()

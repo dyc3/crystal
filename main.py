@@ -32,7 +32,7 @@ cmdClassifier.fit(train, labelsTrain)
 
 # testing to see if MicrophoneInput works
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
-def consoleVisualizer(frame, width):
+def consoleVisualizer(frame, rate, width):
 	rms = audioop.rms(frame, width)
 	info = "power: " + str(rms).rjust(6)
 	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(6) + "\033[0m"
@@ -45,7 +45,7 @@ def consoleVisualizer(frame, width):
 		info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	print(info, end='\r')
 
-def sendToRecognizer(frame, width):
+def sendToRecognizer(frame, rate, width):
 	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
 		recognizer.GiveFrame(frame, micIn.sample_width, micIn.powerThreshold)
