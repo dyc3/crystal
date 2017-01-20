@@ -194,3 +194,11 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
+
+class ConvertToFlacStream(object):
+	"""docstring for ConvertToFlacStream."""
+	def __init__(self, sample_rate, sample_width):
+		super(ConvertToFlacStream, self).__init__()
+		self.sample_rate = sample_rate
+		self.sample_width = sample_width
+		self.flac_converter = get_flac_converter()
