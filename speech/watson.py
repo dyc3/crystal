@@ -31,10 +31,11 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			print("Watson: getting token...")
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://"+ self.hostname,"speech-to-text",self.username,self.password)
 			print("Watson: connecting...")
-			# with websockets.connect("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize",extra_headers=headers) as ws:
-			# 	self.websocket = ws
-			# 	print(ws)
-			self.websocket = websockets.connect("wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize",extra_headers=headers).client
+			# gotta do all this extra junk because websockets.connect is all async and shit
+			# and you have to do this for ALL async functions to run syncronously
+			loop = asyncio.get_event_loop()
+			self.websocket = loop.run_until_complete(websockets.connect("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize",extra_headers=headers))
+			loop.close()
 			print("Watson: connected")
 			self.threadReceiver = threading.Thread(name="watson-receiver")
 			self.threadReceiver.run = self._doThreadReceiver
@@ -50,14 +51,22 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.threadReceiver.join()
 
 	def GiveFrame(self, frame, power_threshold=300):
+		try:
+			loop = asyncio.get_event_loop()
+		except RuntimeError as e:
+			loop = asyncio.new_event_loop()
+			asyncio.set_event_loop(loop)
+			# loop.run_forever()
 		frame_power = audioop.rms(frame, 2)
 		if self.status == "not-speaking" and frame_power >= power_threshold:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
-			yield from self.websocket.send('{action:"start", content-type="audio/flac"}')
+			# self.websocket.send('{action:"start", content-type="audio/flac"}')
+			loop.run_until_complete(self.websocket.send('{action:"start", content-type="audio/flac"}'))
 
 		if self.status == "speaking":
-			yield from self.websocket.send(frame)
+			# self.websocket.send(frame)
+			loop.run_until_complete(self.websocket.send(frame))
 			if frame_power >= power_threshold:
 				self._notSpeakingTicks = 0
 			else:
@@ -65,13 +74,21 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self._notSpeakingTicks >= 280:
 			self.status = "not-speaking"
-			yield from self.websocket.send('{action:"stop"}')
+			# self.websocket.send('{action:"stop"}')
+			loop.run_until_complete(self.websocket.send('{action:"stop"}'))
+
+		loop.stop()
 
 
 	def _doThreadReceiver(self):
+		try:
+			loop = asyncio.get_event_loop()
+		except RuntimeError as e:
+			loop = asyncio.new_event_loop()
+			asyncio.set_event_loop(loop)
 
 		while self.isRunning:
-			received = yield from self.websocket.recv()
+			received = loop.run_until_complete(self.websocket.recv())
 			print("received:",received)
 			result = json.loads(received)
 			if not result.results[0].final:
@@ -80,6 +97,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 				self.onFinish.fire(result.results[0].alternatives[0].transcript)
 
 		self.websocket.close()
+		loop.stop()
+		# loop.close()
 
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
