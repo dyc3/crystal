@@ -26,7 +26,7 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 			print("Binary message received: {0} bytes".format(len(payload)))
 		else:
 			text = payload.decode('utf8')
-			# print("Watson: Text received: {0}".format(text))
+			print("Watson: Text received: {0}".format(text))
 			result = json.loads(text)
 			if 'error' not in result:
 				if 'results' in result:
@@ -111,7 +111,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		if self.status == "not-speaking" and frame_power >= power_threshold:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
-			self.websocket.sendMessage('{"action":"start", "content-type":"audio/flac;rate=44100", "continuous": true, "interim_results":true}'.encode('utf8'), isBinary=False)
+			self.websocket.sendMessage('{"action":"start", "content-type":"audio/flac;rate=16000", "continuous": true, "interim_results":true}'.encode('utf8'), isBinary=False)
 
 		if self.status == "speaking":
 			self.websocket.sendMessage(frame, isBinary=True)

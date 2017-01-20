@@ -7,7 +7,7 @@ from eventhook import EventHook
 
 class MicrophoneInput(object):
 	"""docstring for MicrophoneInput."""
-	def __init__(self, chunk=1024, audioformat=pyaudio.paInt16, channels=2, rate=44100, dynamic_power_threshold=True):
+	def __init__(self, chunk=1024, audioformat=pyaudio.paInt16, channels=2, rate=16000, dynamic_power_threshold=True):
 		super(MicrophoneInput, self).__init__()
 		self.CHUNK = chunk
 		self.FORMAT = audioformat
