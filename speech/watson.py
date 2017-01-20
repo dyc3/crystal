@@ -2,7 +2,7 @@ from eventhook import EventHook
 from speech.base import BaseSpeechRecognizer
 import json
 import requests
-import websockets
+from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory
 import threading
 import audioop
 import asyncio
