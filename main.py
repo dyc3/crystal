@@ -51,8 +51,6 @@ def sendToRecognizer(frame, width):
 		recognizer.GiveFrame(frame, micIn.powerThreshold)
 	else:
 		print("ERROR: recognizer not running ")
-		print("starting recognizer...")
-		recognizer.Start()
 
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer
@@ -60,7 +58,10 @@ print("Calibrating...")
 micIn.Calibrate()
 
 # start recognizer
-recognizer.Start()
+try:
+	recognizer.Start()
+except Exception as e:
+	print("ERROR: failed to start recognizer:",e)
 
 print("Listening...")
 micIn.Start()
