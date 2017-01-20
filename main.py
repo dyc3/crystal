@@ -48,7 +48,7 @@ def consoleVisualizer(frame, width):
 def sendToRecognizer(frame, width):
 	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
-		recognizer.GiveFrame(frame, micIn.powerThreshold)
+		recognizer.GiveFrame(frame, micIn.sample_width, micIn.powerThreshold)
 
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer

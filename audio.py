@@ -18,6 +18,7 @@ class MicrophoneInput(object):
 		self.CHANNELS = channels
 		self.RATE = rate
 		self.p = pyaudio.PyAudio()
+		self.sample_width = p.get_sample_size(self.FORMAT)
 		self.isRunning = False
 		self.powerThreshold = 300
 		self.dynamic_power_threshold = dynamic_power_threshold
@@ -52,7 +53,7 @@ class MicrophoneInput(object):
 			elapsed_time += seconds_per_buffer
 			if elapsed_time > duration: break
 			buffer = stream.read(self.CHUNK)
-			power = audioop.rms(buffer, 2)  # power of the audio signal
+			power = audioop.rms(buffer, self.sample_width)  # power of the audio signal
 
 			# dynamically adjust the power threshold using asymmetric weighted average
 			damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
@@ -67,7 +68,7 @@ class MicrophoneInput(object):
 							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
-			power = audioop.rms(frame, 2)
+			power = audioop.rms(frame, self.sample_width)
 
 			if self.dynamic_power_threshold and power < self.powerThreshold:
 				seconds_per_buffer = (self.CHUNK + 0.0) + self.RATE
@@ -76,7 +77,7 @@ class MicrophoneInput(object):
 				target_power = power * self.dynamic_power_ratio
 				self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
 
-			self.onFrame.fire(frame, 2)
+			self.onFrame.fire(frame, self.sample_width)
 
 		stream.stop_stream()
 		stream.close()

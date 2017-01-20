@@ -6,6 +6,7 @@ from twisted.internet import ssl, reactor
 from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory, connectWS
 import threading
 import audioop
+from audio import get_flac_data
 
 class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 	def __init__(self):
@@ -102,12 +103,12 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.threadReceiver.join()
 			self.websocket.close()
 
-	def GiveFrame(self, frame, power_threshold=300):
+	def GiveFrame(self, frame, sample_width, power_threshold=300):
 		if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
 			# print("\nno websocket")
 			return
 
-		frame_power = audioop.rms(frame, 2)
+		frame_power = audioop.rms(frame, sample_width)
 		if self.status == "not-speaking" and frame_power >= power_threshold:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
