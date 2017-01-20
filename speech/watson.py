@@ -27,7 +27,7 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 			print("Binary message received: {0} bytes".format(len(payload)))
 		else:
 			text = payload.decode('utf8')
-			print("Watson: Text received: {0}".format(text))
+			# print("Watson: Text received: {0}".format(text))
 			result = json.loads(text)
 			if 'error' not in result:
 				if 'results' in result:
