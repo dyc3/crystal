@@ -28,11 +28,14 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 			text = payload.decode('utf8')
 			# print("Watson: Text received: {0}".format(text))
 			result = json.loads(text)
-			if not result['error']:
-				if not result['results'][0]['final']:
-					self.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
-				else:
-					self.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
+			if 'error' not in result:
+				if 'results' in result:
+					if not result['results'][0]['final']:
+						self.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
+					else:
+						self.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
+				elif 'state' in result:
+					print("Watson: server state:", result['state'])
 			else:
 				print("Watson received error:", result['error'])
 
