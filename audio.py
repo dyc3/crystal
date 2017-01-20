@@ -120,7 +120,7 @@ def get_raw_data(frame, sample_rate, sample_width, convert_rate=None, convert_wi
 	raw_data = frame
 
 	# make sure unsigned 8-bit audio (which uses unsigned samples) is handled like higher sample width audio (which uses signed samples)
-	if self.sample_width == 1:
+	if sample_width == 1:
 		raw_data = audioop.bias(raw_data, 1, -128)  # subtract 128 from every sample to make them act like signed samples
 
 	# resample audio at the desired rate if specified
