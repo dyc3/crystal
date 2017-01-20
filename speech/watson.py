@@ -44,6 +44,10 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 		WatsonSpeechRecognizer.singleton.websocket = self
 		print("Watson: WebSocket connection closed: {0}".format(reason))
 
+	@property
+	def is_closed(self):
+		return self.state == STATE_CLOSED
+
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	singleton = None
 	"""docstring for WatsonSpeechRecognizer."""
