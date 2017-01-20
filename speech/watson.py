@@ -7,6 +7,24 @@ import threading
 import audioop
 import asyncio
 
+class WatsonSpeechClientProtocol(WebSocketClientProtocol):
+
+	def onConnect(self, response):
+		print("Watson: Server connected: {0}".format(response.peer))
+
+	def onOpen(self):
+		print("Watson: WebSocket connection open.")
+
+	def onMessage(self, payload, isBinary):
+		if isBinary:
+			print("Binary message received: {0} bytes".format(len(payload)))
+		else:
+			text = payload.decode('utf8'))
+			print("Watson: Text message received: {0}".format(text)
+
+	def onClose(self, wasClean, code, reason):
+		print("WebSocket connection closed: {0}".format(reason))
+
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	"""docstring for WatsonSpeechRecognizer."""
 	def __init__(self, username, password):
