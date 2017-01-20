@@ -18,7 +18,7 @@ class MicrophoneInput(object):
 		self.CHANNELS = channels
 		self.RATE = rate
 		self.p = pyaudio.PyAudio()
-		self.sample_width = p.get_sample_size(self.FORMAT)
+		self.sample_width = self.p.get_sample_size(self.FORMAT)
 		self.isRunning = False
 		self.powerThreshold = 300
 		self.dynamic_power_threshold = dynamic_power_threshold
