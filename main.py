@@ -45,7 +45,7 @@ def consoleVisualizer(frame, rate, width):
 			pass
 		info += "  |  (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	info += "  |  Processing: " + str(current_utterance)
-	print(info, end='\r')
+	print(info, end='                                      \r')
 
 def sendToRecognizer(frame, rate, width):
 	# print(recognizer.websocket.__dict__)
