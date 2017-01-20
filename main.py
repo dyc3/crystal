@@ -38,8 +38,9 @@ def consoleVisualizer(frame, width):
 	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(6) + "\033[0m"
 	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
 	info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
-	if recognizer.websocket != None:
-		info += "  |  websocket is " + ("\033[32m" if recognizer.websocket.open else "\033[31m") + recognizer.websocket.state_name + "\033[0m"
+	if recognizer.websocket_connector != None:
+		# info += "  |  websocket: "+ str(recognizer.websocket) +" == " + str(dir(recognizer.websocket))
+		pass
 	else:
 		info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
 	print(info, end='\r')

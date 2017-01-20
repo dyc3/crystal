@@ -2,30 +2,43 @@ from eventhook import EventHook
 from speech.base import BaseSpeechRecognizer
 import json
 import requests
-from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory
+from twisted.internet import ssl, reactor
+from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory, connectWS
 import threading
 import audioop
-import asyncio
 
 class WatsonSpeechClientProtocol(WebSocketClientProtocol):
+	def __init__(self):
+		# super(WebSocketClientFactory, self).__init__()
+		WatsonSpeechRecognizer.singleton.websocket = self
 
 	def onConnect(self, response):
+		WatsonSpeechRecognizer.singleton.websocket = self
 		print("Watson: Server connected: {0}".format(response.peer))
 
 	def onOpen(self):
+		WatsonSpeechRecognizer.singleton.websocket = self
 		print("Watson: WebSocket connection open.")
 
 	def onMessage(self, payload, isBinary):
+		WatsonSpeechRecognizer.singleton.websocket = self
 		if isBinary:
 			print("Binary message received: {0} bytes".format(len(payload)))
 		else:
-			text = payload.decode('utf8'))
-			print("Watson: Text message received: {0}".format(text)
+			text = payload.decode('utf8')
+			print("Watson: Text received: {0}".format(text))
+			result = json.loads(text)
+			if not result['results'][0]['final']:
+				self.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
+			else:
+				self.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
 
 	def onClose(self, wasClean, code, reason):
-		print("WebSocket connection closed: {0}".format(reason))
+		WatsonSpeechRecognizer.singleton.websocket = self
+		print("Watson: WebSocket connection closed: {0}".format(reason))
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
+	singleton = None
 	"""docstring for WatsonSpeechRecognizer."""
 	def __init__(self, username, password):
 		super(BaseSpeechRecognizer, self).__init__()
@@ -42,20 +55,33 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		self.hostname = "stream.watsonplatform.net"
 		# self.hostname = "general-cardude419.c9users.io"
 
+		self.websocket_factory = WebSocketClientFactory("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize")
+		self.websocket_factory.protocol = WatsonSpeechClientProtocol
+		self.websocket = None
+
+		if not WatsonSpeechRecognizer.singleton:
+			WatsonSpeechRecognizer.singleton = self
+		else:
+			self = WatsonSpeechRecognizer.singleton
+
 	def Start(self):
 		print("Watson: isRunning =", self.isRunning)
 		if not self.isRunning:
 			headers = {}
 			print("Watson: getting token...")
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://"+ self.hostname,"speech-to-text",self.username,self.password)
+			self.websocket_factory.headers = headers
+
 			print("Watson: connecting...")
-			# gotta do all this extra junk because websockets.connect is all async and shit
-			# and you have to do this for ALL async functions to run syncronously
-			loop = asyncio.get_event_loop()
-			self.websocket = loop.run_until_complete(websockets.connect("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize",extra_headers=headers))
-			loop.close()
+			if self.websocket_factory.isSecure:
+				contextFactory = ssl.ClientContextFactory()
+			else:
+				contextFactory = None
+			self.websocket_connector = connectWS(self.websocket_factory, contextFactory=contextFactory)
+			# self.websocket_connector.recognizer = self
 			print("Watson: connected")
-			self.threadReceiver = threading.Thread(name="watson-receiver")
+
+			self.threadReceiver = threading.Thread(name="watson-speech-client")
 			self.threadReceiver.run = self._doThreadReceiver
 			self.isRunning = True
 			self.status = "not-speaking"
@@ -67,57 +93,32 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			print("STOPPING")
 			self.isRunning = False
 			self.threadReceiver.join()
+			self.websocket.close()
 
 	def GiveFrame(self, frame, power_threshold=300):
-		try:
-			loop = asyncio.get_event_loop()
-		except RuntimeError as e:
-			loop = asyncio.new_event_loop()
-			asyncio.set_event_loop(loop)
-			# loop.run_forever()
+		if self.websocket == None:
+			print("\nno websocket")
+			return
+
 		frame_power = audioop.rms(frame, 2)
 		if self.status == "not-speaking" and frame_power >= power_threshold:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
-			# self.websocket.send('{action:"start", content-type="audio/flac"}')
-			loop.run_until_complete(self.websocket.send('{action:"start", content-type="audio/flac"}'))
+			self.websocket.sendMessage('{action:"start", content-type="audio/flac"}'.encode('utf8'), isBinary=False)
 
 		if self.status == "speaking":
-			# self.websocket.send(frame)
-			loop.run_until_complete(self.websocket.send(frame))
+			self.websocket.sendMessage(frame, isBinary=True)
 			if frame_power >= power_threshold:
 				self._notSpeakingTicks = 0
 			else:
 				self._notSpeakingTicks += 1
 
-		if self._notSpeakingTicks >= 280:
+		if self._notSpeakingTicks >= 50:
 			self.status = "not-speaking"
-			# self.websocket.send('{action:"stop"}')
-			loop.run_until_complete(self.websocket.send('{action:"stop"}'))
-
-		loop.stop()
-
+			self.websocket.sendMessage('{action:"stop"}'.encode('utf8'), isBinary=False)
 
 	def _doThreadReceiver(self):
-		try:
-			loop = asyncio.get_event_loop()
-		except RuntimeError as e:
-			loop = asyncio.new_event_loop()
-			asyncio.set_event_loop(loop)
-
-		while self.isRunning:
-			received = loop.run_until_complete(self.websocket.recv())
-			print("received:",received)
-			result = json.loads(received)
-			if not result.results[0].final:
-				self.onSpeech.fire(result.results[0].alternatives[0].transcript)
-			else:
-				self.onFinish.fire(result.results[0].alternatives[0].transcript)
-
-		self.websocket.close()
-		loop.stop()
-		# loop.close()
-
+		reactor.run()
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
 		uri = hostname + "/authorization/api/v1/token?url=" + hostname + '/' + \
