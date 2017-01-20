@@ -45,7 +45,7 @@ class MicrophoneInput(object):
 		else:
 			print("Recording thread was not running")
 
-	def Calibrate(self, duration=1): # TODO: rewrite this to be better
+	def Calibrate(self, duration=1):
 		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
 		elapsed_time = 0
 		seconds_per_buffer = (self.CHUNK + 0.0) / self.RATE

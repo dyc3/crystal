@@ -32,7 +32,6 @@ train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
 cmdClassifier.fit(train, labelsTrain)
 
-# testing to see if MicrophoneInput works
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, rate, width):
 	rms = audioop.rms(frame, width)
