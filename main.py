@@ -35,7 +35,7 @@ micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, width):
 	rms = audioop.rms(frame, width)
 	info = "power: " + str(rms).rjust(6)
-	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(5) + "\033[0m"
+	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(6) + "\033[0m"
 	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
 	info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	if recognizer.websocket != None:
