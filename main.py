@@ -44,8 +44,7 @@ def consoleVisualizer(frame, rate, width):
 			# info += "  |  websocket: "+ str(recognizer.websocket) +" == " + str(dir(recognizer.websocket))
 			pass
 		info += "  |  (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
-	if current_utterance:
-		info += "  |  current_utterance: " + current_utterance
+	info += "  |  Processing: " + str(current_utterance)
 	print(info, end='\r')
 
 def sendToRecognizer(frame, rate, width):
@@ -54,9 +53,12 @@ def sendToRecognizer(frame, rate, width):
 		recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
 
 def onSpeech(text):
+	global current_utterance
+	# print("Processing:", text)
 	current_utterance = text
 
 def onFinish(text):
+	global current_utterance
 	print("User said:", text)
 	current_utterance = None
 	# TODO: process text

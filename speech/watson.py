@@ -112,7 +112,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		if self.status == "not-speaking" and frame_power >= power_threshold:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
-			self.websocket.sendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "continuous": true, "interim_results":true}'.encode('utf8'), isBinary=False)
+			self.websocket.sendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true}'.encode('utf8'), isBinary=False)
 
 		if self.status == "speaking":
 			self.websocket.sendMessage(get_raw_data(frame, sample_rate, sample_width), isBinary=True)
