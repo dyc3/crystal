@@ -5,6 +5,8 @@ import numpy
 import audioop
 import shutil
 import subprocess
+import os
+import stat
 from eventhook import EventHook
 
 class MicrophoneInput(object):
