@@ -17,6 +17,8 @@ class MicrophoneInput(object):
 		self.isRunning = False
 		self.powerThreshold = 300
 		self.dynamic_power_threshold = dynamic_power_threshold
+		self.dynamic_power_adjustment_damping = 0.15
+		self.dynamic_power_ratio = 1.5
 
 		self.onFrame = EventHook()
 
@@ -37,21 +39,24 @@ class MicrophoneInput(object):
 		else:
 			print("Recording thread was not running")
 
-	def Calibrate(self): # TODO: rewrite this to be better
-		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
-							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
+	def Calibrate(self, duration=1): # TODO: rewrite this to be better
+		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
+		elapsed_time = 0
+		seconds_per_buffer = (self.CHUNK + 0.0) / self.RATE
 
-		RECORD_SECONDS = 1
-		frames = []
+		while True:
+			elapsed_time += seconds_per_buffer
+			if elapsed_time > duration: break
+			buffer = stream.read(self.CHUNK)
+			power = audioop.rms(buffer, 2)  # power of the audio signal
 
-		for i in range(0, int(self.RATE / self.CHUNK * RECORD_SECONDS)):
-			data = stream.read(self.CHUNK)
-			frames.append(audioop.rms(data, 2))
+			# dynamically adjust the power threshold using asymmetric weighted average
+			damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
+			target_power = power * self.dynamic_power_ratio
+			self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
 
 		stream.stop_stream()
 		stream.close()
-
-		self.powerThreshold = numpy.max(frames)
 
 	def _doThreadRecord(self):
 		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
@@ -61,12 +66,10 @@ class MicrophoneInput(object):
 			power = audioop.rms(frame, 2)
 
 			if self.dynamic_power_threshold and power < self.powerThreshold:
-				dynamic_power_adjustment_damping = 0.15
-				dynamic_power_ratio = 1.5
 				seconds_per_buffer = (self.CHUNK + 0.0) + self.RATE
 
-				damping = dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
-				target_power = power * dynamic_power_ratio
+				damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
+				target_power = power * self.dynamic_power_ratio
 				self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
 
 			self.onFrame.fire(frame, 2)
