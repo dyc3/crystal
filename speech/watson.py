@@ -119,7 +119,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self._notSpeakingTicks >= 50:
 			self.status = "not-speaking"
-			self.websocket.sendMessage('{action:"stop"}'.encode('utf8'), isBinary=False)
+			self.websocket.sendMessage('{"action":"stop"}'.encode('utf8'), isBinary=False)
 
 	def _doThreadReceiver(self):
 		reactor.run()
