@@ -116,7 +116,6 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self.status == "speaking":
 			flac_data = get_flac_data(frame, sample_rate, sample_width, 16000)
-			print("frame data: ",len(frame),"flac data: ",len(flac_data),"                  ")
 			self.websocket.sendMessage(flac_data, isBinary=True)
 			if frame_power >= power_threshold:
 				self._notSpeakingTicks = 0
