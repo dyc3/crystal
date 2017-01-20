@@ -49,8 +49,6 @@ def sendToRecognizer(frame, width):
 	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
 		recognizer.GiveFrame(frame, micIn.powerThreshold)
-	else:
-		print("ERROR: recognizer not running ")
 
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer
