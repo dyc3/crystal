@@ -37,12 +37,12 @@ def consoleVisualizer(frame, width):
 	info = "power: " + str(rms).rjust(6)
 	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(6) + "\033[0m"
 	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
-	info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
-	if recognizer.websocket_connector != None:
-		# info += "  |  websocket: "+ str(recognizer.websocket) +" == " + str(dir(recognizer.websocket))
-		pass
-	else:
-		info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
+	info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
+	if recognizer.isRunning:
+		if recognizer.websocket_connector != None:
+			# info += "  |  websocket: "+ str(recognizer.websocket) +" == " + str(dir(recognizer.websocket))
+			pass
+		info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	print(info, end='\r')
 
 def sendToRecognizer(frame, width):
