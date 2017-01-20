@@ -4,6 +4,7 @@ import threading
 import numpy
 import audioop
 import shutil
+import subprocess
 from eventhook import EventHook
 
 class MicrophoneInput(object):
@@ -102,3 +103,29 @@ class MicrophoneInput(object):
 		except OSError: pass
 
 		return flac_converter
+
+	def get_flac_data(self, frame, sample_width, convert_rate=None, convert_width=None):
+		"""
+		Returns a byte string representing the contents of a FLAC file converted from the given frame.
+		Note that 32-bit FLAC is not supported. If the audio data is 32-bit and ``convert_width`` is not specified, then the resulting FLAC will be a 24-bit FLAC.
+		If ``convert_rate`` is specified and the audio sample rate is not ``convert_rate`` Hz, the resulting audio is resampled to match.
+		If ``convert_width`` is specified and the audio samples are not ``convert_width`` bytes each, the resulting audio is converted to match.
+		Writing these bytes directly to a file results in a valid `FLAC file <https://en.wikipedia.org/wiki/FLAC>`__.
+		"""
+		assert convert_width is None or (convert_width % 1 == 0 and 1 <= convert_width <= 3), "Sample width to convert to must be between 1 and 3 inclusive"
+
+		if sample_width > 3 and convert_width is None:  # resulting WAV data would be 32-bit, which is not convertable to FLAC using our encoder
+			convert_width = 3  # the largest supported sample width is 24-bit, so we'll limit the sample width to that
+
+		# run the FLAC converter with the WAV data to get the FLAC data
+		# wav_data = self.get_wav_data(convert_rate, convert_width)
+		wav_data = frame
+		flac_converter = self.get_flac_converter()
+		process = subprocess.Popen([
+			flac_converter,
+			"--stdout", "--totally-silent",  # put the resulting FLAC file in stdout, and make sure it's not mixed with any program output
+			"--best",  # highest level of compression available
+			"-",  # the input FLAC file contents will be given in stdin
+		], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		flac_data, stderr = process.communicate(wav_data)
+		return flac_data
