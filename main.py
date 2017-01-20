@@ -26,6 +26,8 @@ cmdClassifier = classifier.CommandClassifier(nlp)
 recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
 # recognizer = SphinxSpeechRecognizer()
 
+current_utterance = None
+
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training...")
 cmdClassifier.fit(train, labelsTrain)
@@ -42,7 +44,9 @@ def consoleVisualizer(frame, rate, width):
 		if recognizer.websocket_connector != None:
 			# info += "  |  websocket: "+ str(recognizer.websocket) +" == " + str(dir(recognizer.websocket))
 			pass
-		info += " (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
+		info += "  |  (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
+	if current_utterance:
+		info += "  |  current_utterance: " + current_utterance
 	print(info, end='\r')
 
 def sendToRecognizer(frame, rate, width):
