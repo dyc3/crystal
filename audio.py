@@ -107,7 +107,7 @@ def get_flac_converter():
 
 	return flac_converter
 
-def get_raw_data(self, frame, sample_rate, sample_width, convert_rate=None, convert_width=None):
+def get_raw_data(frame, sample_rate, sample_width, convert_rate=None, convert_width=None):
 	"""
 	Returns a byte string representing the raw frame data given.
 	If ``convert_rate`` is specified and the audio sample rate is not ``convert_rate`` Hz, the resulting audio is resampled to match.
@@ -145,7 +145,7 @@ def get_raw_data(self, frame, sample_rate, sample_width, convert_rate=None, conv
 
 	return raw_data
 
-def get_wav_data(self, frame, sample_rate, sample_width, convert_rate=None, convert_width=None):
+def get_wav_data(frame, sample_rate, sample_width, convert_rate=None, convert_width=None):
 	"""
 	Returns a byte string representing the contents of a WAV file containing the given frame.
 	If ``convert_width`` is specified and the audio samples are not ``convert_width`` bytes each, the resulting audio is converted to match.
