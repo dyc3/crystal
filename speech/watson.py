@@ -32,9 +32,9 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 			if 'error' not in result:
 				if 'results' in result:
 					if not result['results'][0]['final']:
-						self.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
+						WatsonSpeechRecognizer.singleton.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
 					else:
-						self.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
+						WatsonSpeechRecognizer.singleton.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
 				elif 'state' in result:
 					print("Watson: server state:", result['state'])
 			else:
