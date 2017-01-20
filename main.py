@@ -53,12 +53,22 @@ def sendToRecognizer(frame, rate, width):
 	if recognizer.isRunning:
 		recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
 
+def onSpeech(text):
+	current_utterance = text
+
+def onFinish(text):
+	print("User said:", text)
+	current_utterance = None
+	# TODO: process text
+
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer
 print("Calibrating...")
 micIn.Calibrate()
 
 # start recognizer
+recognizer.onSpeech += onSpeech
+recognizer.onFinish += onFinish
 try:
 	recognizer.Start()
 except Exception as e:
