@@ -46,7 +46,7 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 
 	@property
 	def is_closed(self):
-		return self.state == STATE_CLOSED
+		return self.state == self.STATE_CLOSED
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	singleton = None
