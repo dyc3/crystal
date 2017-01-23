@@ -9,7 +9,7 @@ class ActionDate(BaseAction):
 
 	@classmethod
 	def run(self, doc):
-		print("Date: ", datetime.datetime.now())
+		print("Date: ", datetime.datetime.now().date().isoformat())
 
 def getAction():
 	return ActionDate()
