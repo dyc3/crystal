@@ -36,7 +36,8 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 					else:
 						WatsonSpeechRecognizer.singleton.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
 				elif 'state' in result:
-					print("Watson: server state:", result['state'])
+					# print("Watson: server state:", result['state'])
+					pass
 			else:
 				print("Watson received error:", result['error'])
 
@@ -75,6 +76,11 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			WatsonSpeechRecognizer.singleton = self
 		else:
 			self = WatsonSpeechRecognizer.singleton
+
+		def _onFinish(text):
+			self.status = "not-speaking"
+			self.websocket.sendMessage('{"action":"stop"}'.encode('utf8'), isBinary=False)
+		self.onFinish += _onFinish
 
 	def Start(self):
 		print("Watson: isRunning =", self.isRunning)
@@ -125,7 +131,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			else:
 				self._notSpeakingTicks += 1
 
-		if self._notSpeakingTicks >= 6:
+		if self._notSpeakingTicks >= 10:
 			self.status = "not-speaking"
 			self.websocket.sendMessage('{"action":"stop"}'.encode('utf8'), isBinary=False)
 
