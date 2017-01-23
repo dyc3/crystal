@@ -8,5 +8,8 @@ class ActionDate(BaseAction):
 		self.handled_classifier = "date"
 
 	@classmethod
-	def run(self, text):
-		pass
+	def run(self, doc):
+		print("Date: ", datetime.datetime.now())
+
+def getAction():
+	return ActionDate()

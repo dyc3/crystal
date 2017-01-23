@@ -11,14 +11,13 @@ class BaseAction(metaclass=ABCMeta):
 
 	@classmethod
 	@abc.abstractmethod
-	def run(self, text):
+	def run(self, doc):
 		pass
 
 def load_actions():
 	action_modules_str = ["actions."+a for a in os.listdir("actions") if "." not in a and a != "__pycache__"]
 
-	action_modules = []
+	action_modules = {}
 	for value in action_modules_str:
-		action_modules.append(importlib.import_module(name=value))
-
-	print(action_modules)
+		action = importlib.import_module(name=value).getAction()
+		action_modules[action.handled_classifier] = action
