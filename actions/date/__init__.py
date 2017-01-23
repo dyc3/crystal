@@ -1,1 +1,11 @@
+import datetime
 
+class ActionDate(BaseAction):
+	"""docstring for ActionDate."""
+	def __init__(self):
+		super(ActionDate, self).__init__()
+		self.handled_classifier = "date"
+
+	@classmethod
+	def run(self, text):
+		pass
