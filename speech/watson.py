@@ -125,7 +125,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			else:
 				self._notSpeakingTicks += 1
 
-		if self._notSpeakingTicks >= 50:
+		if self._notSpeakingTicks >= 6:
 			self.status = "not-speaking"
 			self.websocket.sendMessage('{"action":"stop"}'.encode('utf8'), isBinary=False)
 
