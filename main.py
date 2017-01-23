@@ -12,6 +12,7 @@ import audioop
 import time
 import signal
 import sys
+import actions
 
 print("Loading...")
 config = {}
@@ -25,6 +26,8 @@ cmdClassifier = classifier.CommandClassifier(nlp)
 # recognizer = BaseSpeechRecognizer() # placeholder
 recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
 # recognizer = SphinxSpeechRecognizer()
+commands = actions.load_actions()
+print(commands)
 
 current_utterance = None
 
@@ -61,7 +64,10 @@ def onFinish(text):
 	global current_utterance
 	print("User said:", text)
 	current_utterance = None
-	# TODO: process text
+
+	classification = cmdClassifier.predict([text])[0]
+	doc = nlp(text)
+	commands[classification].run(doc)
 
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer
