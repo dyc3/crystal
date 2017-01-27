@@ -139,14 +139,19 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.websocket.close()
 
 	def GiveFrame(self, frame, sample_rate, sample_width, power_threshold=300):
+		def doSendMessage(text):
+			if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
+				return False
+			print(self.websocket.sendMessage(text.encode('utf8'), isBinary=False))
+			return True
+
 		def doSendFrame(frame, sample_rate, sample_width):
+			if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
+				return False
 			raw_data = get_raw_data(frame, sample_rate, sample_width)
 			if len(raw_data) > 0:
 				self.websocket.sendMessage(raw_data, isBinary=True)
-
-		if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
-			# print("\nno websocket")
-			return
+			return True
 
 		frame_power = audioop.rms(frame, sample_width)
 		# add to frame buffer
@@ -159,7 +164,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		if self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 4:
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
-			self.websocket.sendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}'.encode('utf8'), isBinary=False)
+			doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
 			if len(self._speakingBuffer) > 0:
 				for f in self._speakingBuffer:
 					doSendFrame(f, sample_rate, sample_width)
@@ -174,7 +179,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self._notSpeakingTicks >= 10:
 			self.status = "not-speaking"
-			self.websocket.sendMessage('{"action":"stop"}'.encode('utf8'), isBinary=False)
+			doSendMessage('{"action":"stop"}')
 
 	def _doThreadReceiver(self):
 		reactor.run()
