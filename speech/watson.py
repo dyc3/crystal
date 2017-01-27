@@ -4,7 +4,6 @@ import json
 import requests
 from twisted.internet import ssl, reactor, defer
 from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory, connectWS
-from twisted.internet.protocol import ReconnectingClientFactory
 import threading
 import audioop
 from audio import get_flac_data, get_raw_data
@@ -46,6 +45,7 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 	def onClose(self, wasClean, code, reason):
 		WatsonSpeechRecognizer.singleton.websocket = self
 		print("Watson: WebSocket connection closed ({}): {}".format(code, reason))
+		WatsonSpeechRecognizer.singleton.onWebsocketClose(wasClean, code, reason)
 
 	@property
 	def is_closed(self):
@@ -59,19 +59,6 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 			return client.state == client.STATE_CLOSED
 		d.addCallback(_getResult)
 		return d;
-
-class WatsonSpeechClientFactory(WebSocketClientFactory, ReconnectingClientFactory):
-
-	protocol = WatsonSpeechClientProtocol
-
-	def clientConnectionFailed(self, connector, reason):
-		print("Watson client connection failed .. retrying ..")
-		self.retry(connector)
-
-	def clientConnectionLost(self, connector, reason):
-		print("Watson client connection lost .. retrying ..")
-		self.retry(connector)
-
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	singleton = None
@@ -91,7 +78,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		self.hostname = "stream.watsonplatform.net"
 		# self.hostname = "general-cardude419.c9users.io"
 
-		self.websocket_factory = WatsonSpeechClientFactory("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize")
+		self.websocket_factory = WebSocketClientFactory("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize")
 		self.websocket_factory.protocol = WatsonSpeechClientProtocol
 		self.websocket_connector = None
 		self.websocket = None
@@ -195,3 +182,13 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		print(resp.text)
 		jsonObject = resp.json()
 		return jsonObject['token']
+
+	# doesn't work in current state
+	def onWebsocketClose(self, wasClean, code, reason):
+		reactor.stop()
+		self.websocket = None
+		print("waiting for reactor to stop...")
+		while reactor.running:
+			# print(".", end='')
+			pass
+		reactor.run()
