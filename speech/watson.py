@@ -30,7 +30,7 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 			# print("Watson: Text received: {0}".format(text))
 			result = json.loads(text)
 			if 'error' not in result:
-				if 'results' in result:
+				if 'results' in result and len(result['results']) > 0:
 					if not result['results'][0]['final']:
 						WatsonSpeechRecognizer.singleton.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
 					else:
