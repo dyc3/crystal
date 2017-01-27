@@ -59,6 +59,7 @@ class MicrophoneInput(object):
 			# dynamically adjust the power threshold using asymmetric weighted average
 			damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
 			target_power = power * self.dynamic_power_ratio
+			if target_power < 150: target_power = 150
 			self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
 
 		stream.stop_stream()
@@ -76,6 +77,7 @@ class MicrophoneInput(object):
 
 				damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
 				target_power = power * self.dynamic_power_ratio
+				if target_power < 150: target_power = 150
 				self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
 
 			self.onFrame.fire(frame, self.RATE, self.sample_width)
