@@ -2,7 +2,7 @@ from eventhook import EventHook
 from speech.base import BaseSpeechRecognizer
 import json
 import requests
-from twisted.internet import ssl, reactor
+from twisted.internet import ssl, reactor, defer
 from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory, connectWS
 import threading
 import audioop
@@ -44,11 +44,21 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 
 	def onClose(self, wasClean, code, reason):
 		WatsonSpeechRecognizer.singleton.websocket = self
-		print("Watson: WebSocket connection closed: {0}".format(reason))
+		print("Watson: WebSocket connection closed ({}): {}".format(code, reason))
+		WatsonSpeechRecognizer.singleton.onWebsocketClose(wasClean, code, reason)
 
 	@property
 	def is_closed(self):
-		return self.state == self.STATE_CLOSED
+		d = defer.Deferred();
+		def _errBack(err):
+			print("is_closed ERR")
+			print(err)
+		d.addErrback(_errBack)
+		def _getResult(client):
+			# print("_getResult - results", client)
+			return client.state == client.STATE_CLOSED
+		d.addCallback(_getResult)
+		return d;
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	singleton = None
@@ -167,3 +177,13 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		print(resp.text)
 		jsonObject = resp.json()
 		return jsonObject['token']
+
+	# doesn't work in current state
+	def onWebsocketClose(self, wasClean, code, reason):
+		reactor.stop()
+		self.websocket = None
+		print("waiting for reactor to stop...")
+		while reactor.running:
+			# print(".", end='')
+			pass
+		reactor.run()
