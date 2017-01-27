@@ -24,7 +24,8 @@ class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 	def onMessage(self, payload, isBinary):
 		WatsonSpeechRecognizer.singleton.websocket = self
 		if isBinary:
-			print("Binary message received: {0} bytes".format(len(payload)))
+			# print("Binary message received: {0} bytes".format(len(payload)))
+			pass
 		else:
 			text = payload.decode('utf8')
 			# print("Watson: Text received: {0}".format(text))
