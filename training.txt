@@ -22,12 +22,12 @@ roll a d6,roll-die
 roll a d12,roll-die
 roll a d3,roll-die
 flip a coin,roll-die
-pause the video,media-pause
 play media,media-play
 resume playback,media-play
+play the video,media-play
+pause the video,media-pause
 suspend playback,media-pause
 stop the video,media-pause
-play video,media-play
 stop playback,media-pause
 stop playing music,media-pause
 set volume to 100%,volume-set
