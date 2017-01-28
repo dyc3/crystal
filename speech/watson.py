@@ -97,11 +97,11 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
 			doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
+
+		if self.status == "speaking":
 			if len(self._speakingBuffer) > 0:
 				if doSendFrame(numpy.concatenate([self._speakingBuffer]).tobytes(), sample_rate, sample_width):
 					self._speakingBuffer = []
-
-		if self.status == "speaking":
 			doSendFrame(frame, sample_rate, sample_width)
 			if frame_power >= power_threshold:
 				self._notSpeakingTicks = 0
