@@ -116,6 +116,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		while self.isRunning:
 			if self.websocket != None and self.websocket.connected:
 				text = self.websocket.recv()
+				if len(text) == 0:
+					continue
 				# print("Watson: Text received: {0}".format(text))
 				result = json.loads(text)
 				if 'error' not in result:
