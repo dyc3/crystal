@@ -130,7 +130,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		def doSendMessage(text):
 			if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
 				return False
-			print(self.websocket.sendMessage(text.encode('utf8'), isBinary=False))
+			self.websocket.sendMessage(text.encode('utf8'), isBinary=False)
 			return True
 
 		def doSendFrame(frame, sample_rate, sample_width):
