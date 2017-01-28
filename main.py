@@ -62,9 +62,22 @@ def onFinish(text):
 	print("User said:", text)
 	current_utterance = None
 
-	classification = cmdClassifier.predict([text])[0]
+	text = text.replace("crystal", "Crystal")
+
 	doc = nlp(text)
-	commands[classification].run(doc)
+	if isSpeakingToCrystal(doc):
+		classification = cmdClassifier.predict([text])[0]
+		commands[classification].run(doc)
+	else:
+		print("user not talking to me")
+
+def isSpeakingToCrystal(doc):
+	sent = next(doc.sents)
+	for token in sent:
+		print(token, token.pos_, token.dep_, "parent:", token.head)
+		if token.dep_ in ["npadvmod", "ccomp"] and token.pos_ in ["NNP", "NN"]:
+			return True
+	return False
 
 micIn.onFrame += consoleVisualizer
 micIn.onFrame += sendToRecognizer
