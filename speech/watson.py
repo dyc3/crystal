@@ -7,6 +7,7 @@ from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientF
 import threading
 import audioop
 from audio import get_flac_data, get_raw_data
+import numpy
 
 class WatsonSpeechClientProtocol(WebSocketClientProtocol):
 	def __init__(self):
@@ -153,9 +154,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self._notSpeakingTicks = 0
 			doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
 			if len(self._speakingBuffer) > 0:
-				for f in self._speakingBuffer:
-					doSendFrame(f, sample_rate, sample_width)
-				self._speakingBuffer = []
+				if doSendFrame(numpy.concatenate([self._speakingBuffer]).tobytes(), sample_rate, sample_width):
+					self._speakingBuffer = []
 
 		if self.status == "speaking":
 			doSendFrame(frame, sample_rate, sample_width)
