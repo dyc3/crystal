@@ -132,6 +132,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 				else:
 					error = result['error']
 					print("Watson received error:", error)
+					# JANKY: we really should be changing our code so that these errors don't happen
+					if "expected a json header" in error.lower():
+						self._needJsonHeader = True
 			else:
 				time.sleep(0.1)
 
