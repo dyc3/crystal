@@ -2,64 +2,12 @@ from eventhook import EventHook
 from speech.base import BaseSpeechRecognizer
 import json
 import requests
-from twisted.internet import ssl, reactor, defer
-from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory, connectWS
 import threading
 import audioop
 from audio import get_flac_data, get_raw_data
 import numpy
-
-class WatsonSpeechClientProtocol(WebSocketClientProtocol):
-	def __init__(self):
-		# super(WebSocketClientFactory, self).__init__()
-		WatsonSpeechRecognizer.singleton.websocket = self
-
-	def onConnect(self, response):
-		WatsonSpeechRecognizer.singleton.websocket = self
-		print("Watson: Server connected: {0}".format(response.peer))
-
-	def onOpen(self):
-		WatsonSpeechRecognizer.singleton.websocket = self
-		print("Watson: WebSocket connection open.")
-
-	def onMessage(self, payload, isBinary):
-		WatsonSpeechRecognizer.singleton.websocket = self
-		if isBinary:
-			# print("Binary message received: {0} bytes".format(len(payload)))
-			pass
-		else:
-			text = payload.decode('utf8')
-			# print("Watson: Text received: {0}".format(text))
-			result = json.loads(text)
-			if 'error' not in result:
-				if 'results' in result and len(result['results']) > 0:
-					if not result['results'][0]['final']:
-						WatsonSpeechRecognizer.singleton.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
-					else:
-						WatsonSpeechRecognizer.singleton.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
-				elif 'state' in result:
-					# print("Watson: server state:", result['state'])
-					pass
-			else:
-				print("Watson received error:", result['error'])
-
-	def onClose(self, wasClean, code, reason):
-		WatsonSpeechRecognizer.singleton.websocket = self
-		print("Watson: WebSocket connection closed ({}): {}".format(code, reason))
-		WatsonSpeechRecognizer.singleton.onWebsocketClose(wasClean, code, reason)
-
-	@property
-	def is_closed(self):
-		d = defer.Deferred();
-		def _errBack(err):
-			print("is_closed ERR")
-			print(err)
-		d.addErrback(_errBack)
-		def _getResult(client):
-			# print("_getResult - results", client)
-			return client.state == client.STATE_CLOSED
-		d.addCallback(_getResult)
-		return d;
+import websocket
+import time
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	singleton = None
@@ -79,9 +27,6 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		self.hostname = "stream.watsonplatform.net"
 		# self.hostname = "general-cardude419.c9users.io"
 
-		self.websocket_factory = WebSocketClientFactory("wss://"+ self.hostname +"/speech-to-text/api/v1/recognize")
-		self.websocket_factory.protocol = WatsonSpeechClientProtocol
-		self.websocket_connector = None
 		self.websocket = None
 
 		if not WatsonSpeechRecognizer.singleton:
@@ -91,7 +36,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		def _onFinish(text):
 			self.status = "not-speaking"
-			self.websocket.sendMessage('{"action":"stop"}'.encode('utf8'), isBinary=False)
+			self.websocket.send('{"action":"stop"}'.encode('utf8'))
+			self.websocket.close()
 		self.onFinish += _onFinish
 
 	def Start(self):
@@ -100,18 +46,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			headers = {}
 			print("Watson: getting token...")
 			headers['X-Watson-Authorization-Token'] = self.getAuthenticationToken("wss://"+ self.hostname,"speech-to-text",self.username,self.password)
-			self.websocket_factory.headers = headers
+			self.websocket_headers = headers
 
-			print("Watson: connecting...")
-			if self.websocket_factory.isSecure:
-				contextFactory = ssl.ClientContextFactory()
-			else:
-				contextFactory = None
-			self.websocket_connector = connectWS(self.websocket_factory, contextFactory=contextFactory)
-			# self.websocket_connector.recognizer = self
-			print("Watson: connected")
-
-			self.threadReceiver = threading.Thread(name="watson-speech-client")
+			self.threadReceiver = threading.Thread(name="watson-speech-receiver")
 			self.threadReceiver.run = self._doThreadReceiver
 			self.isRunning = True
 			self.status = "not-speaking"
@@ -127,18 +64,25 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.websocket.close()
 
 	def GiveFrame(self, frame, sample_rate, sample_width, power_threshold=300):
+
 		def doSendMessage(text):
-			if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
-				return False
-			self.websocket.sendMessage(text.encode('utf8'), isBinary=False)
+			if self.websocket == None or not self.websocket.connected:
+				# return False
+				self._doConnect()
+				if not self.websocket.connected:
+					return False
+			self.websocket.send(text.encode('utf8'))
 			return True
 
 		def doSendFrame(frame, sample_rate, sample_width):
-			if self.websocket == None or self.websocket.state != WatsonSpeechClientProtocol.STATE_OPEN:
-				return False
+			if self.websocket == None or not self.websocket.connected:
+				# return False
+				self._doConnect()
+				if not self.websocket.connected:
+					return False
 			raw_data = get_raw_data(frame, sample_rate, sample_width)
 			if len(raw_data) > 0:
-				self.websocket.sendMessage(raw_data, isBinary=True)
+				self.websocket.send_binary(raw_data)
 			return True
 
 		frame_power = audioop.rms(frame, sample_width)
@@ -169,7 +113,24 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			doSendMessage('{"action":"stop"}')
 
 	def _doThreadReceiver(self):
-		reactor.run()
+		while self.isRunning:
+			if self.websocket != None and self.websocket.connected:
+				text = self.websocket.recv()
+				# print("Watson: Text received: {0}".format(text))
+				result = json.loads(text)
+				if 'error' not in result:
+					if 'results' in result and len(result['results']) > 0:
+						if not result['results'][0]['final']:
+							WatsonSpeechRecognizer.singleton.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
+						else:
+							WatsonSpeechRecognizer.singleton.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
+					elif 'state' in result:
+						# print("Watson: server state:", result['state'])
+						pass
+				else:
+					print("Watson received error:", result['error'])
+			else:
+				time.sleep(0.1)
 
 	def getAuthenticationToken(self, hostname, serviceName, username, password):
 		uri = hostname + "/authorization/api/v1/token?url=" + hostname + '/' + \
@@ -183,5 +144,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		jsonObject = resp.json()
 		return jsonObject['token']
 
-	def onWebsocketClose(self, wasClean, code, reason):
-		pass
+	def _doConnect(self):
+		if self.websocket != None and self.websocket.connected:
+			print("Already connected.")
+			return
+		uri = "wss://"+ self.hostname +"/speech-to-text/api/v1/recognize"
+		self.websocket = websocket.create_connection(uri, header=self.websocket_headers)
