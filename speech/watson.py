@@ -41,7 +41,6 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		self.onFinish += _onFinish
 
 	def Start(self):
-		print("Watson: isRunning =", self.isRunning)
 		if not self.isRunning:
 			headers = {}
 			print("Watson: getting token...")
@@ -58,7 +57,6 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 	def Stop(self):
 		if self.isRunning:
-			print("STOPPING")
 			self.isRunning = False
 			self.threadReceiver.join()
 			self.websocket.close()
