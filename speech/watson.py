@@ -123,9 +123,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 				if 'error' not in result:
 					if 'results' in result and len(result['results']) > 0:
 						if not result['results'][0]['final']:
-							WatsonSpeechRecognizer.singleton.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
+							self.onSpeech.fire(result['results'][0]['alternatives'][0]['transcript'])
 						else:
-							WatsonSpeechRecognizer.singleton.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
+							self.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
 					elif 'state' in result:
 						# print("Watson: server state:", result['state'])
 						pass
