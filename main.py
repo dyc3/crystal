@@ -74,8 +74,7 @@ def onFinish(text):
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
 	for token in sent:
-		print(token, token.pos_, token.dep_, "parent:", token.head)
-		if token.dep_ in ["npadvmod", "ccomp"] and token.pos_ in ["NNP", "NN"]:
+		if token.dep_ in ["npadvmod", "ccomp"] and token.pos_ in ["NNP", "NN", "PROPN"]:
 			return True
 	return False
 
