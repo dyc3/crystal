@@ -93,9 +93,11 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self._speakingBuffer = []
 
 		# determine if we should start sending data
-		if self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 4:
+		if (self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 4) or \
+			(self.status == "speaking" and self._needJsonHeader):
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
+			self._needJsonHeader = False
 			doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
 
 		if self.status == "speaking":
@@ -111,6 +113,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		if self._notSpeakingTicks >= 10:
 			self.status = "not-speaking"
 			doSendMessage('{"action":"stop"}')
+			self._needJsonHeader = False
 
 	def _doThreadReceiver(self):
 		while self.isRunning:
@@ -128,7 +131,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 							self.onFinish.fire(result['results'][0]['alternatives'][0]['transcript'])
 					elif 'state' in result:
 						# print("Watson: server state:", result['state'])
-						pass
+						if result['state'] == "listening":
+							self._needJsonHeader = False
 				else:
 					error = result['error']
 					print("Watson received error:", error)
@@ -155,4 +159,5 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			print("Already connected.")
 			return
 		uri = "wss://"+ self.hostname +"/speech-to-text/api/v1/recognize"
+		self._needJsonHeader = False
 		self.websocket = websocket.create_connection(uri, header=self.websocket_headers)
