@@ -183,12 +183,5 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		jsonObject = resp.json()
 		return jsonObject['token']
 
-	# doesn't work in current state
 	def onWebsocketClose(self, wasClean, code, reason):
-		reactor.stop()
-		self.websocket = None
-		print("waiting for reactor to stop...")
-		while reactor.running:
-			# print(".", end='')
-			pass
-		reactor.run()
+		pass
