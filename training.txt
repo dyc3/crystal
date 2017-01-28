@@ -16,6 +16,12 @@ is today tuesday,date
 is today wednesday,date
 was yesterday thursday,date
 is today friday,date
+roll a die,roll-die
+roll 2 dice,roll-die
+roll a d6,roll-die
+roll a d12,roll-die
+roll a d3,roll-die
+flip a coin,roll-die
 pause the video,media-pause
 play media,media-play
 resume playback,media-play
