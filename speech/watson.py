@@ -130,7 +130,8 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 						# print("Watson: server state:", result['state'])
 						pass
 				else:
-					print("Watson received error:", result['error'])
+					error = result['error']
+					print("Watson received error:", error)
 			else:
 				time.sleep(0.1)
 
