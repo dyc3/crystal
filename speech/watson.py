@@ -142,7 +142,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		# print(uri)
 		resp = requests.get(uri, auth=(username, password), verify=False,
 							headers={'Accept': 'application/json'}, timeout=(30, 30))
-		print(resp.text)
+		# print(resp.text)
 		jsonObject = resp.json()
 		return jsonObject['token']
 
