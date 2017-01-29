@@ -43,6 +43,8 @@ def consoleVisualizer(frame, rate, width):
 	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
 	info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
 	if recognizer.isRunning:
+		if recognizer.websocket:
+			info += ("\033[32m connected" if recognizer.websocket.connected else "\033[31m disconnected") + "\033[0m"
 		info += "  |  (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	info += "  |  Processing: " + str(current_utterance)
 	print(info, end='                                      \r')
