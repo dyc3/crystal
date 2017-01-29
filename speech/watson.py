@@ -91,7 +91,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self._speakingBuffer = []
 
 		# determine if we should start sending data
-		if (self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 4) or \
+		if (self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 6) or \
 			(self.status == "speaking" and self._needJsonHeader):
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
