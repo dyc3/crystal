@@ -47,7 +47,7 @@ def consoleVisualizer(frame, rate, width):
 			info += ("\033[32m connected" if recognizer.websocket.connected else "\033[31m disconnected") + "\033[0m"
 		info += "  |  (no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
 	info += "  |  Processing: " + str(current_utterance)
-	print(info, end='                                      \r')
+	print(info, end='       \r')
 
 def sendToRecognizer(frame, rate, width):
 	# print(recognizer.websocket.__dict__)
