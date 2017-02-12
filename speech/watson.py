@@ -61,28 +61,27 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.threadReceiver.join()
 			self.websocket.close()
 
+	def doSendMessage(self, text):
+		if self.websocket == None or not self.websocket.connected:
+			# return False
+			self._doConnect()
+			if not self.websocket.connected:
+				return False
+		self.websocket.send(text.encode('utf8'))
+		return True
+
+	def doSendFrame(self, frame, sample_rate, sample_width):
+		if self.websocket == None or not self.websocket.connected:
+			# return False
+			self._doConnect()
+			if not self.websocket.connected:
+				return False
+		raw_data = get_raw_data(frame, sample_rate, sample_width)
+		if len(raw_data) > 0:
+			self.websocket.send_binary(raw_data)
+		return True
+
 	def GiveFrame(self, frame, sample_rate, sample_width, power_threshold=300):
-
-		def doSendMessage(text):
-			if self.websocket == None or not self.websocket.connected:
-				# return False
-				self._doConnect()
-				if not self.websocket.connected:
-					return False
-			self.websocket.send(text.encode('utf8'))
-			return True
-
-		def doSendFrame(frame, sample_rate, sample_width):
-			if self.websocket == None or not self.websocket.connected:
-				# return False
-				self._doConnect()
-				if not self.websocket.connected:
-					return False
-			raw_data = get_raw_data(frame, sample_rate, sample_width)
-			if len(raw_data) > 0:
-				self.websocket.send_binary(raw_data)
-			return True
-
 		frame_power = audioop.rms(frame, sample_width)
 		# add to frame buffer
 		if self.status == "not-speaking" and frame_power >= power_threshold:
@@ -96,13 +95,13 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
 			self._needJsonHeader = False
-			doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
+			self.doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
 
 		if self.status == "speaking":
 			if len(self._speakingBuffer) > 0:
-				if doSendFrame(numpy.concatenate([self._speakingBuffer]).tobytes(), sample_rate, sample_width):
+				if self.doSendFrame(numpy.concatenate([self._speakingBuffer]).tobytes(), sample_rate, sample_width):
 					self._speakingBuffer = []
-			doSendFrame(frame, sample_rate, sample_width)
+			self.doSendFrame(frame, sample_rate, sample_width)
 			if frame_power >= power_threshold:
 				self._notSpeakingTicks = 0
 			else:
@@ -110,7 +109,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		if self._notSpeakingTicks >= 10:
 			self.status = "not-speaking"
-			doSendMessage('{"action":"stop"}')
+			self.doSendMessage('{"action":"stop"}')
 			self._needJsonHeader = False
 
 	def _doThreadReceiver(self):
