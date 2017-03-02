@@ -89,6 +89,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		else:
 			self._speakingBuffer = []
 
+		if self.websocket and self.websocket.connected and self.status == "not-speaking":
+			print("ERR: SHOULD NOT BE CONNECTED")
+
 		# determine if we should start sending data
 		if (self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 6) or \
 			(self.status == "speaking" and self._needJsonHeader):
