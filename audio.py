@@ -8,6 +8,12 @@ import subprocess
 import os
 import stat
 import io
+import numpy as np
+import tensorflow as tf
+import tensorflow.contrib.slim as slim
+import tensorflow.contrib.learn as learn
+import librosa
+import pdb
 from eventhook import EventHook
 
 class MicrophoneInput(object):
@@ -196,3 +202,82 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
+
+class AudioClassifier(object):
+	""" Classifies audio in real time. """
+	def __init__(self):
+		super(AudioClassifier, self).__init__()
+
+	def fit(self, X, y):
+		"""
+		X is an array of file paths to audio files. (wav)
+		y is an array of strings that corespond to the respective audio file's classification.
+
+		returns nothing
+		"""
+		assert isinstance(X, list) and len(X) > 0
+		assert isinstance(y, list) and len(y) > 0
+
+		audio_data = np.array([])
+		for w in range(len(X)):
+			wavfile = X[w]
+			print("loading " + wavfile)
+			audio, sampleRate = librosa.load(wavfile, sr=16000)
+			features = self.featureExtraction(audio, sampleRate)
+			# print(features)
+			# pdb.set_trace()
+			np.append(audio_data, features)
+			print("audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate: " + str(sampleRate) + " has " + str(len(features)) + " features.")
+		print(audio_data.dtype)
+		print(len(audio_data))
+
+		self._classifiers = {}
+		for i in range(len(y)):
+			self._classifiers[i] = y[i]
+
+		classes = np.asarray(range(len(y)), dtype="int")
+
+		feature_columns = learn.infer_real_valued_columns_from_input(audio_data)
+		print(feature_columns)
+		self.classifier = learn.LinearClassifier(n_classes=len(y), feature_columns=feature_columns)
+		self.classifier.fit(audio_data, classes, steps=200, batch_size=32)
+
+	def predict(self, X):
+		assert isinstance(X, str) and len(X) > 0
+
+		audio, sampleRate = librosa.load(X, sr=16000)
+		features = self.featureExtraction(audio, sampleRate)
+		return self._classifiers[self.classifier.predict(features)]
+
+
+	def featureExtraction(self, signal, sampleRate):
+		""" TODO """
+		print("finding chroma features")
+		chroma_feature = librosa.feature.chroma_stft(y=signal, sr=sampleRate)
+		# print("finding mel features")
+		# mel_feature = librosa.feature.melspectrogram(y=signal, sr=sampleRate, n_mels=128)
+		#
+		# print("finding harmonic and percissive features")
+		# y_harmonic, y_percussive = librosa.effects.hpss(y=signal)
+		#
+		# print("harmonic features")
+		# mel_harmonic	= librosa.feature.melspectrogram(y_harmonic, sr=sampleRate)
+		# print("percissive features")
+		# mel_percussive	= librosa.feature.melspectrogram(y_percussive, sr=sampleRate)
+		#
+		# print("log amplitude")
+		# log_melH = librosa.logamplitude(mel_harmonic, ref_power=np.max)
+		# log_melP = librosa.logamplitude(mel_percussive, ref_power=np.max)
+		# print("found all features, concatenating")
+		#
+		# print(len(chroma_feature))
+		# print(len(mel_feature))
+		# print(len(log_melH))
+		# print(len(log_melP))
+
+		all_features = chroma_feature #+ mel_feature + log_melH + log_melP
+		# print("done")
+		# print(all_features)
+
+		# all_features = np.multiply(all_features, 10000)
+		return all_features
