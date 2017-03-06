@@ -12,6 +12,9 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import tensorflow.contrib.learn as learn
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.feature_extraction import DictVectorizer
 import librosa
 import pdb
 from eventhook import EventHook
@@ -218,29 +221,48 @@ class AudioClassifier(object):
 		assert isinstance(X, list) and len(X) > 0
 		assert isinstance(y, list) and len(y) > 0
 
-		audio_data = np.array([])
+
+		# convert y into a dictionary of key:integers, and value:classification
+		self._classifiers = {}
+		_set = list(set(y))
+		for i in range(len(_set)):
+			self._classifiers[i] = _set[i]
+
+		# y as a list of integers rather than a list of strings
+		classes = []
+		invert_classifiers = inv_map = {v: k for k, v in self._classifiers.items()}
+		for c in y:
+			classes.append(invert_classifiers[c])
+
+
+		audio_data = []
+		self.classifier = MLPClassifier(solver='adam', verbose=False, random_state=2, hidden_layer_sizes=(150,))
+		# self.classifier = DecisionTreeClassifier(max_depth=5)
+		classes = []
 		for w in range(len(X)):
 			wavfile = X[w]
 			print("loading " + wavfile)
 			audio, sampleRate = librosa.load(wavfile, sr=16000)
-			features = self.featureExtraction(audio, sampleRate)
-			# print(features)
-			# pdb.set_trace()
-			np.append(audio_data, features)
-			print("audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate: " + str(sampleRate) + " has " + str(len(features)) + " features.")
-		print(audio_data.dtype)
+			for sampleIndex in range(0, len(audio), sampleRate):
+				features = self.featureExtraction(audio[sampleIndex:sampleIndex + sampleRate], sampleRate)
+				# print(str(type(features)) + " " + str(len(features)))
+				# print(str(type(features[0])) + " " + str(features[0]))
+				# print(str(type(features[0][0])) + " " + str(features[0][0]))
+				# features = dict(zip(range(len(features)), features))
+
+				# v = DictVectorizer()
+				# newX = v.fit_transform(features)
+				if len(features) == 384: # HACK: fix this ASAP
+					audio_data.append(features)
+					classes.append(invert_classifiers[y[w]])
+					print("sample " + str(int(sampleIndex / sampleRate)) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate: " + str(sampleRate) + " has " + str(len(features)) + " features.")
+		# print(audio_data.dtype)
 		print(len(audio_data))
+		print(len(classes))
 
-		self._classifiers = {}
-		for i in range(len(y)):
-			self._classifiers[i] = y[i]
 
-		classes = np.asarray(range(len(y)), dtype="int")
+		self.classifier.fit(audio_data, classes)
 
-		feature_columns = learn.infer_real_valued_columns_from_input(audio_data)
-		print(feature_columns)
-		self.classifier = learn.LinearClassifier(n_classes=len(y), feature_columns=feature_columns)
-		self.classifier.fit(audio_data, classes, steps=200, batch_size=32)
 
 	def predict(self, X):
 		assert isinstance(X, str) and len(X) > 0
@@ -280,4 +302,4 @@ class AudioClassifier(object):
 		# print(all_features)
 
 		# all_features = np.multiply(all_features, 10000)
-		return all_features
+		return all_features.flatten().astype(np.float64)
