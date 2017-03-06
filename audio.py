@@ -268,8 +268,12 @@ class AudioClassifier(object):
 		assert isinstance(X, str) and len(X) > 0
 
 		audio, sampleRate = librosa.load(X, sr=16000)
-		features = self.featureExtraction(audio, sampleRate)
-		return self._classifiers[self.classifier.predict(features)]
+		predictions = []
+		for sampleIndex in range(0, len(audio), sampleRate):
+			features = self.featureExtraction(audio[sampleIndex:sampleIndex + sampleRate], sampleRate)
+			if len(features) == 384: # HACK: fix this ASAP
+				predictions.append(self.classifier.predict([features]))
+		return np.asarray(predictions).flatten().tolist()
 
 
 	def featureExtraction(self, signal, sampleRate):
