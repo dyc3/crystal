@@ -9,6 +9,7 @@ import os
 import stat
 import io
 import numpy as np
+from scipy import stats
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import tensorflow.contrib.learn as learn
@@ -206,6 +207,7 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
 
+sample_size = 128
 class AudioClassifier(object):
 	""" Classifies audio in real time. """
 	def __init__(self):
@@ -243,8 +245,9 @@ class AudioClassifier(object):
 			wavfile = X[w]
 			print("loading " + wavfile)
 			audio, sampleRate = librosa.load(wavfile, sr=16000)
-			for sampleIndex in range(0, len(audio), sampleRate):
-				features = self.featureExtraction(audio[sampleIndex:sampleIndex + sampleRate], sampleRate)
+			print("working...")
+			for sampleIndex in range(0, len(audio), sample_size):
+				features = self.featureExtraction(audio[sampleIndex:sampleIndex + sample_size], sampleRate)
 				# print(str(type(features)) + " " + str(len(features)))
 				# print(str(type(features[0])) + " " + str(features[0]))
 				# print(str(type(features[0][0])) + " " + str(features[0][0]))
@@ -252,15 +255,16 @@ class AudioClassifier(object):
 
 				# v = DictVectorizer()
 				# newX = v.fit_transform(features)
-				if len(features) == 384: # HACK: fix this ASAP
+				if len(features) == 12: # HACK: fix this ASAP
 					audio_data.append(features)
 					classes.append(invert_classifiers[y[w]])
-					print("sample " + str(int(sampleIndex / sampleRate)) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate: " + str(sampleRate) + " has " + str(len(features)) + " features.")
+				else:
+					print("SKIPPING sample " + str(int(sampleIndex / sample_size))+"/"+str(len(audio)/sample_size) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate: " + str(sampleRate) + " has " + str(len(features)) + " features.")
 		# print(audio_data.dtype)
 		print(len(audio_data))
 		print(len(classes))
 
-
+		print("fitting...")
 		self.classifier.fit(audio_data, classes)
 
 
@@ -269,16 +273,18 @@ class AudioClassifier(object):
 
 		audio, sampleRate = librosa.load(X, sr=16000)
 		predictions = []
-		for sampleIndex in range(0, len(audio), sampleRate):
-			features = self.featureExtraction(audio[sampleIndex:sampleIndex + sampleRate], sampleRate)
-			if len(features) == 384: # HACK: fix this ASAP
+		for sampleIndex in range(0, len(audio), sample_size):
+			features = self.featureExtraction(audio[sampleIndex:sampleIndex + sample_size], sampleRate)
+			if len(features) == 12: # HACK: fix this ASAP
 				predictions.append(self.classifier.predict([features]))
-		return np.asarray(predictions).flatten().tolist()
+		predictions = np.asarray(predictions).flatten()
+		modes = stats.mode(predictions)
+		return self._classifiers[modes[0][0]]
 
 
 	def featureExtraction(self, signal, sampleRate):
 		""" TODO """
-		print("finding chroma features")
+		# print("finding chroma features")
 		chroma_feature = librosa.feature.chroma_stft(y=signal, sr=sampleRate)
 		# print("finding mel features")
 		# mel_feature = librosa.feature.melspectrogram(y=signal, sr=sampleRate, n_mels=128)
