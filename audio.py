@@ -207,7 +207,7 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
 
-sample_size = 128
+sample_size = 1024
 class AudioClassifier(object):
 	""" Classifies audio in real time. """
 	def __init__(self):
@@ -255,11 +255,11 @@ class AudioClassifier(object):
 
 				# v = DictVectorizer()
 				# newX = v.fit_transform(features)
-				if len(features) == 12: # HACK: fix this ASAP
+				if len(features) == 36: # HACK: fix this ASAP
 					audio_data.append(features)
 					classes.append(invert_classifiers[y[w]])
 				else:
-					print("SKIPPING sample " + str(int(sampleIndex / sample_size))+"/"+str(len(audio)/sample_size) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate: " + str(sampleRate) + " has " + str(len(features)) + " features.")
+					print("SKIPPING sample " + str(int(sampleIndex / sample_size))+"/"+str(len(audio)/sample_size) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate " + str(sampleRate) + " has " + str(len(features)) + " features.")
 		# print(audio_data.dtype)
 		print(len(audio_data))
 		print(len(classes))
@@ -268,18 +268,23 @@ class AudioClassifier(object):
 		self.classifier.fit(audio_data, classes)
 
 
-	def predict(self, X):
+	def predictFile(self, X):
 		assert isinstance(X, str) and len(X) > 0
 
 		audio, sampleRate = librosa.load(X, sr=16000)
 		predictions = []
 		for sampleIndex in range(0, len(audio), sample_size):
 			features = self.featureExtraction(audio[sampleIndex:sampleIndex + sample_size], sampleRate)
-			if len(features) == 12: # HACK: fix this ASAP
+			if len(features) == 36: # HACK: fix this ASAP
 				predictions.append(self.classifier.predict([features]))
 		predictions = np.asarray(predictions).flatten()
 		modes = stats.mode(predictions)
 		return self._classifiers[modes[0][0]]
+
+	def predictSample(self, X, sampleRate):
+		assert isinstance(X, list) and len(X) == sample_size
+
+		features = self.featureExtraction(X,)
 
 
 	def featureExtraction(self, signal, sampleRate):
