@@ -282,6 +282,7 @@ class AudioClassifier(object):
 		return self._classifiers[modes[0][0]]
 
 	def predictSample(self, X, sampleRate):
+		# NOTE: we grab audio in chunks of 4096 bytes
 		assert isinstance(X, list) and len(X) == sample_size
 
 		features = self.featureExtraction(X,)
