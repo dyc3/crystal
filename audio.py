@@ -225,7 +225,7 @@ class AudioClassifier(object):
 		assert isinstance(y, list) and len(y) > 0
 
 
-		# convert y into a dictionary of key:integers, and value:classification
+		# convert y into a dictionary of key:integers (used as identifiers), and value:classification
 		self._classifiers = {}
 		_set = list(set(y))
 		for i in range(len(_set)):
