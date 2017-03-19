@@ -207,11 +207,12 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
 
-sample_size = 4096
+
 class AudioClassifier(object):
 	""" Classifies audio in real time. """
-	def __init__(self):
+	def __init__(self, sample_size = 4096):
 		super(AudioClassifier, self).__init__()
+		self.sample_size = sample_size
 
 	def fit(self, X, y):
 		"""
@@ -246,8 +247,8 @@ class AudioClassifier(object):
 			print("loading " + wavfile)
 			audio, sampleRate = librosa.load(wavfile, sr=16000)
 			print("working...")
-			for sampleIndex in range(0, len(audio), sample_size):
-				features = self.featureExtraction(audio[sampleIndex:sampleIndex + sample_size], sampleRate)
+			for sampleIndex in range(0, len(audio), self.sample_size):
+				features = self.featureExtraction(audio[sampleIndex:sampleIndex + self.sample_size], sampleRate)
 				# print(str(type(features)) + " " + str(len(features)))
 				# print(str(type(features[0])) + " " + str(features[0]))
 				# print(str(type(features[0][0])) + " " + str(features[0][0]))
@@ -259,7 +260,7 @@ class AudioClassifier(object):
 					audio_data.append(features)
 					classes.append(invert_classifiers[y[w]])
 				else:
-					print("SKIPPING sample " + str(int(sampleIndex / sample_size))+"/"+str(len(audio)/sample_size) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate " + str(sampleRate) + " has " + str(len(features)) + " features.")
+					print("SKIPPING sample " + str(int(sampleIndex / self.sample_size))+"/"+str(len(audio)/self.sample_size) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate " + str(sampleRate) + " has " + str(len(features)) + " features.")
 		# print(audio_data.dtype)
 		print(len(audio_data))
 		print(len(classes))
@@ -273,8 +274,8 @@ class AudioClassifier(object):
 
 		audio, sampleRate = librosa.load(X, sr=16000)
 		predictions = []
-		for sampleIndex in range(0, len(audio), sample_size):
-			features = self.featureExtraction(audio[sampleIndex:sampleIndex + sample_size], sampleRate)
+		for sampleIndex in range(0, len(audio), self.sample_size):
+			features = self.featureExtraction(audio[sampleIndex:sampleIndex + self.sample_size], sampleRate)
 			if len(features) == 108: # HACK: fix this ASAP
 				predictions.append(self.classifier.predict([features]))
 		predictions = np.asarray(predictions).flatten()
@@ -283,7 +284,7 @@ class AudioClassifier(object):
 
 	def predictSample(self, X, sampleRate):
 		# NOTE: we grab audio in chunks of 4096 bytes
-		assert isinstance(X, list) and len(X) == sample_size
+		assert isinstance(X, list) and len(X) == self.sample_size
 
 		features = self.featureExtraction(X,)
 
