@@ -207,7 +207,7 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
 
-sample_size = 1024
+sample_size = 4096
 class AudioClassifier(object):
 	""" Classifies audio in real time. """
 	def __init__(self):
@@ -255,7 +255,7 @@ class AudioClassifier(object):
 
 				# v = DictVectorizer()
 				# newX = v.fit_transform(features)
-				if len(features) == 36: # HACK: fix this ASAP
+				if len(features) == 108: # HACK: fix this ASAP
 					audio_data.append(features)
 					classes.append(invert_classifiers[y[w]])
 				else:
@@ -275,7 +275,7 @@ class AudioClassifier(object):
 		predictions = []
 		for sampleIndex in range(0, len(audio), sample_size):
 			features = self.featureExtraction(audio[sampleIndex:sampleIndex + sample_size], sampleRate)
-			if len(features) == 36: # HACK: fix this ASAP
+			if len(features) == 108: # HACK: fix this ASAP
 				predictions.append(self.classifier.predict([features]))
 		predictions = np.asarray(predictions).flatten()
 		modes = stats.mode(predictions)
