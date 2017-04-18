@@ -11,7 +11,7 @@ import audio
 import audioop
 import time
 import signal
-import sys
+import sys, os
 import actions
 
 print("Loading...")
@@ -101,7 +101,7 @@ def quit():
 	print("Quitting...")
 	recognizer.Stop()
 	micIn.Stop()
-	sys.exit(0)
+	os._exit(0)
 
 def signal_handler(signum, frame):
 	quit()
