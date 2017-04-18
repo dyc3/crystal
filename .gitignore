@@ -3,3 +3,4 @@ __pycache__/
 audio_train/
 
 config.txt
+*.model
