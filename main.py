@@ -32,8 +32,10 @@ print(commands)
 current_utterance = None
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
-print("Training...")
+print("Training command classifier...")
 cmdClassifier.fit(train, labelsTrain)
+print("Loading audio classifier...")
+audio_classifier = audio.AudioClassifier.tryLoadFromFile()
 
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, rate, width):
@@ -99,6 +101,7 @@ micIn.Start()
 
 def quit():
 	print("Quitting...")
+	audio_classifier.saveToFile()
 	recognizer.Stop()
 	micIn.Stop()
 	os._exit(0)
