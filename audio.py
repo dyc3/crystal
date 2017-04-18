@@ -285,9 +285,18 @@ class AudioClassifier(object):
 
 	def predictSample(self, X, sampleRate):
 		# NOTE: we grab audio in chunks of 4096 bytes
-		assert isinstance(X, list) and len(X) == self.sample_size
+		if isinstance(X, bytes):
+			X = list(X)
+		assert isinstance(X, list), "X should be a list, not a {}".format(X.__class__)
+		assert len(X) == self.sample_size, "len(X) => {} != self.sample_size => {}".format(len(X), self.sample_size)
+		X = np.asarray(X)
 
-		features = self.featureExtraction(X,)
+		features = self.featureExtraction(X, sampleRate)
+		if len(features) == 108: # HACK: fix this ASAP
+			return self._classifiers[self.classifier.predict([features])[0]]
+		else:
+			print("len(features): {}".format(len(features)))
+			return "no-speech"
 
 
 	def featureExtraction(self, signal, sampleRate):
