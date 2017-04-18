@@ -1,4 +1,5 @@
 __pycache__/
 .env/
+audio_train/
 
 config.txt
