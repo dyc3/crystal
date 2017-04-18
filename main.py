@@ -54,7 +54,8 @@ def consoleVisualizer(frame, rate, width):
 def sendToRecognizer(frame, rate, width):
 	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
-		recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
+		if audio_classifier.predictSample(frame, rate) == "speech":
+			recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
 
 def onSpeech(text):
 	global current_utterance
