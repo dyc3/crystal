@@ -19,6 +19,7 @@ from sklearn.feature_extraction import DictVectorizer
 import librosa
 import pdb
 from eventhook import EventHook
+import pickle
 
 class MicrophoneInput(object):
 	"""docstring for MicrophoneInput."""
@@ -320,3 +321,21 @@ class AudioClassifier(object):
 
 		# all_features = np.multiply(all_features, 10000)
 		return all_features.flatten().astype(np.float64)
+
+
+	def saveToFile(self, filename="audio-classifier.model"):
+		pickle.dump(file=open(filename, "wb"), obj=self)
+
+	@staticmethod
+	def tryLoadFromFile(filename="audio-classifier.model"):
+		audio_classifier = AudioClassifier()
+		if os.path.isfile(filename):
+			audio_classifier = pickle.load(filename)
+			return audio_classifier
+		else:
+			# if there is no saved model, train a new one
+			files = ["audio_train/speech/speech1.wav", "audio_train/speech/speech2.wav", "audio_train/speech/speech3.wav", "audio_train/speech/speech4.wav",  "audio_train/no_speech/no_speech1.wav", "audio_train/no_speech/no_speech2.wav", "audio_train/no_speech/no_speech3.wav"]
+			classes = ["speech", "speech", "speech", "speech", "no_speech", "no_speech", "no_speech"]
+			audio_classifier.fit(files, classes)
+			audio_classifier.saveToFile(filename)
+			return audio_classifier
