@@ -330,7 +330,7 @@ class AudioClassifier(object):
 	def tryLoadFromFile(filename="audio-classifier.model"):
 		audio_classifier = AudioClassifier()
 		if os.path.isfile(filename):
-			audio_classifier = pickle.load(filename)
+			audio_classifier = pickle.load(open(filename, "rb"))
 			return audio_classifier
 		else:
 			# if there is no saved model, train a new one
