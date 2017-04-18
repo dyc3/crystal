@@ -36,3 +36,14 @@ turn down the volume to 50%,volume-set
 turn up the volume by 10%,volume-set
 increase the volume by 25%,volume-set
 decrease volume by 15%,volume-set
+one twenty divided by one eighty,math
+PI over twelve,math
+PI over three,math
+two PI over five,math
+negative seven hundred sixty eight degrees,math
+three point one four degrees,math
+eighty five degrees 18 minutes and 30 seconds to decimal,math
+negative three hundred and forty five point twelve degrees to DMS,math
+three point five feet to inches,math
+one times five,math
+eighteen divided by nine,math
