@@ -13,6 +13,13 @@ import time
 import signal
 import sys, os
 import actions
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--mode", default="voice", const='voice', nargs='?', choices=["voice", "text"], required=False)
+args = parser.parse_args()
+
+print("Mode: {}".format(args.mode))
 
 print("Loading...")
 config = {}
