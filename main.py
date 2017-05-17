@@ -91,22 +91,6 @@ def isSpeakingToCrystal(doc):
 			return True
 	return False
 
-micIn.onFrame += consoleVisualizer
-micIn.onFrame += sendToRecognizer
-print("Calibrating...")
-micIn.Calibrate()
-
-# start recognizer
-recognizer.onSpeech += onSpeech
-recognizer.onFinish += onFinish
-try:
-	recognizer.Start()
-except Exception as e:
-	print("ERROR: failed to start recognizer:",e)
-
-print("Listening...")
-micIn.Start()
-
 def quit():
 	print("Quitting...")
 	audio_classifier.saveToFile()
@@ -119,5 +103,26 @@ def signal_handler(signum, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-# while micIn.isRunning:
-# 	time.sleep(0.25)
+if args.mode == "voice":
+	micIn.onFrame += consoleVisualizer
+	micIn.onFrame += sendToRecognizer
+	print("Calibrating...")
+	micIn.Calibrate()
+
+	# start recognizer
+	recognizer.onSpeech += onSpeech
+	recognizer.onFinish += onFinish
+	try:
+		recognizer.Start()
+	except Exception as e:
+		print("ERROR: failed to start recognizer:",e)
+
+	print("Listening...")
+	micIn.Start()
+elif args.mode == "text":
+	while True:
+		user_input = input("> ")
+		if user_input == "/quit":
+			break
+		onFinish(user_input)
+	quit()
