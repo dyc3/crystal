@@ -11,8 +11,15 @@ import audio
 import audioop
 import time
 import signal
-import sys
+import sys, os
 import actions
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--mode", default="voice", const='voice', nargs='?', choices=["voice", "text"], required=False)
+args = parser.parse_args()
+
+print("Mode: {}".format(args.mode))
 
 print("Loading...")
 config = {}
@@ -32,8 +39,10 @@ print(commands)
 current_utterance = None
 
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
-print("Training...")
+print("Training command classifier...")
 cmdClassifier.fit(train, labelsTrain)
+print("Loading audio classifier...")
+audio_classifier = audio.AudioClassifier.tryLoadFromFile()
 
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, rate, width):
@@ -52,7 +61,8 @@ def consoleVisualizer(frame, rate, width):
 def sendToRecognizer(frame, rate, width):
 	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
-		recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
+		if audio_classifier.predictSample(frame, rate) == "speech":
+			recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
 
 def onSpeech(text):
 	global current_utterance
@@ -77,36 +87,42 @@ def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
 	for token in sent:
 		print(token, token.pos_, token.dep_, "parent:", token.head)
-		if token.dep_ in ["npadvmod", "ccomp", "nsubj"] and token.pos_ in ["NNP", "NN", "PROPN"] and str(token).lower() == "crystal":
+		if token.dep_ in ["npadvmod", "ccomp", "nsubj"] and token.pos_ in ["NNP", "NN", "PROPN", "NOUN"] and str(token).lower() == "crystal":
 			return True
 	return False
 
-micIn.onFrame += consoleVisualizer
-micIn.onFrame += sendToRecognizer
-print("Calibrating...")
-micIn.Calibrate()
-
-# start recognizer
-recognizer.onSpeech += onSpeech
-recognizer.onFinish += onFinish
-try:
-	recognizer.Start()
-except Exception as e:
-	print("ERROR: failed to start recognizer:",e)
-
-print("Listening...")
-micIn.Start()
-
 def quit():
 	print("Quitting...")
+	audio_classifier.saveToFile()
 	recognizer.Stop()
 	micIn.Stop()
-	sys.exit(0)
+	os._exit(0)
 
 def signal_handler(signum, frame):
 	quit()
 
 signal.signal(signal.SIGINT, signal_handler)
 
-# while micIn.isRunning:
-# 	time.sleep(0.25)
+if args.mode == "voice":
+	micIn.onFrame += consoleVisualizer
+	micIn.onFrame += sendToRecognizer
+	print("Calibrating...")
+	micIn.Calibrate()
+
+	# start recognizer
+	recognizer.onSpeech += onSpeech
+	recognizer.onFinish += onFinish
+	try:
+		recognizer.Start()
+	except Exception as e:
+		print("ERROR: failed to start recognizer:",e)
+
+	print("Listening...")
+	micIn.Start()
+elif args.mode == "text":
+	while True:
+		user_input = input("> ")
+		if user_input == "/quit":
+			break
+		onFinish(user_input)
+	quit()

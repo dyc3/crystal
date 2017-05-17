@@ -8,7 +8,18 @@ import subprocess
 import os
 import stat
 import io
+import numpy as np
+from scipy import stats
+import tensorflow as tf
+import tensorflow.contrib.slim as slim
+import tensorflow.contrib.learn as learn
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.feature_extraction import DictVectorizer
+import librosa
+import pdb
 from eventhook import EventHook
+import pickle
 
 class MicrophoneInput(object):
 	"""docstring for MicrophoneInput."""
@@ -196,3 +207,144 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 	], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 	flac_data, stderr = process.communicate(wav_data)
 	return flac_data
+
+
+class AudioClassifier(object):
+	""" Classifies audio in real time. """
+	def __init__(self, sample_size = 4096):
+		super(AudioClassifier, self).__init__()
+		self.sample_size = sample_size
+
+	def fit(self, X, y):
+		"""
+		X is an array of file paths to audio files. (wav)
+		y is an array of strings that corespond to the respective audio file's classification.
+
+		returns nothing
+		"""
+		assert isinstance(X, list) and len(X) > 0
+		assert isinstance(y, list) and len(y) > 0
+
+
+		# convert y into a dictionary of key:integers (used as identifiers), and value:classification
+		self._classifiers = {}
+		_set = list(set(y))
+		for i in range(len(_set)):
+			self._classifiers[i] = _set[i]
+
+		# y as a list of integers rather than a list of strings
+		classes = []
+		invert_classifiers = inv_map = {v: k for k, v in self._classifiers.items()}
+		for c in y:
+			classes.append(invert_classifiers[c])
+
+
+		audio_data = []
+		self.classifier = MLPClassifier(solver='adam', verbose=False, random_state=2, hidden_layer_sizes=(150,))
+		# self.classifier = DecisionTreeClassifier(max_depth=5)
+		classes = []
+		for w in range(len(X)):
+			wavfile = X[w]
+			print("loading " + wavfile)
+			audio, sampleRate = librosa.load(wavfile, sr=16000)
+			print("working...")
+			for sampleIndex in range(0, len(audio), self.sample_size):
+				features = self.featureExtraction(audio[sampleIndex:sampleIndex + self.sample_size], sampleRate)
+				# print(str(type(features)) + " " + str(len(features)))
+				# print(str(type(features[0])) + " " + str(features[0]))
+				# print(str(type(features[0][0])) + " " + str(features[0][0]))
+				# features = dict(zip(range(len(features)), features))
+
+				# v = DictVectorizer()
+				# newX = v.fit_transform(features)
+				if len(features) == 108: # HACK: fix this ASAP
+					audio_data.append(features)
+					classes.append(invert_classifiers[y[w]])
+				else:
+					print("SKIPPING sample " + str(int(sampleIndex / self.sample_size))+"/"+str(len(audio)/self.sample_size) + " from audio " + wavfile + " (len " + str(len(audio)) + ") at sample rate " + str(sampleRate) + " has " + str(len(features)) + " features.")
+		# print(audio_data.dtype)
+		print(len(audio_data))
+		print(len(classes))
+
+		print("fitting...")
+		self.classifier.fit(audio_data, classes)
+
+
+	def predictFile(self, X):
+		assert isinstance(X, str) and len(X) > 0
+
+		audio, sampleRate = librosa.load(X, sr=16000)
+		predictions = []
+		for sampleIndex in range(0, len(audio), self.sample_size):
+			features = self.featureExtraction(audio[sampleIndex:sampleIndex + self.sample_size], sampleRate)
+			if len(features) == 108: # HACK: fix this ASAP
+				predictions.append(self.classifier.predict([features]))
+		predictions = np.asarray(predictions).flatten()
+		modes = stats.mode(predictions)
+		return self._classifiers[modes[0][0]]
+
+	def predictSample(self, X, sampleRate):
+		# NOTE: we grab audio in chunks of 4096 bytes
+		if isinstance(X, bytes):
+			X = list(X)
+		assert isinstance(X, list), "X should be a list, not a {}".format(X.__class__)
+		assert len(X) == self.sample_size, "len(X) => {} != self.sample_size => {}".format(len(X), self.sample_size)
+		X = np.asarray(X)
+
+		features = self.featureExtraction(X, sampleRate)
+		if len(features) == 108: # HACK: fix this ASAP
+			return self._classifiers[self.classifier.predict([features])[0]]
+		else:
+			print("len(features): {}".format(len(features)))
+			return "no-speech"
+
+
+	def featureExtraction(self, signal, sampleRate):
+		""" TODO """
+		# print("finding chroma features")
+		chroma_feature = librosa.feature.chroma_stft(y=signal, sr=sampleRate)
+		# print("finding mel features")
+		# mel_feature = librosa.feature.melspectrogram(y=signal, sr=sampleRate, n_mels=128)
+		#
+		# print("finding harmonic and percissive features")
+		# y_harmonic, y_percussive = librosa.effects.hpss(y=signal)
+		#
+		# print("harmonic features")
+		# mel_harmonic	= librosa.feature.melspectrogram(y_harmonic, sr=sampleRate)
+		# print("percissive features")
+		# mel_percussive	= librosa.feature.melspectrogram(y_percussive, sr=sampleRate)
+		#
+		# print("log amplitude")
+		# log_melH = librosa.logamplitude(mel_harmonic, ref_power=np.max)
+		# log_melP = librosa.logamplitude(mel_percussive, ref_power=np.max)
+		# print("found all features, concatenating")
+		#
+		# print(len(chroma_feature))
+		# print(len(mel_feature))
+		# print(len(log_melH))
+		# print(len(log_melP))
+
+		all_features = chroma_feature #+ mel_feature + log_melH + log_melP
+		# print("done")
+		# print(all_features)
+
+		# all_features = np.multiply(all_features, 10000)
+		return all_features.flatten().astype(np.float64)
+
+
+	def saveToFile(self, filename="audio-classifier.model"):
+		pickle.dump(file=open(filename, "wb"), obj=self)
+
+	@staticmethod
+	def tryLoadFromFile(filename="audio-classifier.model"):
+		audio_classifier = AudioClassifier()
+		if os.path.isfile(filename):
+			audio_classifier = pickle.load(open(filename, "rb"))
+			return audio_classifier
+		else:
+			# if there is no saved model, train a new one
+			files = ["audio_train/speech/speech1.wav", "audio_train/speech/speech2.wav", "audio_train/speech/speech3.wav", "audio_train/speech/speech4.wav",  "audio_train/no_speech/no_speech1.wav", "audio_train/no_speech/no_speech2.wav", "audio_train/no_speech/no_speech3.wav"]
+			classes = ["speech", "speech", "speech", "speech", "no_speech", "no_speech", "no_speech"]
+			audio_classifier.fit(files, classes)
+			audio_classifier.saveToFile(filename)
+			return audio_classifier
