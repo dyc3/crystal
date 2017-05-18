@@ -14,6 +14,7 @@ import signal
 import sys, os
 import actions
 import argparse
+import feedback
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--mode", default="voice", const='voice', nargs='?', choices=["voice", "text"], required=False)
@@ -68,6 +69,7 @@ def onSpeech(text):
 	global current_utterance
 	# print("Processing:", text)
 	current_utterance = text
+	feedback.OnStatus("listening")
 
 def onFinish(text):
 	global current_utterance
@@ -78,10 +80,15 @@ def onFinish(text):
 
 	doc = nlp(text)
 	if isSpeakingToCrystal(doc):
-		classification = cmdClassifier.predict([text])[0]
-		commands[classification].run(doc)
+		feedback.OnStatus("working")
+		try:
+			classification = cmdClassifier.predict([text])[0]
+			commands[classification].run(doc)
+		except Exception as e:
+			feedback.OnStatus("error")
 	else:
 		print("user not talking to me")
+	feedback.OnStatus("idle")
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
@@ -119,6 +126,7 @@ if args.mode == "voice":
 
 	print("Listening...")
 	micIn.Start()
+	feedback.OnStatus("idle")
 elif args.mode == "text":
 	while True:
 		user_input = input("> ")
