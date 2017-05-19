@@ -98,6 +98,12 @@ def isSpeakingToCrystal(doc):
 			return True
 	return False
 
+def reload_commands():
+	global commands
+	commands = actions.load_actions()
+	train, labelsTrain = DataUtil.loadTrainingData("training.txt")
+	cmdClassifier.fit(train, labelsTrain)
+
 def quit():
 	print("Quitting...")
 	audio_classifier.saveToFile()
