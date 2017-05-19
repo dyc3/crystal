@@ -14,6 +14,7 @@ import signal
 import sys, os
 import actions
 import argparse
+import traceback
 import feedback
 
 parser = argparse.ArgumentParser()
@@ -86,6 +87,8 @@ def onFinish(text):
 			commands[classification].run(doc)
 		except Exception as e:
 			feedback.OnStatus("error")
+			print(e)
+			traceback.print_exc()
 	else:
 		print("user not talking to me")
 	feedback.OnStatus("idle")
@@ -101,6 +104,7 @@ def isSpeakingToCrystal(doc):
 def reload_commands():
 	global commands
 	commands = actions.load_actions()
+	print(commands)
 	train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 	cmdClassifier.fit(train, labelsTrain)
 
