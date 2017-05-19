@@ -138,5 +138,8 @@ elif args.mode == "text":
 		user_input = input("> ")
 		if user_input == "/quit":
 			break
+		elif user_input == "/reload":
+			reload_commands()
+			continue
 		onFinish(user_input)
 	quit()
