@@ -50,3 +50,5 @@ negative three hundred and forty five point twelve degrees to DMS,math
 three point five feet to inches,math
 one times five,math
 eighteen divided by nine,math
+what is three plus five,math
+what is six minus two,math
