@@ -43,8 +43,9 @@ current_utterance = None
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training command classifier...")
 cmdClassifier.fit(train, labelsTrain)
-print("Loading audio classifier...")
-audio_classifier = audio.AudioClassifier.tryLoadFromFile()
+if args.mode == "voice":
+	print("Loading audio classifier...")
+	audio_classifier = audio.AudioClassifier.tryLoadFromFile()
 
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, rate, width):
