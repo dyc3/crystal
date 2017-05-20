@@ -19,7 +19,9 @@ def load_actions():
 
 	action_modules = {}
 	for value in action_modules_str:
-		action = importlib.import_module(name=value).getAction()
+		module = importlib.import_module(name=value)
+		module = importlib.reload(module)
+		action = module.getAction()
 		action_modules[action.handled_classifier] = action
 
 	return action_modules
