@@ -9,6 +9,8 @@ class ActionManipulateWm(BaseAction):
 
 	@classmethod
 	def run(self, doc):
+		sentence = next(doc.sents)
+		utils.printSpacy(sentence)
 		command = None
 		workspace_alias = ["workspace", "space", "desktop"]
 		if str(sentence.root) in ["switch", "focus", "show", "pull", "go"]:
