@@ -1,3 +1,5 @@
+import os
+
 def text2int(textnum, numwords={}):
 	if not numwords:
 		units = [
@@ -27,3 +29,10 @@ def text2int(textnum, numwords={}):
 			current = 0
 
 	return result + current
+
+def runAndPrint(command):
+	"""
+	returns the command's exit code
+	"""
+	print("Running {0}...".format(command))
+	return os.system(command)
