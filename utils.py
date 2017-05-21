@@ -36,3 +36,7 @@ def runAndPrint(command):
 	"""
 	print("Running {0}...".format(command))
 	return os.system(command)
+
+def printSpacy(sentence):
+	for token in sentence:
+		print(token, token.pos_, token.dep_, "parent:", token.head)
