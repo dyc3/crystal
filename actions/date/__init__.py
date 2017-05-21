@@ -14,8 +14,6 @@ class ActionDate(BaseAction):
 	def run(self, doc):
 		# print("Date: ", datetime.datetime.now().date().isoformat())
 		sentence = next(doc.sents)
-		for token in sentence:
-			print(token, token.pos_, token.dep_, "parent:", token.head)
 		target_date = datetime.datetime.now()
 		query_type = None # valid: get, verify
 		if sentence[0].text.lower() == "crystal":
