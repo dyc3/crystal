@@ -57,3 +57,7 @@ what is 8 times 3,math
 what is nine over 3,math
 what is six divided by two,math
 twenty one divided by three,math
+switch to workspace 1,manipulate-wm
+focus on workspace 8,manipulate-wm
+show me desktop 5,manipulate-wm
+focus desktop 3,manipulate-wm
