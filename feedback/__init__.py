@@ -11,6 +11,7 @@ try:
 except blink1.BlinkConnectionFailed as e:
 	print(e)
 	enableBlink1 = False
+Notify.init("Crystal")
 
 def OnStatus(status):
 	if enableBlink1:
@@ -22,3 +23,9 @@ def OnStatus(status):
 			b1.fade_to_color(100, "orange")
 		elif status == "error":
 			b1.fade_to_color(100, "red")
+
+def ShowNotify(body, title="Crystal"):
+	print("notify: {} - {}".format(title, body))
+	notification = Notify.Notification.new(title, body, None)
+	notification.show()
+	return notification
