@@ -1,6 +1,7 @@
 import datetime
 from actions import BaseAction
 import parsedatetime
+import feedback
 
 cal = parsedatetime.Calendar()
 
@@ -33,6 +34,7 @@ class ActionDate(BaseAction):
 			else:
 				print("parse_status: {}".format(parse_status))
 			print("Date: ", target_date.date().isoformat())
+			feedback.ShowNotify("Date: {}".format(target_date.date().isoformat()))
 		elif query_type == "verify":
 			compare_date = None
 
@@ -58,11 +60,12 @@ class ActionDate(BaseAction):
 
 			print("comparing dates - target: {}, compare: {}".format(target_date, compare_date))
 			if compare_date.date() == target_date.date():
-				print("Yes")
+				feedback.ShowNotify("Yes")
 			else:
-				print("No")
+				feedback.ShowNotify("No")
 		else:
-			print("unknown query type: {}".format(query_type))
+			feedback.OnStatus("error")
+			feedback.ShowNotify("unknown query type: {}".format(query_type))
 
 def getAction():
 	return ActionDate()

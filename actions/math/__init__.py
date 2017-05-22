@@ -1,5 +1,6 @@
 from actions import BaseAction
 import utils
+import feedback
 
 class ActionMath(BaseAction):
 	"""docstring for ActionMath."""
@@ -49,6 +50,7 @@ class ActionMath(BaseAction):
 		print("expression: {}".format(expression))
 		solution = eval(expression) # FIXME: potential security exploit here
 		print("solution: {}".format(solution))
+		feedback.ShowNotify("{} = {}".format(expression, solution))
 
 def getAction():
 	return ActionMath()

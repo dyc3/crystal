@@ -1,5 +1,6 @@
 import datetime
 from actions import BaseAction
+import feedback
 
 class ActionTime(BaseAction):
 	"""docstring for ActionTime."""
@@ -10,6 +11,7 @@ class ActionTime(BaseAction):
 	@classmethod
 	def run(self, doc):
 		print("Time: ", datetime.datetime.now().time().isoformat())
+		feedback.ShowNotify("Time: {}".format(datetime.datetime.now().time().isoformat()))
 
 def getAction():
 	return ActionTime()

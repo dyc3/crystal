@@ -1,5 +1,6 @@
 from actions import BaseAction
 import random
+import feedback
 
 class ActionRollDie(BaseAction):
 	"""docstring for ActionRollDie."""
@@ -42,13 +43,15 @@ class ActionRollDie(BaseAction):
 						sides = 2
 
 		if count != None and sides != None and count >= 1 and sides > 1:
-			print("rolling {} d{}".format(count, sides))
+			_rolling_str = "rolling {} d{}".format(count, sides)
+			print(_rolling_str)
 			result = rollDie(sides, count)
 			outputstr = "ROLL: {}\n".format(dice)
 			for n in range(len(result)):
 				outputstr += "{}{}".format(result[n], (" + " if n != len(result) - 1 else ""))
 			if len(result) > 1:
 				outputstr += "\ntotal: {}".format(sum(result))
+			feedback.ShowNotify(outputstr, _rolling_str)
 
 def getAction():
 	return ActionRollDie()
