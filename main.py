@@ -96,6 +96,8 @@ def onFinish(text):
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
+	if str(sent[0]).lower() == "crystal":
+		return True
 	for token in sent:
 		print(token, token.pos_, token.dep_, "parent:", token.head)
 		if token.dep_ in ["npadvmod", "ccomp", "nsubj", "dobj", "ROOT"] and token.pos_ in ["NNP", "NN", "PROPN", "NOUN"] and str(token).lower() == "crystal":
