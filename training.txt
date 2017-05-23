@@ -30,6 +30,18 @@ suspend playback,media-pause
 stop the video,media-pause
 stop playback,media-pause
 stop playing music,media-pause
+skip this episode,media-next
+skip video,media-next
+skip song,media-next
+next song,media-next
+next video,media-next
+next track,media-next
+previous video,media-prev
+replay that last song,media-prev
+restart the video,media-seek
+play the music from the beginning,media-seek
+seek to 7 minutes and 12 seconds,media-seek
+skip ahead 4 minutes,media-seek
 set volume to 100%,volume-set
 set volume to 20%,volume-set
 turn down the volume to 50%,volume-set
