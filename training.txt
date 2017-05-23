@@ -75,3 +75,6 @@ show me desktop 5,manipulate-wm
 focus desktop 3,manipulate-wm
 show me work space four,manipulate-wm
 show me desktop three,manipulate-wm
+lock the computer,system-lock
+lock my computer,system-lock
+lock it up,system-lock
