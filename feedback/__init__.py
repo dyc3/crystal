@@ -1,3 +1,4 @@
+import os
 import pgi
 pgi.install_as_gi()
 import gi
@@ -11,7 +12,14 @@ try:
 except blink1.BlinkConnectionFailed as e:
 	print(e)
 	enableBlink1 = False
-Notify.init("Crystal")
+
+enableNotify = True
+try:
+	if os.environ['DISPLAY']:
+		Notify.init("Crystal")
+except KeyError:
+	print('Warning: no $DISPLAY, no notifications will be shown')
+	enableNotify = False
 
 def OnStatus(status):
 	if enableBlink1:
@@ -26,6 +34,8 @@ def OnStatus(status):
 
 def ShowNotify(body, title="Crystal"):
 	print("notify: {} - {}".format(title, body))
+	if not enableNotify:
+		return None
 	notification = Notify.Notification.new(title, body, None)
 	notification.show()
 	return notification
