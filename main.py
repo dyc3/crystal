@@ -81,7 +81,7 @@ def onFinish(text):
 	text = text.replace("crystal", "Crystal")
 
 	doc = nlp(text)
-	if isSpeakingToCrystal(doc):
+	if isSpeakingToCrystal(doc) or args.mode == "text":
 		feedback.OnStatus("working")
 		try:
 			classification = cmdClassifier.predict([text])[0]
