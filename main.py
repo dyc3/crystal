@@ -113,7 +113,8 @@ def reload_commands():
 
 def quit():
 	print("Quitting...")
-	audio_classifier.saveToFile()
+	if args.mode == "voice":
+		audio_classifier.saveToFile()
 	recognizer.Stop()
 	micIn.Stop()
 	os._exit(0)
