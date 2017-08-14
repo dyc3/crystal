@@ -53,7 +53,7 @@ class ActionDate(BaseAction):
 		query_type = None # valid: get, verify
 		if sentence[0].text.lower() == "crystal":
 			sentence = sentence[1:]
-		if str(sentence.root.nbor(-1)) == "what" or sentence[0].dep_ == "det":
+		if str(sentence.root.nbor(-1)) in ["what", "when"] or sentence[0].dep_ == "det":
 			query_type = "get"
 		else:
 			query_type = "verify"
