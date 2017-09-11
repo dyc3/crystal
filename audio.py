@@ -16,7 +16,7 @@ import tensorflow.contrib.learn as learn
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_extraction import DictVectorizer
-import librosa
+import librosa, webrtcvad
 import pdb
 from eventhook import EventHook
 import pickle
