@@ -98,7 +98,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
 			self._needJsonHeader = False
-			self.doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=2;", "interim_results":true, "profanity_filter":false}')
+			self.doSendMessage('{"action":"start", "content-type":"audio/l16;rate=16000;channels=1;", "interim_results":true, "profanity_filter":false}')
 
 		if self.status == "speaking":
 			if len(self._speakingBuffer) > 0:

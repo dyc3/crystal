@@ -16,14 +16,14 @@ import tensorflow.contrib.learn as learn
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_extraction import DictVectorizer
-import librosa
+import librosa, webrtcvad
 import pdb
 from eventhook import EventHook
 import pickle
 
 class MicrophoneInput(object):
 	"""docstring for MicrophoneInput."""
-	def __init__(self, chunk=1024, audioformat=pyaudio.paInt16, channels=2, rate=16000, dynamic_power_threshold=True):
+	def __init__(self, chunk=480, audioformat=pyaudio.paInt16, channels=1, rate=16000, dynamic_power_threshold=True):
 		super(MicrophoneInput, self).__init__()
 		self.CHUNK = chunk
 		self.FORMAT = audioformat
@@ -32,10 +32,6 @@ class MicrophoneInput(object):
 		self.p = pyaudio.PyAudio()
 		self.sample_width = self.p.get_sample_size(self.FORMAT)
 		self.isRunning = False
-		self.powerThreshold = 300
-		self.dynamic_power_threshold = dynamic_power_threshold
-		self.dynamic_power_adjustment_damping = 0.15
-		self.dynamic_power_ratio = 1.5
 
 		self.onFrame = EventHook()
 
@@ -56,42 +52,25 @@ class MicrophoneInput(object):
 		else:
 			print("Recording thread was not running")
 
-	def Calibrate(self, duration=1):
-		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
-		elapsed_time = 0
-		seconds_per_buffer = (self.CHUNK + 0.0) / self.RATE
-
-		while True:
-			elapsed_time += seconds_per_buffer
-			if elapsed_time > duration: break
-			buffer = stream.read(self.CHUNK)
-			power = audioop.rms(buffer, self.sample_width)  # power of the audio signal
-
-			# dynamically adjust the power threshold using asymmetric weighted average
-			damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
-			target_power = power * self.dynamic_power_ratio
-			if target_power < 150: target_power = 150
-			self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
-
-		stream.stop_stream()
-		stream.close()
-
 	def _doThreadRecord(self):
 		stream = self.p.open(format=self.FORMAT, channels=self.CHANNELS,
 							 rate=self.RATE, input=True, frames_per_buffer=self.CHUNK)
+		vad = webrtcvad.Vad(1) # number is filtering aggressiveness, 0 is lowest, 3 is highest
+
 		while self.isRunning:
 			frame = stream.read(self.CHUNK)
-			power = audioop.rms(frame, self.sample_width)
+			duration = self.CHUNK / self.RATE
+			# print("DURATION in seconds", duration)
+			duration = int(duration * 1000) # to milliseconds
+			# print("sample_width", self.sample_width, "RATE", self.RATE)
+			vad_frame = frame * int(self.RATE * duration / 1000)
 
-			if self.dynamic_power_threshold and power < self.powerThreshold:
-				seconds_per_buffer = (self.CHUNK + 0.0) + self.RATE
-
-				damping = self.dynamic_power_adjustment_damping ** seconds_per_buffer  # account for different chunk sizes and rates
-				target_power = power * self.dynamic_power_ratio
-				if target_power < 150: target_power = 150
-				self.powerThreshold = self.powerThreshold * damping + target_power * (1 - damping)
-
-			self.onFrame.fire(frame, self.RATE, self.sample_width)
+			if webrtcvad.valid_rate_and_frame_length(rate=self.RATE, frame_length=int(len(frame) / self.sample_width)):
+				if vad.is_speech(frame, self.RATE):
+					self.onFrame.fire(vad_frame, self.RATE, self.sample_width)
+			else:
+				print("FAILED valid_rate_and_frame_length")
+				break
 
 		stream.stop_stream()
 		stream.close()
@@ -210,7 +189,7 @@ def get_flac_data(frame, sample_rate, sample_width, convert_rate=None, convert_w
 
 
 class AudioClassifier(object):
-	""" Classifies audio in real time. """
+	""" Classifies audio in real time. DEPRECATED """
 	def __init__(self, sample_size = 4096):
 		super(AudioClassifier, self).__init__()
 		self.sample_size = sample_size
