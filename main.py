@@ -43,15 +43,12 @@ current_utterance = None
 train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training command classifier...")
 cmdClassifier.fit(train, labelsTrain)
-if args.mode == "voice":
-	print("Loading audio classifier...")
-	audio_classifier = audio.AudioClassifier.tryLoadFromFile()
 
 micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
 def consoleVisualizer(frame, rate, width):
 	rms = audioop.rms(frame, width)
 	info = "power: " + str(rms).rjust(6)
-	info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(6) + "\033[0m"
+	# info += "  |  threshold: " + ("\033[32m" if rms > micIn.powerThreshold else "\033[31m") + str(micIn.powerThreshold).rjust(6) + "\033[0m"
 	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
 	info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
 	if recognizer.isRunning:
@@ -64,8 +61,7 @@ def consoleVisualizer(frame, rate, width):
 def sendToRecognizer(frame, rate, width):
 	# print(recognizer.websocket.__dict__)
 	if recognizer.isRunning:
-		if audio_classifier.predictSample(frame, rate) == "speech":
-			recognizer.GiveFrame(frame, rate, micIn.sample_width, micIn.powerThreshold)
+		recognizer.GiveFrame(frame, rate, micIn.sample_width)
 
 def onSpeech(text):
 	global current_utterance
@@ -113,7 +109,6 @@ def reload_commands():
 
 def quit():
 	print("Quitting...")
-	audio_classifier.saveToFile()
 	recognizer.Stop()
 	micIn.Stop()
 	os._exit(0)
@@ -126,8 +121,6 @@ signal.signal(signal.SIGINT, signal_handler)
 if args.mode == "voice":
 	micIn.onFrame += consoleVisualizer
 	micIn.onFrame += sendToRecognizer
-	print("Calibrating...")
-	micIn.Calibrate()
 
 	# start recognizer
 	recognizer.onSpeech += onSpeech
