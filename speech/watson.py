@@ -29,6 +29,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		self.websocket = None
 
+		self.bytes_sent = 0
+		self.bytes_received = 0
+
 		if not WatsonSpeechRecognizer.singleton:
 			WatsonSpeechRecognizer.singleton = self
 		else:
@@ -36,7 +39,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		def _onFinish(text):
 			self.status = "not-speaking"
-			self.websocket.send('{"action":"stop"}'.encode('utf8'))
+			self.doSendMessage('{"action":"stop"}')
 			self.websocket.close()
 		self.onFinish += _onFinish
 
@@ -67,7 +70,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self._doConnect()
 			if not self.websocket.connected:
 				return False
-		self.websocket.send(text.encode('utf8'))
+		msg = text.encode('utf8')
+		self.websocket.send(msg)
+		self.bytes_sent += len(msg)
 		return True
 
 	def doSendFrame(self, frame, sample_rate, sample_width):
@@ -79,6 +84,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 		raw_data = get_raw_data(frame, sample_rate, sample_width)
 		if len(raw_data) > 0:
 			self.websocket.send_binary(raw_data)
+			self.bytes_sent += len(raw_data)
 		return True
 
 	def GiveFrame(self, frame, sample_rate, sample_width, power_threshold=300):
@@ -139,6 +145,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 					# JANKY: we really should be changing our code so that these errors don't happen
 					if "expected a json header" in error.lower():
 						self._needJsonHeader = True
+				self.bytes_received += len(text)
 			else:
 				time.sleep(0.1)
 
