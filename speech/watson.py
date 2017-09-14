@@ -7,7 +7,7 @@ import audioop
 from audio import get_flac_data, get_raw_data
 import numpy
 import websocket
-import time
+import time, datetime
 
 class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	singleton = None
@@ -31,6 +31,9 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 
 		self.bytes_sent = 0
 		self.bytes_received = 0
+		self.last_frame_timestamp = None
+		# if this threshold is passed, then the user has stopped speaking
+		self.end_speak_threshold = 200 # milliseconds
 
 		if not WatsonSpeechRecognizer.singleton:
 			WatsonSpeechRecognizer.singleton = self
@@ -87,10 +90,16 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			self.bytes_sent += len(raw_data)
 		return True
 
-	def GiveFrame(self, frame, sample_rate, sample_width, power_threshold=300):
+	def GiveFrame(self, frame, sample_rate, sample_width):
+		# TODO: this whole function needs to be redone
+
+		if self.last_frame_timestamp:
+			if (datetime.datetime.now() - self.last_frame_timestamp).microseconds / 1000 > self.end_speak_threshold:
+				self.status == "not-speaking"
+
 		frame_power = audioop.rms(frame, sample_width)
 		# add to frame buffer
-		if self.status == "not-speaking" and frame_power >= power_threshold:
+		if self.status == "not-speaking":
 			self._speakingBuffer.append(frame)
 		else:
 			self._speakingBuffer = []
@@ -99,7 +108,7 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			print("ERR: SHOULD NOT BE CONNECTED")
 
 		# determine if we should start sending data
-		if (self.status == "not-speaking" and frame_power >= power_threshold and len(self._speakingBuffer) > 6) or \
+		if (self.status == "not-speaking" and len(self._speakingBuffer) > 6) or \
 			(self.status == "speaking" and self._needJsonHeader):
 			self.status = "speaking"
 			self._notSpeakingTicks = 0
@@ -111,15 +120,13 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 				if self.doSendFrame(numpy.concatenate([self._speakingBuffer]).tobytes(), sample_rate, sample_width):
 					self._speakingBuffer = []
 			self.doSendFrame(frame, sample_rate, sample_width)
-			if frame_power >= power_threshold:
-				self._notSpeakingTicks = 0
-			else:
-				self._notSpeakingTicks += 1
 
 		if self._notSpeakingTicks >= 10:
 			self.status = "not-speaking"
 			self.doSendMessage('{"action":"stop"}')
 			self._needJsonHeader = False
+
+		self.last_frame_timestamp = datetime.datetime.now()
 
 	def _doThreadReceiver(self):
 		while self.isRunning:
