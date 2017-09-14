@@ -74,8 +74,13 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 			if not self.websocket.connected:
 				return False
 		msg = text.encode('utf8')
-		self.websocket.send(msg)
-		self.bytes_sent += len(msg)
+		try:
+			self.websocket.send(msg)
+			self.bytes_sent += len(msg)
+		except Exception as e:
+			print(e)
+			print("Probably an SSL thing. Good luck.")
+			return False
 		return True
 
 	def doSendFrame(self, frame, sample_rate, sample_width):
@@ -86,8 +91,13 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 				return False
 		raw_data = get_raw_data(frame, sample_rate, sample_width)
 		if len(raw_data) > 0:
-			self.websocket.send_binary(raw_data)
-			self.bytes_sent += len(raw_data)
+			try:
+				self.websocket.send_binary(raw_data)
+				self.bytes_sent += len(raw_data)
+			except OSError as e:
+				print(e)
+				print("Probably an SSL thing. Good luck.")
+				return False
 		return True
 
 	def GiveFrame(self, frame, sample_rate, sample_width):
@@ -131,7 +141,12 @@ class WatsonSpeechRecognizer(BaseSpeechRecognizer):
 	def _doThreadReceiver(self):
 		while self.isRunning:
 			if self.websocket != None and self.websocket.connected:
-				text = self.websocket.recv()
+				try:
+					text = self.websocket.recv()
+				except BrokenPipeError as e:
+					print(e)
+					print("Probably an SSL thing. Good luck.")
+					continue
 				if len(text) == 0:
 					continue
 				# print("Watson: Text received: {0}".format(text))
