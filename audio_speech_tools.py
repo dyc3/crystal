@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 
+from PyQt5.QtGui import (
+	QOpenGLBuffer,
+	QOpenGLShader,
+	QOpenGLShaderProgram,
+	QOpenGLVersionProfile,
+	QOpenGLVertexArrayObject,
+	QSurfaceFormat,
+	QOpenGLWindow,
+	QOpenGLVersionProfile
+)
+from PyQt5.QtWidgets import QApplication, QMainWindow, QOpenGLWidget, QStyle, qApp
+from PyQt5 import QtCore
+from PyQt5.QtCore import QTimer
+from OpenGL.GL import *
+from OpenGL.GLU import *
+
 class CrystalDisplay(QOpenGLWindow):
 	versionprofile = QOpenGLVersionProfile()
 	versionprofile.setVersion(2, 0)
