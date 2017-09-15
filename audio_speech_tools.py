@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys, time, threading, audioop, random, numpy, librosa
 from PyQt5.QtGui import (
 	QOpenGLBuffer,
 	QOpenGLShader,
@@ -16,11 +17,15 @@ from PyQt5.QtCore import QTimer
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+def clamp(value, minimum, maximum): return max(min(value, maximum), minimum)
+def lerp(x, a, b): return (1-x)*a + x*b;
+def map(x, in_min, in_max, out_min, out_max): return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+
 class CrystalDisplay(QOpenGLWindow):
 	versionprofile = QOpenGLVersionProfile()
 	versionprofile.setVersion(2, 0)
-	spectrum_array = [] #[(-1,-1),(1,1)]
-	spectrum_mean = 0
+	render_line_points = [] #[(-1,-1),(1,1)]
+	waveform_mean = 0
 	energy_lerp = 0
 
 	def __init__(self, device_index = None, sample_rate = 44100, chunk_size = 1024):
@@ -32,22 +37,19 @@ class CrystalDisplay(QOpenGLWindow):
 			QtCore.Qt.X11BypassWindowManagerHint
 			)
 		"""
-		self.visualizer = "energy-spectrum"
+		self.visualizer = "pure-waveform"
 		self.max_energy = 300
 		self.energy_history = [0,0,0,0]
 
 		self.setGeometry(QStyle.alignedRect(
 			QtCore.Qt.LeftToRight, QtCore.Qt.AlignCenter,
-			QtCore.QSize(640, 480),
+			QtCore.QSize(1920, 1080),
 			qApp.desktop().availableGeometry()))
 
 		self.animationTimer = QTimer()
 		self.animationTimer.setSingleShot(False)
 		self.animationTimer.timeout.connect(self.animate)
-		if self.visualizer == "spectrum":
-			self.animationTimer.start(20)
-		else:
-			self.animationTimer.start(50)
+		self.animationTimer.start(1)
 
 		# set up PyAudio
 		self.pyaudio_module = self.get_pyaudio()
@@ -112,17 +114,17 @@ class CrystalDisplay(QOpenGLWindow):
 
 		self.gl.glClear(self.gl.GL_COLOR_BUFFER_BIT | self.gl.GL_DEPTH_BUFFER_BIT)
 		glEnableClientState(GL_VERTEX_ARRAY)
-		#r = map(self.spectrum_mean, -0.3, 0.3, 0, 0.5)
-		#g = map(self.spectrum_mean, -0.3, 0.3, 0, 0.2)
-		#b = map(self.spectrum_mean, -0.3, 0.3, 0, 1.0)
+		#r = map(self.waveform_mean, -0.3, 0.3, 0, 0.5)
+		#g = map(self.waveform_mean, -0.3, 0.3, 0, 0.2)
+		#b = map(self.waveform_mean, -0.3, 0.3, 0, 1.0)
 		#r = clamp(r, 0.0, 1.0)
 		#g = clamp(g, 0.0, 1.0)
 		#b = clamp(b, 0.0, 1.0)
 
-		glColor(0.4,0.2,1.0) # dunno what color this is, but it should be a light blue-ish purple
+		glColor(0.35,0.2,1.0) # dunno what color this is, but it should be a light blue-ish purple
 
-		glVertexPointerf(self.spectrum_array)
-		glDrawArrays(GL_LINE_STRIP, 0, len(self.spectrum_array))
+		glVertexPointerf(self.render_line_points)
+		glDrawArrays(GL_LINE_STRIP, 0, len(self.render_line_points))
 		glFlush()
 
 	def resizeGL(self, w, h):
@@ -134,16 +136,35 @@ class CrystalDisplay(QOpenGLWindow):
 		global isListening
 
 		if not self.isVisible():
+			print("not visible")
 			return
 		try:
-			if enableNewBgListener:
-				buffer = self.spectrum_data
-			else:
-				buffer = self.pyaudio_stream.read(self.CHUNK, exception_on_overflow = False)
+			# if enableNewBgListener:
+			# 	buffer = self.waveform_data
+			# else:
+			buffer = self.pyaudio_stream.read(self.CHUNK, exception_on_overflow = False)
 		except Exception as e:
+			print(e)
 			return
-		if self.visualizer == "spectrum":
-			self.spectrum_array = []
+		if self.visualizer == "pure-waveform":
+			self.render_line_points = []
+			x = -1.0
+			for a in buffer:
+				x += 2.0 / (len(buffer))
+				y = map(a, 1.0, 256.0, -0.8, 0.8)
+				self.render_line_points.append([x, y])
+			# self.waveform_mean = numpy.mean(self.render_line_points)
+		elif self.visualizer == "spectrum":
+			self.render_line_points = []
+			spectrum = librosa.stft(numpy.asarray(buffer))
+			print(max(spectrum))
+			x = -1.0
+			for a in spectrum:
+				x += 2.0 / (len(spectrum))
+				y = map(a, 1.0, 256.0, -0.8, 0.8)
+				self.render_line_points.append([x, y])
+		elif self.visualizer == "waveform":
+			self.render_line_points = []
 			maxCenter = 0.6
 			maxEdge = 0.0
 			x = -1.0
@@ -162,10 +183,10 @@ class CrystalDisplay(QOpenGLWindow):
 					y = map(a, 1.0, 256.0, 0, -yRange)
 				togg = not togg
 				#y = clamp(y, -yRange, yRange)
-				self.spectrum_array.append([x, y])
-			self.spectrum_mean = numpy.mean(self.spectrum_array)
-		elif self.visualizer == "energy-spectrum":
-			self.spectrum_array = []
+				self.render_line_points.append([x, y])
+			# self.waveform_mean = numpy.mean(self.render_line_points)
+		elif self.visualizer == "energy-waveform":
+			self.render_line_points = []
 			energy = audioop.rms(buffer, self.SAMPLE_WIDTH) # energy of the audio signal
 			self.energy_lerp = lerp(0.2, self.energy_lerp, energy)
 			#print("energy: {} lerp: {}".format(energy, self.energy_lerp))
@@ -191,14 +212,24 @@ class CrystalDisplay(QOpenGLWindow):
 				r = ((random.random() - 0.5) / 20) * (energy / self.max_energy)
 				y += r
 				togg = not togg
-				self.spectrum_array.append([x, y])
+				self.render_line_points.append([x, y])
 		elif self.visualizer == "energy":
-			self.spectrum_array = []
+			self.render_line_points = []
 			energy = audioop.rms(buffer, self.SAMPLE_WIDTH) # energy of the audio signal
 			self.energy_history.append(energy)
 			# i dont know where im going with this
 
 		self.update()
 
+qtapp = QApplication(sys.argv)
 display = CrystalDisplay()
+display.setTitle("Crystal Audio Speech Tools")
 display.show()
+
+# def update_display():
+# 	while True:
+# 		display.animate()
+# updateThread = threading.Thread(target=update_display, daemon=True)
+# updateThread.start()
+
+sys.exit(qtapp.exec_())
