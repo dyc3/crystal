@@ -120,8 +120,11 @@ class CrystalDisplay(QOpenGLWindow):
 		#r = clamp(r, 0.0, 1.0)
 		#g = clamp(g, 0.0, 1.0)
 		#b = clamp(b, 0.0, 1.0)
+		r = 0.35
+		g = 0.2
+		b = 1.0
 
-		glColor(0.35,0.2,1.0) # dunno what color this is, but it should be a light blue-ish purple
+		glColor(r, g, b) # dunno what color this is, but it should be a light blue-ish purple
 
 		glVertexPointerf(self.render_line_points)
 		glDrawArrays(GL_LINE_STRIP, 0, len(self.render_line_points))
