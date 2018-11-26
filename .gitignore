@@ -1,6 +1,9 @@
 __pycache__/
 .env/
 audio_train/
+data/
 
 config.txt
 *.model
+*.wav
+main.py.orig
