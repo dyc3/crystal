@@ -1,6 +1,6 @@
 import datetime
 from pulsectl import Pulse
-from actions import BaseAction
+from crystal.actions import BaseAction
 
 pulse = Pulse('Crystal-AI')
 

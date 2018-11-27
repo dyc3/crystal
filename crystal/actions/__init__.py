@@ -15,7 +15,7 @@ class BaseAction(metaclass=ABCMeta):
 		pass
 
 def load_actions():
-	action_modules_str = ["actions."+a for a in os.listdir("actions") if "." not in a and a != "__pycache__"]
+	action_modules_str = ["crystal.actions."+a for a in os.listdir("crystal/actions") if "." not in a and a != "__pycache__"]
 
 	action_modules = {}
 	for value in action_modules_str:

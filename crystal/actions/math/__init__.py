@@ -1,6 +1,6 @@
-from actions import BaseAction
+from crystal.actions import BaseAction
 import utils
-import feedback
+from crystal import feedback
 
 class ActionMath(BaseAction):
 	"""docstring for ActionMath."""

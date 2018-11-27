@@ -12,10 +12,9 @@ import audioop
 import time
 import signal
 import sys, os
-import actions
 import argparse
 import traceback
-import feedback
+from crystal import actions, feedback
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--mode", default="voice", const='voice', nargs='?', choices=["voice", "text"], required=False)

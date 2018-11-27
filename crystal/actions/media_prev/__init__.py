@@ -1,4 +1,4 @@
-from actions import BaseAction
+from crystal.actions import BaseAction
 
 class ActionMediaPrevious(BaseAction):
 	"""docstring for ActionMediaPrevious."""

@@ -1,6 +1,6 @@
 import datetime
-from actions import BaseAction
-import feedback
+from crystal.actions import BaseAction
+from crystal import feedback
 
 class ActionTime(BaseAction):
 	"""docstring for ActionTime."""

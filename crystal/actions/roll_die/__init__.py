@@ -1,6 +1,6 @@
-from actions import BaseAction
+from crystal.actions import BaseAction
 import random
-import feedback
+from crystal import feedback
 
 class ActionRollDie(BaseAction):
 	"""docstring for ActionRollDie."""

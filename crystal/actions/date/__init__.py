@@ -1,7 +1,7 @@
 import datetime
-from actions import BaseAction
+from crystal.actions import BaseAction
 import parsedatetime
-import feedback
+from crystal import feedback
 
 cal = parsedatetime.Calendar()
 
