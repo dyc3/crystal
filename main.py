@@ -14,7 +14,8 @@ import signal
 import sys, os
 import argparse
 import traceback
-from crystal import actions, feedback
+from crystal import input, actions, feedback
+import crystal.input.speech_recognition_input
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--mode", default="voice", const='voice', nargs='?', choices=["voice", "text"], required=False)
@@ -32,8 +33,9 @@ with open("config.txt", "r") as f:
 nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
 # recognizer = BaseSpeechRecognizer() # placeholder
-recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
+# recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
 # recognizer = SphinxSpeechRecognizer()
+user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
 commands = actions.load_actions()
 print(commands)
 
@@ -43,32 +45,13 @@ train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 print("Training command classifier...")
 cmdClassifier.fit(train, labelsTrain)
 
-micIn = audio.MicrophoneInput(dynamic_power_threshold=True)
-def consoleVisualizer(frame, rate, width):
-	rms = audioop.rms(frame, width)
-	info = "power: " + str(rms).rjust(6)
-	info += "  |  " + ("\033[32m" if recognizer.status == "speaking" else "\033[31m") + recognizer.status.rjust(12) + "\033[0m"
-	info += "  |  " + "recognizer is running" if recognizer.isRunning else "recognizer is not running"
-	info += "  |  " + "{} bytes in/{} bytes out".format(recognizer.bytes_sent, recognizer.bytes_received)
-	if recognizer.isRunning:
-		if recognizer.websocket:
-			info += ("\033[32m connected" if recognizer.websocket.connected else "\033[31m disconnected") + "\033[0m"
-		info += "  |  " + "(speak buffer: " + str(len(recognizer._speakingBuffer)).rjust(3) + ")" + "(no speak: " + str(recognizer._notSpeakingTicks).rjust(4) + ")"
-	info += "  |  Processing: " + str(current_utterance)
-	print(info, end='       \r')
-
-def sendToRecognizer(frame, rate, width):
-	# print(recognizer.websocket.__dict__)
-	if recognizer.isRunning:
-		recognizer.GiveFrame(frame, rate, micIn.sample_width)
-
-def onSpeech(text):
+def on_utterance_update(text):
 	global current_utterance
 	# print("Processing:", text)
 	current_utterance = text
 	feedback.OnStatus("listening")
 
-def onFinish(text):
+def on_utterance_finish(text):
 	global current_utterance
 	print("User said:", text)
 	current_utterance = None
@@ -108,8 +91,7 @@ def reload_commands():
 
 def quit():
 	print("Quitting...")
-	recognizer.Stop()
-	micIn.Stop()
+	user_input.StopListening()
 	os._exit(0)
 
 def signal_handler(signum, frame):
@@ -118,19 +100,16 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 if args.mode == "voice":
-	micIn.onFrame += consoleVisualizer
-	micIn.onFrame += sendToRecognizer
-
 	# start recognizer
-	recognizer.onSpeech += onSpeech
-	recognizer.onFinish += onFinish
+	user_input.on_utterance_update += on_utterance_update
+	user_input.on_utterance_finish += on_utterance_finish
 	try:
-		recognizer.Start()
+		user_input.StartListening()
 	except Exception as e:
 		print("ERROR: failed to start recognizer:",e)
 
 	print("Listening...")
-	micIn.Start()
+	# micIn.Start()
 	feedback.OnStatus("idle")
 elif args.mode == "text":
 	while True:
@@ -140,5 +119,5 @@ elif args.mode == "text":
 		elif user_input == "/reload":
 			reload_commands()
 			continue
-		onFinish(user_input)
+		on_utterance_finish(user_input)
 	quit()
