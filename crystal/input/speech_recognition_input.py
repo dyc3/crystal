@@ -16,7 +16,6 @@ class SpeechRecognitionInput(BaseInput):
 		self.mic = sr.Microphone()
 
 	def StartListening(self):
-		self.listener = Listener()
 		# adjust for background noise
 		with self.mic as source:
 			self.recog.adjust_for_ambient_noise(source)
