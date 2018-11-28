@@ -24,19 +24,21 @@ class SpeechRecognitionInput(BaseInput):
 	def StopListening(self):
 		self._do_stop_listening()
 
-	def recognizerCallback(recognizer, audio, failcount=0):
+	def recognizerCallback(self, recognizer, audio, failcount=0):
+		self.on_utterance_start.fire()
 		try:
-			self.on_utterance_start.fire()
 			self.current_utterance = recognizer.recognize_google(audio)
-			self.on_utterance_update.fire(self.current_utterance)
-			self.on_utterance_finish.fire(self.current_utterance)
-			self.current_utterance = ""
 		except sr.UnknownValueError:
 			print("sr.UnknownValueError")
-		except sr.RequestError as e:
+			return
+		except sr.RequestError:
 			if failcount < 3:
 				waittime = 2 * failcount + 2
 				print("retrying in {} seconds...".format(waittime))
 				time.sleep(waittime)
-			else:
 				self.recognizerCallback(recognizer, audio, failcount + 1)
+			return
+
+		self.on_utterance_update.fire(self.current_utterance)
+		self.on_utterance_finish.fire(self.current_utterance)
+		self.current_utterance = ""

@@ -14,7 +14,7 @@ import signal
 import sys, os
 import argparse
 import traceback
-from crystal import input, actions, feedback
+from crystal import actions, feedback
 import crystal.input.speech_recognition_input
 
 parser = argparse.ArgumentParser()
@@ -111,13 +111,15 @@ if args.mode == "voice":
 	print("Listening...")
 	# micIn.Start()
 	feedback.OnStatus("idle")
+	while True:
+		time.sleep(0.1)
 elif args.mode == "text":
 	while True:
-		user_input = input("> ")
-		if user_input == "/quit":
+		text_input = input("> ")
+		if text_input == "/quit":
 			break
-		elif user_input == "/reload":
+		elif text_input == "/reload":
 			reload_commands()
 			continue
-		on_utterance_finish(user_input)
+		on_utterance_finish(text_input)
 	quit()
