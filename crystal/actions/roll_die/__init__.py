@@ -25,14 +25,13 @@ class ActionRollDie(BaseAction):
 						if "d" in dice:
 							#print("dice: "+dice)
 							d = dice.split("d")
-							if d[1] != "":
-								if d[0] != "":
-									count = int(d[0])
-									sides = int(d[1])
-								else:
-									if count == None:
-										count = 1
-									sides = int(dice.lstrip("d"))
+							if d[0] != "" and d[1] != "":
+								count = int(d[0])
+								sides = int(d[1])
+							else:
+								if count == None:
+									count = 1
+								sides = int(dice.lstrip("d"))
 						elif child.dep_ == "nummod":
 							count = int(str(child))
 		elif str(sentence.root) == "flip":
