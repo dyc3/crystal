@@ -7,3 +7,4 @@ config.txt
 *.model
 *.wav
 main.py.orig
+.vscode/tags
