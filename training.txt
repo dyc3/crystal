@@ -94,3 +94,21 @@ open up youtube,run-program
 Crystal give me a calculator,run-program
 run bleachbit,run-program
 open up volume control,run-program
+click,human-input
+left click,human-input
+middle click,human-input
+right click,human-input
+double click,human-input
+press space,human-input
+press tab,human-input
+press escape,human-input
+press space,human-input
+type hello,human-input
+type goodbye,human-input
+move cursor to the center,human-input
+move cursor to the left,human-input
+move cursor 400 pixels to the right,human-input
+move the cursor up by 100 pixels,human-input
+move the cursor 200 pixels down,human-input
+scroll up,human-input
+scroll down,human-input
