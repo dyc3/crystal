@@ -29,7 +29,8 @@ class SpeechRecognitionInput(BaseInput):
 		try:
 			self.current_utterance = recognizer.recognize_google(audio)
 		except sr.UnknownValueError:
-			print("sr.UnknownValueError")
+			# This happens when no speech is recognized in the audio, so
+			# just eat the error and ignore it.
 			return
 		except sr.RequestError:
 			if failcount < 3:
