@@ -1,7 +1,7 @@
 import unittest
 import datetime
 import spacy
-from actions import date
+from crystal.actions import date
 
 nlp = None
 

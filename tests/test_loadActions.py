@@ -1,5 +1,5 @@
 import unittest
-import actions
+from crystal import actions
 
 class TestLoadActions(unittest.TestCase):
 	"""docstring for TestLoadActions."""

@@ -1,5 +1,5 @@
 import unittest
-from actions import roll_die
+from crystal.actions import roll_die
 
 class TestActionRollDie(unittest.TestCase):
 	"""docstring for TestActionRollDie."""
