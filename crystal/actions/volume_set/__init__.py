@@ -11,8 +11,16 @@ class ActionVolumeSet(BaseAction):
 		self.handled_classifier = "volume-set"
 
 	@classmethod
-	def run(self, doc):
-		sentence = next(doc.sents)
+	def parse(self, current_volume: float, sentence) -> float:
+		"""
+		current_voiume: The current volume in this context.
+		sentence: spaCy parsed sentence
+
+		returns the target volume as float
+		"""
+		assert isinstance(current_volume, float)
+		assert not isinstance(sentence, str)
+
 		percent = None
 		volumeaction = None
 		if str(sentence.root) == "set" or str(sentence.root) == "increase" or str(sentence.root) == "decrease":
@@ -51,12 +59,20 @@ class ActionVolumeSet(BaseAction):
 		if percent == None:
 			percent = 0.10
 			print("percent unspecified, using arbitrary percentage: {0}".format(percent))
+
+		if volumeaction == "increase":
+			return current_volume + percent
+		elif volumeaction == "decrease":
+			return current_volume - percent
+
+		return percent
+
+	@classmethod
+	def run(self, doc):
+		sentence = next(doc.sents)
 		for sink in pulse.sink_list():
 			if sink.name == pulse.server_info().default_sink_name:
-				if volumeaction == "increase":
-					percent = sink.volume.value_flat + percent
-				elif volumeaction == "decrease":
-					percent = sink.volume.value_flat - percent
+				percent = self.parse(sink.volume.value_flat, sentence)
 				print("setting default sink volume: {} -> {}".format(sink.volume.value_flat, percent))
 				pulse.volume_set_all_chans(sink, percent)
 				break
