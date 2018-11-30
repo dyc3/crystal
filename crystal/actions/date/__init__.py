@@ -67,8 +67,10 @@ class ActionDate(BaseAction):
 				target_date = datetime.datetime(*time_struct[:6])
 			else:
 				print("parse_status: {}".format(parse_status))
-			print("Date: ", target_date.date().isoformat())
-			feedback.ShowNotify("Date: {}".format(target_date.date().isoformat()))
+
+			date_str = target_date.date().strftime("%A, %Y-%b-%d")
+			print("Date: ", date_str)
+			feedback.ShowNotify("Date: {}".format(date_str))
 		elif query_type == "verify":
 			if self.verify(sentence):
 				feedback.ShowNotify("Yes")
