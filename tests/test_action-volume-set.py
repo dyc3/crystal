@@ -12,7 +12,6 @@ class TestActionVolumeSet(unittest.TestCase):
 		nlp = spacy.load("en")
 
 	def test_action_volume_set(self):
-		pass
 		# current_volume, query string, expected result
 		test_set = [
 			(0.5, "set volume to 80%", 0.8),
