@@ -32,6 +32,11 @@ class ActionVolumeSet(BaseAction):
 						if volumeaction == None: volumeaction = "increase"
 					elif str(child) == "down":
 						if volumeaction == None: volumeaction = "decrease"
+		elif str(sentence.root) == "volume":
+			for child in sentence.root.children:
+				if str(child) in ["increase", "decrease"]:
+					volumeaction = str(child)
+
 		for child in sentence.root.children:
 			#print ("child: {0}: {1}".format(child, child.dep_))
 			if child.dep_ == "prep":
@@ -61,11 +66,11 @@ class ActionVolumeSet(BaseAction):
 			print("percent unspecified, using arbitrary percentage: {0}".format(percent))
 
 		if volumeaction == "increase":
-			return current_volume + percent
+			return round(current_volume + percent, 2)
 		elif volumeaction == "decrease":
-			return current_volume - percent
+			return round(current_volume - percent, 2)
 
-		return percent
+		return round(percent, 2)
 
 	@classmethod
 	def run(self, doc):
