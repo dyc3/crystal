@@ -49,6 +49,7 @@ class ActionManipulateWm(BaseAction):
 			print("exit: ", exitcode)
 		else:
 			print("error: command == None")
+			raise Exception("error: command == None")
 
 def getAction():
 	return ActionManipulateWm()
