@@ -65,12 +65,18 @@ def on_utterance_finish(text):
 			classification = cmdClassifier.predict([text])[0]
 			commands[classification].run(doc)
 		except Exception as e:
-			feedback.OnStatus("error")
 			print(e)
 			traceback.print_exc()
+			on_action_error()
 	else:
 		print("user not talking to me")
 	feedback.OnStatus("idle")
+
+def on_action_error():
+	"""
+	Run when an error occurs while running an action.
+	"""
+	feedback.OnStatus("error")
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
