@@ -113,3 +113,28 @@ move the cursor up by 100 pixels,human-input
 move the cursor 200 pixels down,human-input
 scroll up,human-input
 scroll down,human-input
+how many CPU threads do I have,info-hardware
+how many logical processors do I have,info-hardware
+show me the number of logical cores in this machine,info-hardware
+how many threads are available,info-hardware
+count my physical processors,info-hardware
+how much disk space do I have left,info-hardware
+how much disk space is free,info-hardware
+show me disk usage,info-hardware
+where are my disks mounted,info-hardware
+how many disks are mounted,info-hardware
+what disks are mounted,info-hardware
+what partitions are mounted,info-hardware
+what are the partitions on my drives,info-hardware
+show me the partitions on my drives,info-hardware
+how much memory is free,info-hardware
+how much memory am I using,info-hardware
+show me memory usage,info-hardware
+what are my pulseaudio sinks,info-hardware
+what pulseaudio sink is active,info-hardware
+list pulseaudio sinks,info-hardware
+show me pulseaudio sinks,info-hardware
+are my headphones being used,info-hardware
+what microphones are available,info-hardware
+what is my internal IP,info-hardware
+what network devices are available,info-hardware
