@@ -11,8 +11,8 @@ Big things
 ==========
 
 - real time speech recognition
-- command classifier
-- commands
+* command classifier
+* commands
 - response types (data, action)
 - blink1 support
 - compound commands
@@ -23,12 +23,17 @@ Big things
 Commands
 ========
 
-- date and time
-- volume control
++ date and time
++ volume control
 - audio device switching
-- switch workspace
-- run programs
+* switch workspace
+* run programs
 - wemo stuff
 - list files
 - show pictures
-- media control
+* media control
+
+Other things
+============
+
+- wake word activation using snowboy http://docs.kitt.ai/snowboy/
