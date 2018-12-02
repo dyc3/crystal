@@ -8,6 +8,8 @@ gi.require_version('Notify', '0.7')
 from gi.repository import Notify # see: http://www.devdungeon.com/content/desktop-notifications-python-libnotify
 from blink1 import blink1
 
+import crystal.core
+
 enableBlink1 = True
 try:
 	b1 = blink1.Blink1()
@@ -24,6 +26,7 @@ except KeyError:
 	enableNotify = False
 
 def OnStatus(status):
+	crystal.core.on_status_update.fire(status)
 	if enableBlink1:
 		if status == "idle":
 			b1.fade_to_color(100, "purple")

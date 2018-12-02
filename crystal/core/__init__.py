@@ -12,6 +12,7 @@ on_input_error = EventHook()
 on_action_start = EventHook()
 on_action_finish = EventHook()
 on_action_error = EventHook()
+on_status_update = EventHook()
 
 # debug event handlers
 def print_on_event_trigger(*args, **kwargs):
@@ -23,3 +24,4 @@ on_input_error += print_on_event_trigger
 on_action_start += print_on_event_trigger
 on_action_finish += print_on_event_trigger
 on_action_error += print_on_event_trigger
+on_status_update += print_on_event_trigger
