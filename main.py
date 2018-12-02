@@ -30,7 +30,14 @@ with open("config.txt", "r") as f:
 		spl = line.split("=")
 		config[spl[0]] = spl[1]
 
-nlp = spacy.load('en')
+spacy.prefer_gpu()
+try:
+	nlp = spacy.load('en')
+except OSError:
+	# model loading failed, it probably doesn't exist
+	# download it
+	os.system("python -m spacy download en")
+	nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
 # recognizer = BaseSpeechRecognizer() # placeholder
 # recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
