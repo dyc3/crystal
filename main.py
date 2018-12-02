@@ -14,7 +14,7 @@ import signal
 import sys, os
 import argparse
 import traceback
-from crystal import actions, feedback
+from crystal import actions, feedback, core
 import crystal.input.speech_recognition_input
 
 parser = argparse.ArgumentParser()
@@ -45,6 +45,8 @@ cmdClassifier = classifier.CommandClassifier(nlp)
 user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
 commands = actions.load_actions()
 print(commands)
+feedback_modules = feedback.load_feedback()
+print(feedback_modules)
 
 current_utterance = None
 
@@ -74,7 +76,7 @@ def on_utterance_finish(text):
 		except Exception as e:
 			print(e)
 			traceback.print_exc()
-			on_action_error()
+			crystal.core.on_action_error.fire()
 	else:
 		print("user not talking to me")
 	feedback.OnStatus("idle")
@@ -96,9 +98,11 @@ def isSpeakingToCrystal(doc):
 	return False
 
 def reload_commands():
-	global commands
+	global commands, feedback_modules
 	commands = actions.load_actions()
 	print(commands)
+	feedback_modules = feedback.load_feedback()
+	print(feedback_modules)
 	train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 	cmdClassifier.fit(train, labelsTrain)
 
@@ -111,11 +115,12 @@ def signal_handler(signum, frame):
 	quit()
 
 signal.signal(signal.SIGINT, signal_handler)
+crystal.core.on_action_error += on_action_error
+crystal.core.on_utterance_update += on_utterance_update
+crystal.core.on_utterance_finish += on_utterance_finish
 
 if args.mode == "voice":
 	# start recognizer
-	user_input.on_utterance_update += on_utterance_update
-	user_input.on_utterance_finish += on_utterance_finish
 	try:
 		user_input.StartListening()
 	except Exception as e:
@@ -134,5 +139,5 @@ elif args.mode == "text":
 		elif text_input == "/reload":
 			reload_commands()
 			continue
-		on_utterance_finish(text_input)
+		crystal.core.on_utterance_finish.fire(text_input)
 	quit()

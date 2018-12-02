@@ -1,4 +1,6 @@
-import os
+from abc import ABCMeta
+import abc
+import os, importlib
 import pgi
 pgi.install_as_gi()
 import gi
@@ -39,3 +41,29 @@ def ShowNotify(body, title="Crystal"):
 	notification = Notify.Notification.new(title, body, None)
 	notification.show()
 	return notification
+
+class BaseFeedback(metaclass=ABCMeta):
+	"""docstring for BaseFeedback."""
+	def __init__(self):
+		super(BaseFeedback, self).__init__()
+
+	@classmethod
+	@abc.abstractmethod
+	def register(self):
+		"""
+		Each feedback module will individually attach itself to the pipeline here.
+		"""
+		pass
+
+def load_feedback():
+	feedback_modules_str = ["crystal.feedback."+a for a in os.listdir("crystal/feedback") if "." not in a and a != "__pycache__"]
+
+	feedback_modules = []
+	for value in feedback_modules_str:
+		module = importlib.import_module(name=value)
+		module = importlib.reload(module)
+		feedback = module.getFeedback()
+		feedback_modules.append(feedback)
+		feedback.register()
+
+	return feedback_modules

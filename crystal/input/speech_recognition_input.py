@@ -1,5 +1,6 @@
 from eventhook import EventHook
 from crystal.input import BaseInput
+import crystal.core
 import speech_recognition as sr
 import time
 
@@ -7,9 +8,9 @@ class SpeechRecognitionInput(BaseInput):
 	""" Uses the `SpeechRecognition` package to do speech recognition. """
 	def __init__(self):
 		super(SpeechRecognitionInput, self).__init__()
-		self.on_utterance_start = EventHook()
-		self.on_utterance_update = EventHook()
-		self.on_utterance_finish = EventHook()
+		# self.on_utterance_start = EventHook()
+		# self.on_utterance_update = EventHook()
+		# self.on_utterance_finish = EventHook()
 		self.current_utterance = ""
 
 		self.recog = sr.Recognizer()
@@ -25,7 +26,7 @@ class SpeechRecognitionInput(BaseInput):
 		self._do_stop_listening()
 
 	def recognizerCallback(self, recognizer, audio, failcount=0):
-		self.on_utterance_start.fire()
+		crystal.core.on_utterance_start.fire()
 		try:
 			self.current_utterance = recognizer.recognize_google(audio)
 		except sr.UnknownValueError:
@@ -40,6 +41,6 @@ class SpeechRecognitionInput(BaseInput):
 				self.recognizerCallback(recognizer, audio, failcount + 1)
 			return
 
-		self.on_utterance_update.fire(self.current_utterance)
-		self.on_utterance_finish.fire(self.current_utterance)
+		crystal.core.on_utterance_update.fire(self.current_utterance)
+		crystal.core.on_utterance_finish.fire(self.current_utterance)
 		self.current_utterance = ""
