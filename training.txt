@@ -17,6 +17,7 @@ is today wednesday,date
 was yesterday thursday,date
 is today friday,date
 what's tomorrow,date
+what day is friday,date
 roll a die,roll-die
 roll 2 dice,roll-die
 roll a d6,roll-die
