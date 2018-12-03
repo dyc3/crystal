@@ -58,7 +58,7 @@ def on_utterance_update(text):
 	global current_utterance
 	# print("Processing:", text)
 	current_utterance = text
-	feedback.OnStatus("listening")
+	core.set_status(core.CrystalStatus.LISTENING)
 
 def on_utterance_finish(text):
 	global current_utterance
