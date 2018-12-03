@@ -69,7 +69,7 @@ def on_utterance_finish(text):
 
 	doc = nlp(text)
 	if isSpeakingToCrystal(doc) or args.mode == "text":
-		feedback.OnStatus("working")
+		core.set_status(core.CrystalStatus.BUSY)
 		try:
 			classification = cmdClassifier.predict([text])[0]
 			commands[classification].run(doc)
@@ -79,13 +79,13 @@ def on_utterance_finish(text):
 			crystal.core.on_action_error.fire()
 	else:
 		print("user not talking to me")
-	feedback.OnStatus("idle")
+	core.set_status(core.CrystalStatus.IDLE)
 
 def on_action_error():
 	"""
 	Run when an error occurs while running an action.
 	"""
-	feedback.OnStatus("error")
+	core.set_status(core.CrystalStatus.ERROR)
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
@@ -128,7 +128,7 @@ if args.mode == "voice":
 
 	print("Listening...")
 	# micIn.Start()
-	feedback.OnStatus("idle")
+	core.set_status(core.CrystalStatus.IDLE)
 	while True:
 		time.sleep(0.1)
 elif args.mode == "text":

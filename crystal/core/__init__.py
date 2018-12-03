@@ -1,3 +1,4 @@
+from enum import Enum
 from eventhook import EventHook
 
 """
@@ -25,3 +26,16 @@ on_action_start += print_on_event_trigger
 on_action_finish += print_on_event_trigger
 on_action_error += print_on_event_trigger
 on_status_update += print_on_event_trigger
+
+class CrystalStatus(Enum):
+	IDLE = 0
+	LISTENING = 1
+	BUSY = 2
+	ERROR = 3
+
+status = CrystalStatus.IDLE
+
+def set_status(s: CrystalStatus):
+	global status
+	status = s
+	on_status_update.fire(status)

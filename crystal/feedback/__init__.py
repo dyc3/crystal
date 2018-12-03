@@ -10,13 +10,6 @@ from blink1 import blink1
 
 import crystal.core
 
-enableBlink1 = True
-try:
-	b1 = blink1.Blink1()
-except blink1.BlinkConnectionFailed as e:
-	print(e)
-	enableBlink1 = False
-
 enableNotify = True
 try:
 	if os.environ['DISPLAY']:
@@ -26,16 +19,15 @@ except KeyError:
 	enableNotify = False
 
 def OnStatus(status):
-	crystal.core.on_status_update.fire(status)
-	if enableBlink1:
-		if status == "idle":
-			b1.fade_to_color(100, "purple")
-		elif status == "listening":
-			b1.fade_to_color(100, "blue")
-		elif status == "working":
-			b1.fade_to_color(100, "orange")
-		elif status == "error":
-			b1.fade_to_color(100, "red")
+	print("WARNING: OnStatus has been deprecated, remove the call and replace it with crystal.core.set_status")
+	if status == "idle":
+		crystal.core.set_status(crystal.core.CrystalStatus.IDLE)
+	elif status == "listening":
+		crystal.core.set_status(crystal.core.CrystalStatus.LISTENING)
+	elif status == "working":
+		crystal.core.set_status(crystal.core.CrystalStatus.BUSY)
+	elif status == "error":
+		crystal.core.set_status(crystal.core.CrystalStatus.ERROR)
 
 def ShowNotify(body, title="Crystal"):
 	print("notify: {} - {}".format(title, body))
@@ -45,27 +37,13 @@ def ShowNotify(body, title="Crystal"):
 	notification.show()
 	return notification
 
-class BaseFeedback(metaclass=ABCMeta):
-	"""docstring for BaseFeedback."""
-	def __init__(self):
-		super(BaseFeedback, self).__init__()
-
-	@classmethod
-	@abc.abstractmethod
-	def register(self):
-		"""
-		Each feedback module will individually attach itself to the pipeline here.
-		"""
-		pass
-
 def load_feedback():
 	feedback_modules_str = ["crystal.feedback."+a for a in os.listdir("crystal/feedback") if "." not in a and a != "__pycache__"]
 
 	feedback_modules = []
 	for value in feedback_modules_str:
 		module = importlib.import_module(name=value)
-		module = importlib.reload(module)
-		feedback = module.getFeedback()
+		feedback = importlib.reload(module)
 		feedback_modules.append(feedback)
 		feedback.register()
 
