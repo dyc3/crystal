@@ -5,7 +5,6 @@ from blink1 import blink1
 b1 = None
 
 def on_status_update(status):
-	print("STATUS:", status)
 	if status == CrystalStatus.IDLE:
 		b1.fade_to_color(100, "purple")
 	elif status == CrystalStatus.LISTENING:

@@ -38,4 +38,5 @@ status = CrystalStatus.IDLE
 def set_status(s: CrystalStatus):
 	global status
 	status = s
+	print("STATUS:", status)
 	on_status_update.fire(status)
