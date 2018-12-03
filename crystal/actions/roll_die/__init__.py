@@ -9,11 +9,10 @@ class ActionRollDie(BaseAction):
 		self.handled_classifier = "roll-die"
 
 	@classmethod
-	def run(self, doc):
-		sentence = next(doc.sents)
-		count = None
-		sides = None
-		dice = None
+	def parse(self, sentence):
+		sides, count = None, None
+		dice = None # what does this do?
+
 		if str(sentence.root) == "roll":
 			for child in sentence.root.children:
 				if child.dep_ in ["nummod", "dobj"]:
@@ -41,10 +40,18 @@ class ActionRollDie(BaseAction):
 						count = 1
 						sides = 2
 
+		return sides, count
+
+	@classmethod
+	def run(self, doc):
+		sentence = next(doc.sents)
+		sides, count = self.parse(sentence)
+
 		if count != None and sides != None and count >= 1 and sides > 1:
 			_rolling_str = "rolling {} d{}".format(count, sides)
 			print(_rolling_str)
 			result = rollDie(sides, count)
+			dice = "{} d{}".format(count, sides)
 			outputstr = "ROLL: {}\n".format(dice)
 			for n in range(len(result)):
 				outputstr += "{}{}".format(result[n], (" + " if n != len(result) - 1 else ""))
