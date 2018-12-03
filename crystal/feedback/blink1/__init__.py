@@ -24,3 +24,6 @@ def register():
 		return
 
 	crystal.core.on_status_update += on_status_update
+
+def unregister():
+	crystal.core.on_status_update -= on_status_update

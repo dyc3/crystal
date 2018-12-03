@@ -101,6 +101,9 @@ def reload_commands():
 	global commands, feedback_modules
 	commands = actions.load_actions()
 	print(commands)
+
+	for f in feedback_modules:
+		f.unregister()
 	feedback_modules = feedback.load_feedback()
 	print(feedback_modules)
 	train, labelsTrain = DataUtil.loadTrainingData("training.txt")

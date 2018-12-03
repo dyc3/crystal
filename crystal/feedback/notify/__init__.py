@@ -40,3 +40,9 @@ def register():
 	crystal.core.on_utterance_update += on_utterance_update
 	crystal.core.on_utterance_finish += on_utterance_finish
 	crystal.core.on_action_error += on_action_error
+
+def unregister():
+	crystal.core.on_utterance_start -= on_utterance_start
+	crystal.core.on_utterance_update -= on_utterance_update
+	crystal.core.on_utterance_finish -= on_utterance_finish
+	crystal.core.on_action_error -= on_action_error
