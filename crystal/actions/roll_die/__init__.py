@@ -1,6 +1,7 @@
 from crystal.actions import BaseAction
 import random
 from crystal import feedback
+import utils
 
 class ActionRollDie(BaseAction):
 	"""docstring for ActionRollDie."""
@@ -34,9 +35,7 @@ class ActionRollDie(BaseAction):
 								try:
 									count = int(str(count_token))
 								except:
-									# TODO: add a utility function in crystal.core to convert word form numbers into numbers
-									num_words = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10}
-									count = num_words[str(count_token)]
+									count = utils.text2int(str(count_token))
 		elif str(sentence.root) == "flip":
 			for child in sentence.root.children:
 				if child.dep_ in ["dobj"]:

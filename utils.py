@@ -1,3 +1,5 @@
+# TODO: move to crystal.core
+
 import os
 
 def text2int(textnum, numwords={}):
