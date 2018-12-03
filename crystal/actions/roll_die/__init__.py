@@ -11,28 +11,32 @@ class ActionRollDie(BaseAction):
 	@classmethod
 	def parse(self, sentence):
 		sides, count = None, None
-		dice = None # what does this do?
 
-		if str(sentence.root) == "roll":
-			for child in sentence.root.children:
-				if child.dep_ in ["nummod", "dobj"]:
+		if str(sentence[0]) == "roll":
+			for child in sentence:
+				if "d" in str(child):
 					if str(child).lower() == "die":
 						count = 1 # TODO: support multiple dice this way
 						sides = 6
 					else:
-						dice = str(child).lower().rstrip("s")
-						if "d" in dice:
-							#print("dice: "+dice)
-							d = dice.split("d")
-							if d[0] != "" and d[1] != "":
-								count = int(d[0])
-								sides = int(d[1])
+						dice_token = child
+						d_spl = str(dice_token).split("d")
+						if d_spl[0] != "" and d_spl[1] != "":
+							count = int(d_spl[0])
+							sides = int(d_spl[1])
+						else:
+							sides = int(str(dice_token).lstrip("d"))
+
+							count_token = dice_token.nbor(-1)
+							if str(count_token) == "a":
+								count = 1
 							else:
-								if count == None:
-									count = 1
-								sides = int(dice.lstrip("d"))
-						elif child.dep_ == "nummod":
-							count = int(str(child))
+								try:
+									count = int(str(count_token))
+								except:
+									# TODO: add a utility function in crystal.core to convert word form numbers into numbers
+									num_words = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10}
+									count = num_words[str(count_token)]
 		elif str(sentence.root) == "flip":
 			for child in sentence.root.children:
 				if child.dep_ in ["dobj"]:
