@@ -72,6 +72,7 @@ def on_utterance_finish(text):
 		core.set_status(core.CrystalStatus.BUSY)
 		try:
 			classification = cmdClassifier.predict([text])[0]
+			print("Action detected:", classification)
 			commands[classification].run(doc)
 		except Exception as e:
 			print(e)
