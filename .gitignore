@@ -2,6 +2,7 @@ __pycache__/
 .env/
 audio_train/
 data/
+crystal/feedback/sound/sound/
 
 config.txt
 *.model
