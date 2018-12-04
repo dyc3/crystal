@@ -12,6 +12,13 @@ class ActionDate(BaseAction):
 		self.handled_classifier = "date"
 
 	@classmethod
+	def get_query_type(self, sentence):
+		if sentence.root.lemma_ in ["what", "when"] or sentence.root.nbor(-1).lemma_ in ["what", "when"] or sentence[0].dep_ == "det":
+			return "get"
+		else:
+			return "verify"
+
+	@classmethod
 	def verify(self, sentence):
 		target_date = None
 		compare_date = None
@@ -50,13 +57,9 @@ class ActionDate(BaseAction):
 		# print("Date: ", datetime.datetime.now().date().isoformat())
 		sentence = next(doc.sents)
 		target_date = datetime.datetime.now()
-		query_type = None # valid: get, verify
-		if sentence[0].text.lower() == "crystal":
+		if str(sentence[0]).lower() == "crystal":
 			sentence = sentence[1:]
-		if str(sentence.root.nbor(-1)) in ["what", "when"] or sentence[0].dep_ == "det":
-			query_type = "get"
-		else:
-			query_type = "verify"
+		query_type = self.get_query_type(sentence) # valid: get, verify
 		print("query_type: ", query_type)
 
 		if query_type == "get":
