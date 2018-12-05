@@ -60,9 +60,7 @@ def error():
 	_playfile(f)
 
 def on_status_update(status):
-	if status == CrystalStatus.LISTENING:
-		listen_start()
-	elif status == CrystalStatus.BUSY:
+	if status == CrystalStatus.BUSY:
 		processing()
 	elif status == CrystalStatus.ERROR:
 		error()
