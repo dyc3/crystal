@@ -13,6 +13,8 @@ class ActionDate(BaseAction):
 
 	@classmethod
 	def get_query_type(self, sentence):
+		if sentence.root.lemma_ == "is":
+			return "verify"
 		if sentence.root.lemma_ in ["what", "when"] or sentence.root.nbor(-1).lemma_ in ["what", "when"] or sentence[0].dep_ == "det":
 			return "get"
 		else:
@@ -74,11 +76,14 @@ class ActionDate(BaseAction):
 			date_str = target_date.date().strftime("%A, %Y-%b-%d")
 			print("Date: ", date_str)
 			feedback.ShowNotify("Date: {}".format(date_str))
+			return "Date: {}".format(date_str)
 		elif query_type == "verify":
-			if self.verify(sentence):
+			result = self.verify(sentence)
+			if result:
 				feedback.ShowNotify("Yes")
 			else:
 				feedback.ShowNotify("No")
+			return result
 		else:
 			feedback.OnStatus("error")
 			feedback.ShowNotify("unknown query type: {}".format(query_type))

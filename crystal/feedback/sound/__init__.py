@@ -65,8 +65,18 @@ def on_status_update(status):
 	elif status == CrystalStatus.ERROR:
 		error()
 
+def on_action_finish(result):
+	if str(result).lower() == "yes" or result == True:
+		sayaffirmative()
+	elif str(result).lower() == "no" or result == False:
+		saynegative()
+	else:
+		ack()
+
 def register():
 	crystal.core.on_status_update += on_status_update
+	crystal.core.on_action_finish += on_action_finish
 
 def unregister():
 	crystal.core.on_status_update -= on_status_update
+	crystal.core.on_action_finish -= on_action_finish

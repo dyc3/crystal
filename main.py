@@ -73,7 +73,17 @@ def on_utterance_finish(text):
 		try:
 			classification = cmdClassifier.predict([text])[0]
 			print("Action detected:", classification)
-			commands[classification].run(doc)
+			action_result = commands[classification].run(doc)
+			if not action_result:
+				# TODO: create a more robust response system, so that
+				# crystal can display complex information, ask for more missing parameters, etc.
+				print("WARNING: Action did not return result. All actions must return result.")
+			try:
+				crystal.core.on_action_finish.fire(action_result)
+			except Exception as e:
+				print("error occured in on_action_finish")
+				print(e)
+				traceback.print_exc()
 		except Exception as e:
 			print(e)
 			traceback.print_exc()
@@ -87,6 +97,9 @@ def on_action_error():
 	Run when an error occurs while running an action.
 	"""
 	core.set_status(core.CrystalStatus.ERROR)
+
+def on_action_finish(result):
+	print("Action result:", result)
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)
@@ -120,6 +133,7 @@ def signal_handler(signum, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 crystal.core.on_action_error += on_action_error
+crystal.core.on_action_finish += on_action_finish
 crystal.core.on_utterance_update += on_utterance_update
 crystal.core.on_utterance_finish += on_utterance_finish
 

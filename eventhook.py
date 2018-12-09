@@ -1,6 +1,7 @@
 class EventHook(object):
 
-	def __init__(self):
+	def __init__(self, name):
+		self.name = name
 		self.__handlers = []
 
 	def __iadd__(self, handler):
@@ -12,6 +13,7 @@ class EventHook(object):
 		return self
 
 	def fire(self, *args, **keywargs):
+		print("event triggered:", self.name, args, keywargs)
 		for handler in self.__handlers:
 			handler(*args, **keywargs)
 
