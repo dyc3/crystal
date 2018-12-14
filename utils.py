@@ -1,6 +1,8 @@
 # TODO: move to crystal.core
 
 import os
+import logging
+log = logging.getLogger(__name__)
 
 def text2int(textnum, numwords={}):
 	if not numwords:
@@ -36,7 +38,7 @@ def runAndPrint(command):
 	"""
 	returns the command's exit code
 	"""
-	print("Running {0}...".format(command))
+	log.info("Running {0}...".format(command))
 	return os.system(command)
 
 def printSpacy(sentence):

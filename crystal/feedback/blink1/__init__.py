@@ -1,6 +1,8 @@
 import crystal.core
 from crystal.core import CrystalStatus
 from blink1 import blink1
+import logging
+log = logging.getLogger(__name__)
 
 b1 = None
 
@@ -19,7 +21,7 @@ def register():
 	try:
 		b1 = blink1.Blink1()
 	except blink1.BlinkConnectionFailed as e:
-		print(e)
+		log.exception(e)
 		return
 
 	crystal.core.on_status_update += on_status_update

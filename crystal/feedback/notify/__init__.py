@@ -6,6 +6,8 @@ pgi.install_as_gi()
 import gi
 gi.require_version('Notify', '0.7')
 from gi.repository import Notify # see: http://www.devdungeon.com/content/desktop-notifications-python-libnotify
+import logging
+log = logging.getLogger(__name__)
 
 current_utterance_notif = Notify.Notification.new("Crystal", "User:", None)
 
@@ -33,7 +35,7 @@ def register():
 		if os.environ['DISPLAY']:
 			Notify.init("Crystal")
 	except KeyError:
-		print('Warning: no $DISPLAY, no notifications will be shown')
+		log.warn('Warning: no $DISPLAY, no notifications will be shown')
 		return
 
 	crystal.core.on_utterance_start += on_utterance_start

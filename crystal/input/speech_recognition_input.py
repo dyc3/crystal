@@ -3,6 +3,8 @@ from crystal.input import BaseInput
 import crystal.core
 import speech_recognition as sr
 import time
+import logging
+log = logging.getLogger(__name__)
 
 class SpeechRecognitionInput(BaseInput):
 	""" Uses the `SpeechRecognition` package to do speech recognition. """
@@ -39,7 +41,7 @@ class SpeechRecognitionInput(BaseInput):
 		except sr.RequestError:
 			if failcount < 3:
 				waittime = 2 * failcount + 2
-				print("retrying in {} seconds...".format(waittime))
+				log.debug("retrying in {} seconds...".format(waittime))
 				time.sleep(waittime)
 				self.recognizerCallback(recognizer, audio, failcount + 1)
 			return

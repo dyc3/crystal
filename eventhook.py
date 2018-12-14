@@ -1,3 +1,6 @@
+import logging
+log = logging.getLogger(__name__)
+
 class EventHook(object):
 
 	def __init__(self, name):
@@ -13,7 +16,7 @@ class EventHook(object):
 		return self
 
 	def fire(self, *args, **keywargs):
-		print("event triggered:", self.name, args, keywargs)
+		log.debug("event triggered: {}, {}, {}".format(self.name, args, keywargs))
 		for handler in self.__handlers:
 			handler(*args, **keywargs)
 

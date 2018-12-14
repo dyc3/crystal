@@ -2,6 +2,8 @@ from crystal.actions import BaseAction
 from crystal import feedback
 import psutil
 from pulsectl import Pulse # https://pypi.python.org/pypi/pulsectl
+import logging
+log = logging.getLogger(__name__)
 
 class ActionInfoHardware(BaseAction):
 	"""docstring for ActionInfoHardware."""
@@ -58,9 +60,10 @@ class ActionInfoHardware(BaseAction):
 	def run(self, doc):
 		sentence = next(doc.sents)
 		query_type, query_params = self.parse(sentence)
-		print("parsed query: {}, {}".format(query_type, query_params))
+		log.info("parsed query: {}, {}".format(query_type, query_params))
 
 		if query_type == None:
+			log.error("Failed to parse query_type: {}, {}".format(query_type, query_params))
 			raise Exception("info-hardware: Failed to parse query_type: {}, {}".format(query_type, query_params))
 
 		if query_type == "processors":
@@ -72,7 +75,7 @@ class ActionInfoHardware(BaseAction):
 			elif "physical" in query_params:
 				feedback.ShowNotify("{} cores".format(psutil.cpu_count(logical=False)))
 			else:
-				print("Unknown query parameters:", query_params)
+				log.error("Unknown query parameters:", query_params)
 		elif query_type == "memory":
 			# TODO: do this better, get parameters
 			memvirt = psutil.virtual_memory()

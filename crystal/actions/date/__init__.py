@@ -2,6 +2,8 @@ import datetime
 from crystal.actions import BaseAction
 import parsedatetime
 from crystal import feedback
+import logging
+log = logging.getLogger(__name__)
 
 cal = parsedatetime.Calendar()
 
@@ -28,30 +30,30 @@ class ActionDate(BaseAction):
 		# parse what we are looking in
 		target_token = [word for word in sentence[sentence.root.i:] if word.ent_type_ == "DATE"][0]
 		parse_string = str(target_token)
-		print("parsing target date: {}".format(parse_string))
+		log.debug("parsing target date: {}".format(parse_string))
 		time_struct, parse_status = cal.parse(parse_string)
 		if parse_status != 0:
 			target_date = datetime.datetime(*time_struct[:6])
 		else:
-			print("parse_status: {}".format(parse_status))
+			log.debug("parse_status: {}".format(parse_status))
 
 		# parse what we are looking for
 		parse_string = str([word for word in sentence[sentence.root.i:] if word != target_token])
-		print("parsing compare date: {}".format(parse_string))
+		log.debug("parsing compare date: {}".format(parse_string))
 		# ok, I'll admit this is really janky
 		context_struct = None
 		if target_date.date() == datetime.date.today() + datetime.timedelta(days=1):
 			context_struct, _ = cal.parse("today")
 		else:
 			context_struct, _ = cal.parse("last week")
-		print("context: ", context_struct)
+		log.debug("context: ", context_struct)
 		time_struct, parse_status = cal.parse(parse_string, sourceTime=context_struct)
 		if parse_status != 0:
 			compare_date = datetime.datetime(*time_struct[:6])
 		else:
-			print("parse_status: {}".format(parse_status))
+			log.debug("parse_status: {}".format(parse_status))
 
-		print("comparing dates - target: {}, compare: {}".format(target_date, compare_date))
+		log.debug("comparing dates - target: {}, compare: {}".format(target_date, compare_date))
 		return compare_date.date() == target_date.date()
 
 	@classmethod
@@ -62,19 +64,19 @@ class ActionDate(BaseAction):
 		if str(sentence[0]).lower() == "crystal":
 			sentence = sentence[1:]
 		query_type = self.get_query_type(sentence) # valid: get, verify
-		print("query_type: ", query_type)
+		log.debug("query_type: {}".format(query_type))
 
 		if query_type == "get":
 			parse_string = str(sentence[sentence.root.i:])
-			print("parsing date: {}".format(parse_string))
+			log.debug("parsing date: {}".format(parse_string))
 			time_struct, parse_status = cal.parse(parse_string)
 			if parse_status != 0:
 				target_date = datetime.datetime(*time_struct[:6])
 			else:
-				print("parse_status: {}".format(parse_status))
+				log.debug("parse_status: {}".format(parse_status))
 
 			date_str = target_date.date().strftime("%A, %Y-%b-%d")
-			print("Date: ", date_str)
+			log.info("Date: {}".format(date_str))
 			feedback.ShowNotify("Date: {}".format(date_str))
 			return "Date: {}".format(date_str)
 		elif query_type == "verify":

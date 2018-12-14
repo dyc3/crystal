@@ -6,6 +6,8 @@ pgi.install_as_gi()
 import gi
 gi.require_version('Notify', '0.7')
 from gi.repository import Notify # see: http://www.devdungeon.com/content/desktop-notifications-python-libnotify
+import logging
+log = logging.getLogger(__name__)
 
 import crystal.core
 
@@ -14,11 +16,11 @@ try:
 	if os.environ['DISPLAY']:
 		Notify.init("Crystal")
 except KeyError:
-	print('Warning: no $DISPLAY, no notifications will be shown')
+	log.warn('no $DISPLAY, no notifications will be shown')
 	enableNotify = False
 
 def OnStatus(status):
-	print("WARNING: OnStatus has been deprecated, remove the call and replace it with crystal.core.set_status")
+	log.warn("WARNING: OnStatus has been deprecated, remove the call and replace it with crystal.core.set_status")
 	if status == "idle":
 		crystal.core.set_status(crystal.core.CrystalStatus.IDLE)
 	elif status == "listening":
@@ -29,7 +31,7 @@ def OnStatus(status):
 		crystal.core.set_status(crystal.core.CrystalStatus.ERROR)
 
 def ShowNotify(body, title="Crystal"):
-	print("notify: {} - {}".format(title, body))
+	log.info("notify: {} - {}".format(title, body))
 	if not enableNotify:
 		return None
 	notification = Notify.Notification.new(title, body, None)

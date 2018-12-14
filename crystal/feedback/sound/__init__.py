@@ -2,6 +2,8 @@ import random, os
 import crystal.core
 from crystal.core import CrystalStatus
 import simpleaudio as sa # http://simpleaudio.readthedocs.io/en/latest/simpleaudio.html#api
+import logging
+log = logging.getLogger(__name__)
 
 nowPlaying = None
 
@@ -10,7 +12,7 @@ def _playfile(file):
 	file = dir_path + "/" + file
 
 	global nowPlaying
-	print("Voice: playing {0}".format(file))
+	log.debug("Voice: playing {}".format(file))
 
 	if nowPlaying and nowPlaying.is_playing():
 		nowPlaying.stop()

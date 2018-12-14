@@ -1,5 +1,7 @@
 from enum import Enum
 from eventhook import EventHook
+import logging
+log = logging.getLogger(__name__)
 
 """
 This file defines event hooks for all events throughout the pipeline, from input to output.
@@ -26,5 +28,5 @@ status = CrystalStatus.IDLE
 def set_status(s: CrystalStatus):
 	global status
 	status = s
-	print("STATUS:", status)
+	log.info("STATUS: {}".format(status))
 	on_status_update.fire(status)

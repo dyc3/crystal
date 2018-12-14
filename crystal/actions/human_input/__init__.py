@@ -1,6 +1,8 @@
 from crystal.actions import BaseAction
 from crystal import feedback
 import pyautogui
+import logging
+log = logging.getLogger(__name__)
 
 class ActionHumanInput(BaseAction):
 	"""docstring for ActionHumanInput."""
@@ -92,7 +94,7 @@ class ActionHumanInput(BaseAction):
 
 	@classmethod
 	def human_input(self, inputaction, parameters=None):
-		print("human-input: {} ({})".format(inputaction, parameters))
+		log.info("human-input: {} ({})".format(inputaction, parameters))
 		assert inputaction != None, "human-input: inputaction can't be None"
 
 		if inputaction == "click" and parameters == None:
@@ -109,12 +111,12 @@ class ActionHumanInput(BaseAction):
 			if parameters != None:
 				pyautogui.typeWrite(parameters, interval=(0.2/len(parameters)))
 			else:
-				print("human-input: No text specified")
+				log.warn("human-input: No text specified")
 		elif inputaction == "press":
 			if parameters != None:
 				pyautogui.press(parameters)
 			else:
-				print("human-input: No key specified")
+				log.warn("human-input: No key specified")
 		elif inputaction == "scroll":
 			genericScroll = 8
 			superScroll = 100
@@ -128,7 +130,7 @@ class ActionHumanInput(BaseAction):
 			elif "bottom" in parameters:
 				pyautogui.scroll(-superScroll)
 			else:
-				print("human-input: scrolling in that direction is not supported.")
+				log.warn("human-input: scrolling in that direction is not supported.")
 		elif inputaction == "move":
 			mouseact = None
 			value = None
@@ -149,11 +151,11 @@ class ActionHumanInput(BaseAction):
 					x, y = pyautogui.center((0,0,screenWidth,screenHeight))
 					pyautogui.moveTo(x, y, duration=0.25, tween=pyautogui.easeInOutQuad)
 				else:
-					print("can't move the mouse like that")
+					log.warn("can't move the mouse like that")
 			else:
-				print("can't move the mouse like that")
+				log.warn("can't move the mouse like that")
 		else:
-			print("human-input: inputaction {} not yet supported".format(inputaction))
+			log.error("human-input: inputaction {} not yet supported".format(inputaction))
 
 def getAction():
 	return ActionHumanInput()

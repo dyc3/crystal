@@ -1,6 +1,8 @@
 import datetime
 from pulsectl import Pulse
 from crystal.actions import BaseAction
+import logging
+log = logging.getLogger(__name__)
 
 pulse = Pulse('Crystal-AI')
 
@@ -63,7 +65,7 @@ class ActionVolumeSet(BaseAction):
 
 		if percent == None:
 			percent = 0.10
-			print("percent unspecified, using arbitrary percentage: {0}".format(percent))
+			log.debug("percent unspecified, using arbitrary percentage: {}".format(percent))
 
 		if volumeaction == "increase":
 			return round(current_volume + percent, 2)
@@ -78,7 +80,7 @@ class ActionVolumeSet(BaseAction):
 		for sink in pulse.sink_list():
 			if sink.name == pulse.server_info().default_sink_name:
 				percent = self.parse(sink.volume.value_flat, sentence)
-				print("setting default sink volume: {} -> {}".format(sink.volume.value_flat, percent))
+				log.info("setting default sink volume: {} -> {}".format(sink.volume.value_flat, percent))
 				pulse.volume_set_all_chans(sink, percent)
 				break
 
