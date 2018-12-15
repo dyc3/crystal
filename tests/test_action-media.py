@@ -12,7 +12,7 @@ class TestActionMedia(unittest.TestCase):
 		global nlp
 		nlp = spacy.load("en")
 
-	def test_date_verify(self):
+	def test_parse(self):
 		# query, expected result
 		test_set = [
 			("play song", "play"),
@@ -30,12 +30,24 @@ class TestActionMedia(unittest.TestCase):
 
 			("previous song", "previous"),
 			("previous video", "previous"),
+
+			("go to 8 seconds", "position 8"),
+			("seek position to 2 minutes", "position 120"),
+			("go to 2 minutes 30 seconds", "position 150"),
+			("go to 2 minutes and 30 seconds", "position 150"),
+
+			("skip ahead 4 seconds", "position +4"),
+			("go forward 1 minute", "position +60"),
+
+			("skip back 30 seconds", "position -30"),
+			("skip back 1 minute and 30 seconds", "position -90"),
+			("go back 4 seconds", "position -4"),
 		]
 		action_media = media.ActionMedia()
 		for test, expectedResult in test_set:
 			doc = nlp(test)
 			sent = next(doc.sents)
-			self.assertEqual(action_media.parse(sent), expectedResult)
+			self.assertEqual(action_media.parse(sent), expectedResult, test)
 
 if __name__ == '__main__':
 	unittest.main()
