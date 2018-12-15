@@ -1,6 +1,8 @@
 import datetime
 from crystal.actions import BaseAction
 from crystal import feedback
+import logging
+log = logging.getLogger(__name__)
 
 class ActionTime(BaseAction):
 	"""docstring for ActionTime."""
@@ -24,7 +26,7 @@ class ActionTime(BaseAction):
 
 		current_time = datetime.datetime.now().time()
 		result = "Time: {}".format(current_time.isoformat())
-		print(result)
+		log.info(result)
 		feedback.ShowNotify(result)
 		return result
 
