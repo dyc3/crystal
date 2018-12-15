@@ -83,6 +83,8 @@ show me desktop three,manipulate-wm
 kill this program,manipulate-wm
 quit this application,manipulate-wm
 close that,manipulate-wm
+toggle fullscreen,manipulate-wm
+toggle floating,manipulate-wm
 lock the computer,system-lock
 lock my computer,system-lock
 lock it up,system-lock

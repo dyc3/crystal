@@ -38,6 +38,13 @@ class ActionManipulateWm(BaseAction):
 						command = 'i3-msg "move container to workspace number {}"'.format(num)
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
+		else:
+			for word in sentence:
+				if str(word) == "toggle":
+					if str(word.nbor(1)) in ["fullscreen"]:
+						command = 'i3-msg "fullscreen toggle"'
+					elif str(word.nbor(1)) in ["floating"]:
+						command = 'i3-msg "floating toggle"'
 
 		return command
 
