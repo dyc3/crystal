@@ -8,6 +8,7 @@ what is today's date,date
 give me the date,date
 what day of the week is it,date
 what's the date,date
+date,date
 what day of the month is it,date
 what month is it,date
 what year is it,date

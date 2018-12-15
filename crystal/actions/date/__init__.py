@@ -15,6 +15,8 @@ class ActionDate(BaseAction):
 
 	@classmethod
 	def get_query_type(self, sentence):
+		if sentence.root.lemma_ == "date":
+			return "get"
 		if sentence.root.lemma_ == "is":
 			return "verify"
 		if sentence.root.lemma_ in ["what", "when"] or sentence.root.nbor(-1).lemma_ in ["what", "when"] or sentence[0].dep_ == "det":
