@@ -89,12 +89,15 @@ class SpeechRecognitionInput(BaseInput):
 			if "wurkspace" in text: score -= 1 # what the fuck even is this?
 			if "Works face for" in text: score -= 1
 			if "ShowMe" in text: score -= 1
+			if "show me the top five" in text: score -= 1
 			if "open up at home" in text: score -= 1
 			if "open up Adam" in text: score -= 1
 			if "run Adam" in text: score -= 1
 			if "Paws video" in text: score -= 1
 			if "paws" in text: score -= 1
 			if "cromeans" in text: score -= 1
+			if "move Vista" in text: score -= 1
+			if "mufassal" in text: score -= 1
 
 			if text.lower().startswith("crystal"):
 				score += 1
@@ -104,6 +107,7 @@ class SpeechRecognitionInput(BaseInput):
 			if "run atom" in text: score += 1
 			if "workspace 4" in text: score += 1
 			if "workspace 9" in text: score += 1
+			if "desktop 5" in text: score += 1
 			if "desktop 10" in text: score += 1
 			if "close that" in text: score += 1
 			if "default sink" in text: score += 1
