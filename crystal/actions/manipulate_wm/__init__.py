@@ -36,6 +36,8 @@ class ActionManipulateWm(BaseAction):
 						except:
 							num = utils.text2int(str(num_token).lower())
 						command = 'i3-msg "move container to workspace number {}"'.format(num)
+		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
+			command = 'i3-msg "kill"'
 
 		return command
 
