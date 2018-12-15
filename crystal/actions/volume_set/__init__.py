@@ -1,6 +1,7 @@
 import datetime
 from pulsectl import Pulse
 from crystal.actions import BaseAction
+import utils
 import logging
 log = logging.getLogger(__name__)
 
@@ -18,10 +19,14 @@ class ActionVolumeSet(BaseAction):
 		current_voiume: The current volume in this context.
 		sentence: spaCy parsed sentence
 
-		returns the target volume as float
+		returns the target volume as float, or a string, either "mute" or "unmute"
 		"""
 		assert isinstance(current_volume, float)
 		assert not isinstance(sentence, str)
+
+		for word in sentence:
+			if word.lemma_ in ["mute", "unmute"]:
+				return word.lemma_
 
 		percent = None
 		volumeaction = None
@@ -79,9 +84,17 @@ class ActionVolumeSet(BaseAction):
 		sentence = next(doc.sents)
 		for sink in pulse.sink_list():
 			if sink.name == pulse.server_info().default_sink_name:
-				percent = self.parse(sink.volume.value_flat, sentence)
-				log.info("setting default sink volume: {} -> {}".format(sink.volume.value_flat, percent))
-				pulse.volume_set_all_chans(sink, percent)
+				result = self.parse(sink.volume.value_flat, sentence)
+				if result == "mute":
+					log.info("muting default sink")
+					utils.runAndPrint("pactl set-sink-mute @DEFAULT_SINK@ on")
+				elif result == "unmute":
+					log.info("unmuting default sink")
+					utils.runAndPrint("pactl set-sink-mute @DEFAULT_SINK@ off")
+				else:
+					percent = result
+					log.info("setting default sink volume: {} -> {}".format(sink.volume.value_flat, percent))
+					pulse.volume_set_all_chans(sink, percent)
 				break
 
 def getAction():

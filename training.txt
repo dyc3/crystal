@@ -53,6 +53,8 @@ turn up the volume by 10%,volume-set
 crank up the volume to 100%,volume-set
 increase the volume by 25%,volume-set
 decrease volume by 15%,volume-set
+mute audio,volume-set
+unmute the sound,volume-set
 one twenty divided by one eighty,math
 PI over twelve,math
 PI over three,math

@@ -27,6 +27,9 @@ class TestActionVolumeSet(unittest.TestCase):
 			(0.5, "decrease the volume", 0.4),
 			(0.5, "decrease volume by 40", 0.1),
 			(0.5, "turn down the volume", 0.4),
+
+			(0.5, "mute the sound", "mute"),
+			(0.5, "unmute audio", "unmute"),
 		]
 		action_volume_set = volume_set.ActionVolumeSet()
 		for current_vol, query, expected_result in test_set:
