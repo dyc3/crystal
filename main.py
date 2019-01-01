@@ -169,9 +169,11 @@ if args.mode == "voice":
 elif args.mode == "text":
 	while True:
 		text_input = input("> ")
+		if text_input == "":
+			continue
 		if text_input == "/quit":
 			break
-		elif text_input == "/reload":
+		if text_input == "/reload":
 			reload_commands()
 			continue
 		crystal.core.on_utterance_finish.fire(text_input)
