@@ -16,6 +16,15 @@ class ActionDate(BaseAction):
 
 	@classmethod
 	def get_query_type(self, sentence):
+		for word in sentence:
+			if word.lemma_ == "how" and word.nbor(1).lemma_ in ["many", "far"]:
+				return "count"
+			if word.lemma_ == "count":
+				return "count"
+
+			if word.lemma_ == "what":
+				return "get"
+
 		if sentence.root.lemma_ == "date":
 			return "get"
 		if sentence.root.lemma_ == "is":
@@ -28,12 +37,16 @@ class ActionDate(BaseAction):
 			return "verify"
 
 	@classmethod
-	def verify(self, sentence):
+	def find_target_and_compare_dates(self, sentence):
 		target_date = None
 		compare_date = None
 
 		# parse what we are looking in
-		target_token = [word for word in sentence[sentence.root.i:] if word.ent_type_ == "DATE"][0]
+		target_token = [word for word in sentence if word.ent_type_ == "DATE" and word.lemma_ not in ["day", "the", "many"]][0]
+		# the entity that the target token is in might have more than one word, eg. "Jan 20"
+		# so make sure target_token has the *entire* date entity
+		target_token = [ent for ent in sentence.doc.ents if ent.start == target_token.i][0].merge()
+
 		parse_string = str(target_token)
 		log.debug("parsing target date: {}".format(parse_string))
 		time_struct, parse_status = cal.parse(parse_string)
@@ -43,7 +56,7 @@ class ActionDate(BaseAction):
 			log.debug("parse_status: {}".format(parse_status))
 
 		# parse what we are looking for
-		parse_string = str([word for word in sentence[sentence.root.i:] if word != target_token])
+		parse_string = str([word for word in sentence if word != target_token])
 		log.debug("parsing compare date: {}".format(parse_string))
 		# ok, I'll admit this is really janky
 		context_struct = None
@@ -51,15 +64,33 @@ class ActionDate(BaseAction):
 			context_struct, _ = cal.parse("today")
 		else:
 			context_struct, _ = cal.parse("last week")
-		log.debug("context: ", context_struct)
+		log.debug("context: {}".format(context_struct))
 		time_struct, parse_status = cal.parse(parse_string, sourceTime=context_struct)
 		if parse_status != 0:
 			compare_date = datetime.datetime(*time_struct[:6])
 		else:
 			log.debug("parse_status: {}".format(parse_status))
 
+		# fallback
+		if compare_date == None:
+			log.debug("fallback, compare date == today")
+			context_struct, _ = cal.parse("today")
+			time_struct, parse_status = cal.parse(parse_string, sourceTime=context_struct)
+			compare_date = datetime.datetime(*time_struct[:6])
+
+		return target_date, compare_date
+
+	@classmethod
+	def verify(self, sentence):
+		target_date, compare_date = self.find_target_and_compare_dates(sentence)
 		log.debug("comparing dates - target: {}, compare: {}".format(target_date, compare_date))
 		return compare_date.date() == target_date.date()
+
+	@classmethod
+	def count(self, sentence):
+		target_date, compare_date = self.find_target_and_compare_dates(sentence)
+		delta = target_date - compare_date
+		return delta.days
 
 	@classmethod
 	def run(self, doc):
@@ -90,6 +121,9 @@ class ActionDate(BaseAction):
 				return ActionResponseQuery("Yes")
 			else:
 				return ActionResponseQuery("No")
+		elif query_type == "count":
+			result = self.count(sentence)
+			return ActionResponseQuery("{} days".format(result))
 		else:
 			feedback.OnStatus("error")
 			feedback.ShowNotify("unknown query type: {}".format(query_type))

@@ -19,6 +19,8 @@ was yesterday thursday,date
 is today friday,date
 what's tomorrow,date
 what day is friday,date
+how many days until Monday,date
+count the days until Monday,date
 roll a die,roll-die
 roll 2 dice,roll-die
 roll a d6,roll-die
@@ -88,8 +90,8 @@ toggle floating,manipulate-wm
 lock the computer,system-lock
 lock my computer,system-lock
 lock it up,system-lock
-thanks crystal,small-talk
-hey crystal,small-talk
+thanks,small-talk
+hey,small-talk
 ok thanks,small-talk
 how was your day today,small-talk
 what is your favorite color,small-talk
@@ -101,7 +103,7 @@ bring up steam,run-program
 open Firefox,run-program
 open up a web browser,run-program
 open up youtube,run-program
-Crystal give me a calculator,run-program
+give me a calculator,run-program
 run bleachbit,run-program
 open up volume control,run-program
 click,human-input
