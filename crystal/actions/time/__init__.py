@@ -1,5 +1,6 @@
 import datetime
 from crystal.actions import BaseAction
+from crystal.actions.responses import ActionResponseQuery
 from crystal import feedback
 import logging
 log = logging.getLogger(__name__)
@@ -25,10 +26,8 @@ class ActionTime(BaseAction):
 		context_timezone, target_timezone, target_time = self.parse(sentence)
 
 		current_time = datetime.datetime.now().time()
-		result = "Time: {}".format(current_time.isoformat())
-		log.info(result)
-		feedback.ShowNotify(result)
-		return result
+		log.info("Time: {}".format(current_time.isoformat()))
+		return ActionResponseQuery(current_time.isoformat())
 
 def getAction():
 	return ActionTime()

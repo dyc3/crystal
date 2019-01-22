@@ -1,5 +1,6 @@
 import datetime
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 import parsedatetime
 from crystal import feedback
 import logging
@@ -19,7 +20,9 @@ class ActionDate(BaseAction):
 			return "get"
 		if sentence.root.lemma_ == "is":
 			return "verify"
-		if sentence.root.lemma_ in ["what", "when"] or sentence.root.nbor(-1).lemma_ in ["what", "when"] or sentence[0].dep_ == "det":
+		if sentence.root.i != 0 and sentence.root.nbor(-1).lemma_ in ["what", "when"]:
+			return "get"
+		if sentence.root.lemma_ in ["what", "when"] or sentence[0].dep_ == "det":
 			return "get"
 		else:
 			return "verify"
@@ -79,18 +82,18 @@ class ActionDate(BaseAction):
 
 			date_str = target_date.date().strftime("%A, %Y-%b-%d")
 			log.info("Date: {}".format(date_str))
-			feedback.ShowNotify("Date: {}".format(date_str))
-			return "Date: {}".format(date_str)
+			# feedback.ShowNotify("Date: {}".format(date_str))
+			return ActionResponseQuery(date_str)
 		elif query_type == "verify":
 			result = self.verify(sentence)
 			if result:
-				feedback.ShowNotify("Yes")
+				return ActionResponseQuery("Yes")
 			else:
-				feedback.ShowNotify("No")
-			return result
+				return ActionResponseQuery("No")
 		else:
 			feedback.OnStatus("error")
 			feedback.ShowNotify("unknown query type: {}".format(query_type))
+			return ActionResponseBasic(ActionResponseType.FAILURE, "unknown query type: {}".format(query_type))
 
 def getAction():
 	return ActionDate()

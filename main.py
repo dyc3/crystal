@@ -16,6 +16,7 @@ import argparse
 import traceback
 import logging, coloredlogs
 from crystal import actions, feedback, core
+from crystal.actions.responses import *
 import crystal.input.speech_recognition_input
 
 log = logging.getLogger(__name__)
@@ -93,7 +94,10 @@ def on_utterance_finish(text):
 			if not action_result:
 				# TODO: create a more robust response system, so that
 				# crystal can display complex information, ask for more missing parameters, etc.
+				# (this is in progress)
 				log.warn("Action did not return result. All actions must return result.")
+			elif not isinstance(action_result, ActionResponseBase):
+				log.warn("Action returned a {}, responses should be derived from ActionResponseBase.".format(type(action_result)))
 			try:
 				crystal.core.on_action_finish.fire(action_result)
 			except Exception as e:
@@ -116,6 +120,13 @@ def on_action_error():
 
 def on_action_finish(result):
 	log.info("Action result: {}".format(result))
+
+	if isinstance(result, ActionResponseBase):
+		if result.type == ActionResponseType.SUCCESS:
+			if isinstance(result, ActionResponseQuery):
+				feedback.ShowNotify(result.message)
+		elif result.type == ActionResponseType.FAILURE:
+			feedback.ShowNotify("Action failed: {}".format(result.message))
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)

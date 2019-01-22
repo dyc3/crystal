@@ -1,5 +1,6 @@
 from enum import Enum
 from eventhook import EventHook
+from abc import ABCMeta
 import logging
 log = logging.getLogger(__name__)
 
