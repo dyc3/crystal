@@ -147,3 +147,6 @@ are my headphones being used,info-hardware
 what microphones are available,info-hardware
 what is my internal IP,info-hardware
 what network devices are available,info-hardware
+how many notifications are on Github,github
+check github notifications,github
+list my repositories,github
