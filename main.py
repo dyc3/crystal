@@ -161,7 +161,8 @@ def reload_commands():
 
 def quit():
 	log.info("Quitting...")
-	user_input.StopListening()
+	if args.mode == "voice":
+		user_input.StopListening()
 	os._exit(0)
 
 def signal_handler(signum, frame):
