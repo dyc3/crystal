@@ -11,6 +11,7 @@ class ActionTodo(BaseAction):
 	def __init__(self):
 		super(ActionTodo, self).__init__()
 		self.handled_classifier = "todo"
+		self.requires_updater = False
 
 	@classmethod
 	def log_in(self):

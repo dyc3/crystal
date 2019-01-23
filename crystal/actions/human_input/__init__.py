@@ -9,6 +9,7 @@ class ActionHumanInput(BaseAction):
 	def __init__(self):
 		super(ActionHumanInput, self).__init__()
 		self.handled_classifier = "human-input"
+		self.requires_updater = False
 
 	@classmethod
 	def run(self, doc):

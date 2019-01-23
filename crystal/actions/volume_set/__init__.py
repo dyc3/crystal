@@ -12,6 +12,7 @@ class ActionVolumeSet(BaseAction):
 	def __init__(self):
 		super(ActionVolumeSet, self).__init__()
 		self.handled_classifier = "volume-set"
+		self.requires_updater = False
 
 	@classmethod
 	def parse(self, current_volume: float, sentence) -> float:

@@ -11,6 +11,7 @@ class ActionGithub(BaseAction):
 	def __init__(self):
 		super(ActionGithub, self).__init__()
 		self.handled_classifier = "github"
+		self.requires_updater = False
 
 	@classmethod
 	def parse(self, sentence):

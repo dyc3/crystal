@@ -10,6 +10,7 @@ class ActionTime(BaseAction):
 	def __init__(self):
 		super(ActionTime, self).__init__()
 		self.handled_classifier = "time"
+		self.requires_updater = False
 
 	@classmethod
 	def parse(self, sentence):

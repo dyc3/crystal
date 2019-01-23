@@ -6,6 +6,7 @@ class ActionLockSystem(BaseAction):
 	def __init__(self):
 		super(ActionLockSystem, self).__init__()
 		self.handled_classifier = "system-lock"
+		self.requires_updater = False
 
 	@classmethod
 	def run(self, doc):

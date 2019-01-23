@@ -8,6 +8,7 @@ class ActionRollDie(BaseAction):
 	def __init__(self):
 		super(ActionRollDie, self).__init__()
 		self.handled_classifier = "roll-die"
+		self.requires_updater = False
 
 	@classmethod
 	def parse(self, sentence):

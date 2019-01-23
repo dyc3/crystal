@@ -8,6 +8,7 @@ class ActionManipulateWm(BaseAction):
 	def __init__(self):
 		super(ActionManipulateWm, self).__init__()
 		self.handled_classifier = "manipulate-wm"
+		self.requires_updater = False
 
 	@classmethod
 	def parse(self, sentence):

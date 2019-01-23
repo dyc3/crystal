@@ -13,6 +13,7 @@ class ActionDate(BaseAction):
 	def __init__(self):
 		super(ActionDate, self).__init__()
 		self.handled_classifier = "date"
+		self.requires_updater = False
 
 	@classmethod
 	def get_query_type(self, sentence):

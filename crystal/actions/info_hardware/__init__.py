@@ -10,6 +10,7 @@ class ActionInfoHardware(BaseAction):
 	def __init__(self):
 		super(ActionInfoHardware, self).__init__()
 		self.handled_classifier = "info-hardware"
+		self.requires_updater = False
 
 		self.pulse = Pulse('{}-AI'.format("Crystal"))
 

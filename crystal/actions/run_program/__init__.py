@@ -38,6 +38,7 @@ class ActionRunProgram(BaseAction):
 	def __init__(self):
 		super(ActionRunProgram, self).__init__()
 		self.handled_classifier = "run-program"
+		self.requires_updater = False
 
 	@classmethod
 	def run(self, doc):

@@ -29,6 +29,7 @@ class ActionMedia(BaseAction):
 	def __init__(self):
 		super(ActionMedia, self).__init__()
 		self.handled_classifier = "media"
+		self.requires_updater = False
 
 	@classmethod
 	def parse(self, sentence):

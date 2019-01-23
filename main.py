@@ -186,7 +186,16 @@ if args.mode == "voice":
 	# micIn.Start()
 	core.set_status(core.CrystalStatus.IDLE)
 	while True:
-		time.sleep(0.1)
+		time.sleep(1)
+
+		# run updaters for actions
+		for name, action in commands.items():
+			if action.requires_updater:
+				# This is useful for reminders, alarms, etc.
+				# Anything that user wants Crystal do that
+				# requires Crystal to do it automatically.
+				log.debug("Running update() for {}".format(name))
+				action.update()
 elif args.mode == "text":
 	while True:
 		text_input = input("> ")

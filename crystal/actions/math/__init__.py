@@ -7,6 +7,7 @@ class ActionMath(BaseAction):
 	def __init__(self):
 		super(ActionMath, self).__init__()
 		self.handled_classifier = "math"
+		self.requires_updater = False
 
 	@classmethod
 	def run(self, doc):
