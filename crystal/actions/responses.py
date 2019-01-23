@@ -38,6 +38,6 @@ class ActionResponsePromptList(ActionResponseBase):
 def show_user_prompt(action_response: ActionResponsePromptList):
 	assert isinstance(action_response, ActionResponsePromptList)
 
-	rofi_prompt = rofi.Rofi(action_response.items)
+	rofi_prompt = rofi.Rofi(len(action_response.items))
 	rofi_result = rofi_prompt.select(action_response.prompt, action_response.items)
 	return rofi_result

@@ -119,14 +119,23 @@ def on_action_error():
 	core.set_status(core.CrystalStatus.ERROR)
 
 def on_action_finish(result):
-	log.info("Action result: {}".format(result))
+	log.info("Action result: {} {}".format(result.type, result))
 
 	if isinstance(result, ActionResponseBase):
 		if result.type == ActionResponseType.SUCCESS:
 			if isinstance(result, ActionResponseQuery):
 				feedback.ShowNotify(result.message)
+			elif isinstance(result, ActionResponsePromptList):
+				# TODO: replace this with a rofi prompt
+				list_text = "List Result:\n"
+				for i in result.items:
+					list_text += "* " + str(i) + "\n"
+				feedback.ShowNotify(list_text)
+				crystal.actions.responses.show_user_prompt(result)
 		elif result.type == ActionResponseType.FAILURE:
 			feedback.ShowNotify("Action failed: {}".format(result.message))
+		else:
+			log.error("Unknown result type: {}".format(result.type))
 
 def isSpeakingToCrystal(doc):
 	sent = next(doc.sents)

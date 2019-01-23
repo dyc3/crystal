@@ -152,3 +152,6 @@ what network devices are available,info-hardware
 how many notifications are on Github,github
 check github notifications,github
 list my repositories,github
+whats on my todo list,todo
+show me my todo list,todo
+what do I have to get done,todo
