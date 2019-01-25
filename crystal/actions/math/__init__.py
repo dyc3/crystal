@@ -27,7 +27,7 @@ class ActionMath(BaseAction):
 						value = int(str(next(child.children)))
 						expression += str(value)
 					except Exception as e:
-						expression += str(text2int(str(next(child.children))))
+						expression += str(utils.text2int(str(next(child.children))))
 		else:
 			for token in sentence:
 				print("{} - {}, {}".format(str(token), token.pos_, token.dep_))
