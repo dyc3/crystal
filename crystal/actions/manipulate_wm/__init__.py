@@ -1,4 +1,5 @@
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 import utils
 import logging
 log = logging.getLogger(__name__)
@@ -58,9 +59,10 @@ class ActionManipulateWm(BaseAction):
 		if command != None:
 			exitcode = utils.runAndPrint(command)
 			log.debug("exit: {}".format(exitcode))
+			return ActionResponseBasic(ActionResponseType.SUCCESS)
 		else:
 			log.error("command == None")
-			raise Exception("error: command == None")
+			return ActionResponseBasic(ActionResponseType.FAILURE, "command == None")
 
 def getAction():
 	return ActionManipulateWm()
