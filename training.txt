@@ -155,3 +155,10 @@ list my repositories,github
 whats on my todo list,todo
 show me my todo list,todo
 what do I have to get done,todo
+what is the weather,weather
+what is the temperature outside,weather
+do I need a jacket,weather
+should I wear a coat,weather
+how cold is it,weather
+is it hot out,weather
+will it warm up later today,weather
