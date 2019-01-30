@@ -1,4 +1,5 @@
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 import utils
 import logging
 log = logging.getLogger(__name__)
@@ -84,7 +85,12 @@ class ActionMedia(BaseAction):
 	def run(self, doc):
 		sentence = next(doc.sents)
 		command = self.parse(sentence)
-		utils.runAndPrint("playerctl {}".format(command))
+		exitcode = utils.runAndPrint("playerctl {}".format(command))
+
+		if exitcode == 0:
+			return ActionResponseBasic(ActionResponseType.SUCCESS)
+		else:
+			return ActionResponseBasic(ActionResponseType.FAILURE, "playerctl exit code: {}".format(exitcode))
 
 def getAction():
 	return ActionMedia()
