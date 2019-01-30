@@ -203,7 +203,7 @@ def run(in_args):
 	log.info("Loading config...")
 	global config
 	config = load_config("config.txt")
-	log.debug("Config loaded, found {} items".format(len(config)))
+	log.info("Config loaded, found {} items".format(len(config)))
 
 	log.info("Loading NLP model...")
 	global nlp
