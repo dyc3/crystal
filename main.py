@@ -38,12 +38,7 @@ else:
 log.debug(args)
 log.info("Mode: {}".format(args.mode))
 
-log.info("Loading...")
-config = {}
-with open("config.txt", "r") as f:
-	for line in f:
-		spl = line.split("=")
-		config[spl[0]] = spl[1]
+core.initialize()
 
 spacy.prefer_gpu()
 try:
@@ -55,7 +50,7 @@ except OSError:
 	nlp = spacy.load('en')
 cmdClassifier = classifier.CommandClassifier(nlp)
 # recognizer = BaseSpeechRecognizer() # placeholder
-# recognizer = WatsonSpeechRecognizer(config["watson_username"], config["watson_password"])
+# recognizer = WatsonSpeechRecognizer(core.get_config("watson_username"), core.get_config("watson_password"))
 # recognizer = SphinxSpeechRecognizer()
 user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
 commands = actions.load_actions()

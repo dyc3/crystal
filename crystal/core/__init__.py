@@ -25,9 +25,30 @@ class CrystalStatus(Enum):
 	ERROR = 3
 
 status = CrystalStatus.IDLE
+config = {}
 
 def set_status(s: CrystalStatus):
 	global status
 	status = s
 	log.info("STATUS: {}".format(status))
 	on_status_update.fire(status)
+
+def initialize():
+	set_status(CrystalStatus.BUSY)
+
+	log.info("Loading...")
+	global config
+	with open("config.txt", "r") as f:
+		for line in f:
+			spl = line.split("=")
+			config[spl[0]] = spl[1]
+	log.debug("Config loaded, found {} items".format(len(config)))
+
+	set_status(CrystalStatus.IDLE)
+
+def get_config(key: str):
+	try:
+		return config[key]
+	except KeyError:
+		log.critical("Config does not contain value for {}".format(key))
+		return None

@@ -2,7 +2,7 @@ import todoist.api
 
 from crystal.actions import BaseAction
 from crystal.actions.responses import ActionResponseType, ActionResponseBasic, ActionResponseQuery, ActionResponsePromptList
-from crystal import feedback
+from crystal import core, feedback
 import logging
 log = logging.getLogger(__name__)
 
@@ -15,15 +15,9 @@ class ActionTodo(BaseAction):
 
 	@classmethod
 	def log_in(self):
-		# TODO: handle the config in crystal.core, because this is stupid
-		config = {}
-		with open("config.txt", "r") as f:
-			for line in f:
-				spl = line.split("=")
-				config[spl[0]] = spl[1]
-		self.TODOIST_ACCESS_TOKEN = config["todoist_access_token"]
-		self.TODOIST_CLIENT_ID = config["todoist_client_id"]
-		self.TODOIST_CLIENT_SECRET = config["todoist_client_secret"]
+		self.TODOIST_ACCESS_TOKEN = core.get_config("todoist_access_token")
+		self.TODOIST_CLIENT_ID = core.get_config("todoist_client_id")
+		self.TODOIST_CLIENT_SECRET = core.get_config("todoist_client_secret")
 
 		self.todo_api = todoist.api.TodoistAPI(token=self.TODOIST_ACCESS_TOKEN)
 

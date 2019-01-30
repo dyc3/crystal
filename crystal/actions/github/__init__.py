@@ -2,7 +2,7 @@ import requests
 
 from crystal.actions import BaseAction
 from crystal.actions.responses import ActionResponseType, ActionResponseBasic, ActionResponseQuery, ActionResponsePromptList
-from crystal import feedback
+from crystal import core, feedback
 import logging
 log = logging.getLogger(__name__)
 
@@ -24,13 +24,7 @@ class ActionGithub(BaseAction):
 
 	@classmethod
 	def get_notifications(self):
-		# TODO: handle the config in crystal.core, because this is stupid
-		config = {}
-		with open("config.txt", "r") as f:
-			for line in f:
-				spl = line.split("=")
-				config[spl[0]] = spl[1]
-		self.GITHUB_ACCESS_TOKEN = config["github_access_token"]
+		self.GITHUB_ACCESS_TOKEN = core.get_config("github_access_token")
 
 		resp = requests.get("https://api.github.com/notifications?access_token={}".format(self.GITHUB_ACCESS_TOKEN))
 		if resp.status_code == 200:
