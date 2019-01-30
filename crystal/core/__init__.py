@@ -83,7 +83,7 @@ def core_on_utterance_finish(text):
 	text = text.replace("crystal", "Crystal")
 
 	doc = nlp(text)
-	if isSpeakingToCrystal(doc) or args.mode == "text":
+	if is_speaking_to_crystal(doc) or args.mode == "text":
 		set_status(CrystalStatus.BUSY)
 		try:
 			classification = cmdClassifier.predict([text])[0]
@@ -138,7 +138,7 @@ def core_on_action_finish(result):
 	else:
 		log.error("Unknown result type: {}".format(result.type))
 
-def isSpeakingToCrystal(doc):
+def is_speaking_to_crystal(doc):
 	sent = next(doc.sents)
 	if str(sent[0]).lower() == "crystal":
 		return True
