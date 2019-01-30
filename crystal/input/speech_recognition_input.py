@@ -98,6 +98,8 @@ class SpeechRecognitionInput(BaseInput):
 			if "cromeans" in text: score -= 1
 			if "move Vista" in text: score -= 1
 			if "mufassal" in text: score -= 1
+			if "Crystal Puzzle" in text: score -= 1
+			if "Crystal Palace" in text: score -= 1
 
 			if text.lower().startswith("crystal"):
 				score += 1
