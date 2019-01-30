@@ -28,6 +28,15 @@ parser.add_argument("--verbose", action='store_true', help="Increase verbosity (
 
 args = parser.parse_args()
 
+# TODO: refactor how queries work, like you did with reponses
+# Currently, we just pass a spacy doc to the action.
+# Instead, we'll start passing some kind of query object.
+# Each query will have an ID.
+# When a query is made, the audio is saved to file in the cache.
+# Query objects will have 2 properties, the query as a string, and the query as a spacy doc.
+
+# TODO: allow actions to provide context strings for speech recognition result filtering
+
 # set up log levels
 coloredlogs.install(level=args.log_level)
 if args.verbose:
