@@ -13,8 +13,8 @@ Big things
 - real time speech recognition
 * command classifier
 * commands
-- response types (data, action)
-- blink1 support
++ response types (data, action)
++ blink1 support
 - compound commands
 - some way to show information
 - plenty of training data
@@ -26,12 +26,12 @@ Commands
 + date and time
 + volume control
 - audio device switching
-* switch workspace
++ switch workspace
 * run programs
 - wemo stuff
 - list files
 - show pictures
-* media control
++ media control
 
 Other things
 ============
