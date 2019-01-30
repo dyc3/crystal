@@ -69,6 +69,19 @@ def get_config(key: str) -> str:
 		log.critical("Config does not contain value for {}".format(key))
 		return None
 
+def load_nlp(model: str):
+	"""
+	model: specify spaCy model to use
+	"""
+	try:
+		nlp = spacy.load(model)
+	except OSError:
+		# model loading failed, it probably doesn't exist
+		# download it
+		os.system("python -m spacy download {}".foramt(model))
+		nlp = spacy.load(model)
+	return nlp
+
 def core_on_utterance_update(text):
 	global current_utterance
 	# print("Processing:", text)
@@ -194,13 +207,7 @@ def run(in_args):
 
 	log.info("Loading NLP model...")
 	global nlp
-	try:
-		nlp = spacy.load('en')
-	except OSError:
-		# model loading failed, it probably doesn't exist
-		# download it
-		os.system("python -m spacy download en")
-		nlp = spacy.load('en')
+	nlp = load_nlp("en")
 
 	log.info("Loading modules...")
 	global user_input, commands, feedback_modules
