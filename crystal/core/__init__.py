@@ -83,6 +83,9 @@ def load_nlp(model: str):
 		nlp = spacy.load(model)
 	return nlp
 
+def parse_nlp(text: str):
+	return nlp(text)
+
 def core_on_utterance_update(text):
 	global current_utterance
 	# print("Processing:", text)
@@ -90,13 +93,13 @@ def core_on_utterance_update(text):
 	set_status(CrystalStatus.LISTENING)
 
 def core_on_utterance_finish(text):
-	global current_utterance, nlp, cmdClassifier
+	global current_utterance, cmdClassifier
 	log.info("User said: {}".format(text))
 	current_utterance = None
 
 	text = text.replace("crystal", "Crystal")
 
-	doc = nlp(text)
+	doc = parse_nlp(text)
 	if is_speaking_to_crystal(doc) or args.mode == "text":
 		set_status(CrystalStatus.BUSY)
 		try:
