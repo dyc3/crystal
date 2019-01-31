@@ -1,8 +1,5 @@
 #!.env/bin/python3
-import audio
-import audioop
 import argparse
-import traceback
 import crystal.core
 import logging, coloredlogs
 
