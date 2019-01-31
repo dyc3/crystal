@@ -44,9 +44,10 @@ current_utterance = None
 
 def set_status(s: CrystalStatus):
 	global status
-	status = s
-	log.info("STATUS: {}".format(status))
-	on_status_update.fire(status)
+	if status != s:
+		status = s
+		log.info("STATUS: {}".format(status))
+		on_status_update.fire(status)
 
 def load_config(path: Path) -> dict:
 	"""
