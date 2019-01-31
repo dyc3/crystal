@@ -1,13 +1,33 @@
+import os
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 import spacy
 
+import logging
+log = logging.getLogger(__name__)
+
+def load_nlp(model: str):
+	"""
+	model: specify spaCy model to use
+	"""
+	global nlp
+	log.debug("spaCy using GPU: {}".format(spacy.prefer_gpu()))
+	try:
+		nlp = spacy.load(model)
+	except OSError:
+		# model loading failed, it probably doesn't exist
+		# download it
+		os.system("python -m spacy download {}".format(model))
+		nlp = spacy.load(model)
+
+def parse_nlp(text: str):
+	return nlp(text)
+
 class CommandClassifier():
 	"""docstring for CommandClassifier."""
-	def __init__(self, nlp):
+	def __init__(self):
 		super(CommandClassifier, self).__init__()
-		self.nlp = nlp
 		self.clf = LinearSVC()
 		self.vectorizer = CountVectorizer(tokenizer=self._tokenizeText, ngram_range=(1,1))
 		self.pipe = Pipeline([('vectorizer', self.vectorizer), ('clf', self.clf)])
@@ -16,7 +36,7 @@ class CommandClassifier():
 	def _tokenizeText(self, sample):
 
 		# get the tokens using spaCy
-		tokens = self.nlp(sample)
+		tokens = parse_nlp(sample)
 
 		# lemmatize
 		lemmas = []

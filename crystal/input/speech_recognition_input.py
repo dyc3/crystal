@@ -1,4 +1,3 @@
-from eventhook import EventHook
 from crystal.input import BaseInput
 import crystal.core
 import speech_recognition as sr
@@ -10,9 +9,6 @@ class SpeechRecognitionInput(BaseInput):
 	""" Uses the `SpeechRecognition` package to do speech recognition. """
 	def __init__(self):
 		super(SpeechRecognitionInput, self).__init__()
-		# self.on_utterance_start = EventHook()
-		# self.on_utterance_update = EventHook()
-		# self.on_utterance_finish = EventHook()
 		self.current_utterance = ""
 
 		self.recog = sr.Recognizer()

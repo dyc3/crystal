@@ -5,11 +5,11 @@ import traceback
 from pathlib import Path
 
 import spacy
-spacy.prefer_gpu()
+from spacy import displacy
 
-from eventhook import EventHook
-import classifier
-from datautil import DataUtil
+from crystal.core.events import *
+import crystal.core.processing
+from crystal.core.datautil import DataUtil
 
 from crystal import actions, feedback
 from crystal.actions.responses import *
@@ -17,20 +17,6 @@ import crystal.input.speech_recognition_input
 
 import logging
 log = logging.getLogger(__name__)
-
-"""
-This file defines event hooks for all events throughout the pipeline, from input to output.
-The event handlers are attached and defined elsewhere.
-"""
-
-on_utterance_start = EventHook("on_utterance_start")
-on_utterance_update = EventHook("on_utterance_update")
-on_utterance_finish = EventHook("on_utterance_finish")
-on_input_error = EventHook("on_input_error")
-on_action_start = EventHook("on_action_start")
-on_action_finish = EventHook("on_action_finish")
-on_action_error = EventHook("on_action_error")
-on_status_update = EventHook("on_status_update")
 
 class CrystalStatus(Enum):
 	IDLE = 0
@@ -70,61 +56,44 @@ def get_config(key: str) -> str:
 		log.critical("Config does not contain value for {}".format(key))
 		return None
 
-def load_nlp(model: str):
-	"""
-	model: specify spaCy model to use
-	"""
-	try:
-		nlp = spacy.load(model)
-	except OSError:
-		# model loading failed, it probably doesn't exist
-		# download it
-		os.system("python -m spacy download {}".format(model))
-		nlp = spacy.load(model)
-	return nlp
-
-def parse_nlp(text: str):
-	return nlp(text)
-
-def core_on_utterance_update(text):
+def core_on_utterance_update(text: str):
 	global current_utterance
 	# print("Processing:", text)
 	current_utterance = text
 	set_status(CrystalStatus.LISTENING)
 
-def core_on_utterance_finish(text):
+def core_on_utterance_finish(text: str):
 	global current_utterance, cmdClassifier
 	log.info("User said: {}".format(text))
 	current_utterance = None
 
 	text = text.replace("crystal", "Crystal")
 
-	doc = parse_nlp(text)
-	if is_speaking_to_crystal(doc) or args.mode == "text":
-		set_status(CrystalStatus.BUSY)
+	doc = crystal.core.processing.parse_nlp(text)
+	if args.mode == "voice" and not is_speaking_to_crystal(doc):
+		log.debug("user not talking to me")
+		return
+
+	set_status(CrystalStatus.BUSY)
+	try:
+		classification = cmdClassifier.predict([text])[0]
+		log.info("Action detected: {}".format(classification))
+		action_result = commands[classification].run(doc)
+		if not action_result:
+			log.warn("Action did not return result. All actions must return result.")
+		elif not isinstance(action_result, ActionResponseBase):
+			log.warn("Action returned a {}, responses should be derived from ActionResponseBase.".format(type(action_result)))
 		try:
-			classification = cmdClassifier.predict([text])[0]
-			log.info("Action detected: {}".format(classification))
-			action_result = commands[classification].run(doc)
-			if not action_result:
-				# TODO: create a more robust response system, so that
-				# crystal can display complex information, ask for more missing parameters, etc.
-				# (this is in progress)
-				log.warn("Action did not return result. All actions must return result.")
-			elif not isinstance(action_result, ActionResponseBase):
-				log.warn("Action returned a {}, responses should be derived from ActionResponseBase.".format(type(action_result)))
-			try:
-				crystal.core.on_action_finish.fire(action_result)
-			except Exception as e:
-				log.error("error occured in on_action_finish")
-				log.exception(e)
-				traceback.print_exc()
+			on_action_finish.fire(action_result)
 		except Exception as e:
+			log.error("error occured in on_action_finish")
 			log.exception(e)
 			traceback.print_exc()
-			crystal.core.on_action_error.fire()
-	else:
-		log.debug("user not talking to me")
+	except Exception as e:
+		log.exception(e)
+		traceback.print_exc()
+		on_action_error.fire()
+
 	set_status(CrystalStatus.IDLE)
 
 def core_on_action_error():
@@ -133,7 +102,7 @@ def core_on_action_error():
 	"""
 	set_status(CrystalStatus.ERROR)
 
-def core_on_action_finish(result):
+def core_on_action_finish(result: ActionResponseBase):
 	log.info("Action result: {} {}".format(result.type, result))
 
 	if not isinstance(result, ActionResponseBase):
@@ -210,8 +179,7 @@ def run(in_args):
 	log.info("Config loaded, found {} items".format(len(config)))
 
 	log.info("Loading NLP model...")
-	global nlp
-	nlp = load_nlp("en")
+	crystal.core.processing.load_nlp("en")
 
 	log.info("Loading modules...")
 	global user_input, commands, feedback_modules
@@ -228,7 +196,7 @@ def run(in_args):
 
 	log.info("Training command classifier...")
 	global cmdClassifier
-	cmdClassifier = classifier.CommandClassifier(nlp)
+	cmdClassifier = crystal.core.processing.CommandClassifier()
 	train, labelsTrain = DataUtil.loadTrainingData("training.txt")
 	cmdClassifier.fit(train, labelsTrain)
 

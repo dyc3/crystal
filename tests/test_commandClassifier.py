@@ -2,9 +2,7 @@ import unittest
 import numpy
 import spacy
 from sklearn.metrics import accuracy_score
-import classifier
-
-nlp = spacy.load('en')
+import crystal.core.processing
 
 class TestCommandClassifier(unittest.TestCase):
 
@@ -13,7 +11,8 @@ class TestCommandClassifier(unittest.TestCase):
 		pass
 
 	def test_commandClassifier(self):
-		cmdClassifier = classifier.CommandClassifier(nlp)
+		crystal.core.processing.load_nlp("en")
+		cmdClassifier = crystal.core.processing.CommandClassifier()
 
 		# TODO: load training data from file
 		train = ["what time is it", "what is today's date", "what's the time", "what time is it in eastern standard time",

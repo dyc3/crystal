@@ -1,4 +1,3 @@
-from eventhook import EventHook
 
 class BaseInput(object):
 	""" This is the class from which all input modules are derived from. """
