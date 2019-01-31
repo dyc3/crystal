@@ -79,7 +79,7 @@ def load_nlp(model: str):
 	except OSError:
 		# model loading failed, it probably doesn't exist
 		# download it
-		os.system("python -m spacy download {}".foramt(model))
+		os.system("python -m spacy download {}".format(model))
 		nlp = spacy.load(model)
 	return nlp
 
