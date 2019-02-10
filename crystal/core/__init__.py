@@ -148,6 +148,7 @@ def reload_commands():
 
 def quit():
 	log.info("Quitting...")
+	on_core_exit.fire()
 	if args.mode == "voice":
 		user_input.StopListening()
 	os._exit(0)
