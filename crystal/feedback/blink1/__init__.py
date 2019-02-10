@@ -16,6 +16,9 @@ def on_status_update(status):
 	elif status == CrystalStatus.ERROR:
 		b1.fade_to_color(100, "red")
 
+def on_core_exit():
+	b1.fade_to_color(2000, "black")
+
 def register():
 	global b1
 	try:
@@ -25,6 +28,8 @@ def register():
 		return
 
 	crystal.core.on_status_update += on_status_update
+	crystal.core.on_core_exit += on_core_exit
 
 def unregister():
 	crystal.core.on_status_update -= on_status_update
+	crystal.core.on_core_exit -= on_core_exit
