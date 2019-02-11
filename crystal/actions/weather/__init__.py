@@ -39,7 +39,12 @@ class ActionWeather(BaseAction):
 			log.debug("No zipcode cache, creating new: {}".format(str(zipcode_cache_path.parent)))
 			zipcode_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-		resp = requests.get("https://www.zipcodeapi.com/rest/{}/info.json/{}/degrees".format(core.get_config("zipcode_api_key"), zipcode))
+		zipcode_api_key = core.get_config("zipcode_api_key")
+		if not zipcode_api_key:
+			log.error("Failed to get `zipcode_api_key` from config")
+			return None
+
+		resp = requests.get("https://www.zipcodeapi.com/rest/{}/info.json/{}/degrees".format(zipcode_api_key, zipcode))
 		data = resp.json()
 		city_result = "{}, {}".format(data["city"], data["state"])
 		zipcode_cache[zipcode] = city_result
@@ -56,7 +61,14 @@ class ActionWeather(BaseAction):
 
 		if command == "current":
 			zipcode = core.get_config("zipcode")
-			resp = requests.get(API_URL_CURRENT_WEATHER.format(core.get_config("openweathermap_api_key"), zipcode))
+			if not zipcode:
+				return ActionResponseBasic(ActionResponseType.FAILURE, "Failed to get `zipcode` from config")
+
+			openweather_api_key = core.get_config("openweathermap_api_key")
+			if not openweather_api_key:
+				return ActionResponseBasic(ActionResponseType.FAILURE, "Failed to get `openweathermap_api_key` from config")
+
+			resp = requests.get(API_URL_CURRENT_WEATHER.format(openweather_api_key, zipcode))
 			if resp.status_code != 200:
 				return ActionResponseBasic(ActionResponseType.FAILURE, "weather API query failed: {}, {}".format(resp.status_code, resp.json()))
 			log.debug("Weather API success: 200")
