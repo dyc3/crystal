@@ -24,8 +24,6 @@ class TestCoreIsTalkingToMe(unittest.TestCase):
 		for query, expected_result in test_set:
 			doc = nlp(query)
 			result = crystal.core.is_speaking_to_crystal(doc)
-			if expected_result != result:
-				displacy.serve(doc)
 			self.assertEqual(result, expected_result, "Results did not match. Expected: {} Got: {}, {}".format(expected_result, result, query))
 
 if __name__ == '__main__':
