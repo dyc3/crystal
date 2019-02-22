@@ -1,6 +1,7 @@
 import datetime
 from pulsectl import Pulse
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 import utils
 import logging
 log = logging.getLogger(__name__)
@@ -89,14 +90,18 @@ class ActionVolumeSet(BaseAction):
 				if result == "mute":
 					log.info("muting default sink")
 					utils.runAndPrint("pactl set-sink-mute @DEFAULT_SINK@ on")
+					return ActionResponseBasic(ActionResponseType.SUCCESS)
 				elif result == "unmute":
 					log.info("unmuting default sink")
 					utils.runAndPrint("pactl set-sink-mute @DEFAULT_SINK@ off")
+					return ActionResponseBasic(ActionResponseType.SUCCESS)
 				else:
 					percent = result
 					log.info("setting default sink volume: {} -> {}".format(sink.volume.value_flat, percent))
 					pulse.volume_set_all_chans(sink, percent)
+					return ActionResponseBasic(ActionResponseType.SUCCESS)
 				break
+		return ActionResponseBasic(ActionResponseType.FAILURE)
 
 def getAction():
 	return ActionVolumeSet()
