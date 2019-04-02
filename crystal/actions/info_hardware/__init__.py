@@ -76,7 +76,7 @@ class ActionInfoHardware(BaseAction):
 			elif "physical" in query_params:
 				feedback.ShowNotify("{} cores".format(psutil.cpu_count(logical=False)))
 			else:
-				log.error("Unknown query parameters:", query_params)
+				log.error("Unknown query parameters: {}".format(query_params))
 		elif query_type == "memory":
 			# TODO: do this better, get parameters
 			memvirt = psutil.virtual_memory()
