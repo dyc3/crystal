@@ -46,7 +46,7 @@ def load_config(path: Path) -> dict:
 	with path.open() as f:
 		for line in f:
 			spl = line.split("=")
-			config[spl[0]] = spl[1]
+			config[spl[0]] = spl[1].rstrip()
 	return config
 
 def get_config(key: str) -> str:
