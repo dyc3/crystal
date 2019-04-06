@@ -132,7 +132,7 @@ def is_speaking_to_crystal(doc):
 		log.debug("{} {} {} parent: {} entity: {}".format(token, token.pos_, token.dep_, token.head, token.ent_type_))
 		if token.dep_ in ["npadvmod", "ccomp", "nsubj", "dobj", "ROOT"] and token.pos_ in ["NNP", "NN", "PROPN", "NOUN"] and str(token).lower() == "crystal":
 			return True
-		if token.pos_ in ["PROPN"] and str(token).lower() == "crystal":
+		if token.pos_ in ["PROPN"] and token.dep_ not in ["pobj"] and str(token).lower() == "crystal":
 			return True
 	return False
 

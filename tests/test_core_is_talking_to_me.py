@@ -19,6 +19,8 @@ class TestCoreIsTalkingToMe(unittest.TestCase):
 
 			("Crystal what's the date", True),
 			("what's the date Crystal", True),
+
+			("I'm talking about Crystal and she shouldn't activate", False)
 		]
 
 		for query, expected_result in test_set:
