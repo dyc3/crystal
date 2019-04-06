@@ -1,5 +1,6 @@
 from crystal.actions import BaseAction
 from crystal import feedback
+import utils
 import pyautogui
 import logging
 log = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ class ActionHumanInput(BaseAction):
 		self.requires_updater = False
 
 	@classmethod
-	def run(self, doc):
+	def extract_parameters(self, doc):
 		sentence = next(doc.sents)
 
 		inputaction = None
@@ -76,7 +77,7 @@ class ActionHumanInput(BaseAction):
 						num = int(str(numToken))
 					except:
 						try:
-							num = text2int(str(numToken))
+							num = utils.text2int(str(numToken))
 						except Exception as e:
 							print("could not parse {}".format(numToken))
 							break
@@ -88,6 +89,11 @@ class ActionHumanInput(BaseAction):
 						inputparameters += s
 		if inputparameters != None:
 			inputparameters = inputparameters.rstrip()
+		return inputaction, inputparameters
+
+	@classmethod
+	def run(self, doc):
+		inputaction, inputparameters = self.extract_parameters(doc)
 		if inputaction != None:
 			self.human_input(inputaction, parameters=inputparameters)
 		else:
@@ -110,7 +116,7 @@ class ActionHumanInput(BaseAction):
 				pyautogui.tripleClick()
 		elif inputaction == "type":
 			if parameters != None:
-				pyautogui.typeWrite(parameters, interval=(0.2/len(parameters)))
+				pyautogui.typewrite(parameters, interval=(0.2/len(parameters)))
 			else:
 				log.warn("human-input: No text specified")
 		elif inputaction == "press":
