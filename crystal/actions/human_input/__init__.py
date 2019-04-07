@@ -23,36 +23,43 @@ class ActionHumanInput(BaseAction):
 		sentence = next(doc.sents)
 
 		inputaction = None
-		inputparameters = []
-		# JANKY: bug in spaCy prevents this from being parsed correctly
-		if str(sentence) == "left click":
-			inputaction = "click"
-			inputparameters = ["left"]
-			return inputaction, inputparameters
 
-		if str(sentence.root).lower() in ["click", "move", "type", "press", "scroll"]:
-			if inputaction == None:
-				inputaction = str(sentence.root).lower()
-		for child in sentence.root.children:
+		# extract the action
+		for word in sentence:
+			if word.lemma_ in ["click", "move", "type", "press", "scroll"]:
+				inputaction = word.lemma_
+				break
+
+		# default parameters
+		click_param = "left"
+		scroll_direction = "down"
+		scroll_amount = 0
+		move_direction = ""
+		move_amount = 0
+
+		# extract the parameters
+		for word in sentence:
 			if inputaction == "click":
-				if child.dep_ == "amod" and str(child).lower() in ["left","middle","right","double","triple"]:
-					inputparameters += [str(child).lower()]
+				if word.lemma_ in ["left","middle","right","double","triple"]:
+					click_param = word.lemma_
+					break
+
 			elif inputaction == "scroll":
-				if child.dep_ == "prep" and str(child) == "to":
-					for prepchild in child.children:
-						if prepchild.dep_ == "pobj" and str(prepchild) in ["top", "bottom"]:
-							inputparameters += [str(prepchild).lower()]
-				elif str(child) in ["up","down","left","right"]:
-					if inputparameters == None:
-						inputparameters += [str(child).lower()]
+				if word.lemma_ in ["up", "down"]:
+					scroll_direction = word.lemma_
+					scroll_amount = 8
+				elif word.lemma_ in ["top", "bottom"]:
+					scroll_direction = {"top":"up", "bottom":"down"}[word.lemma_]
+					scroll_amount = 10000
+				break
+
 			elif inputaction == "move":
 				numToken = None
-				num = None
-				if str(child) in ["up","down","left","right"]:
-					inputparameters += [str(child).lower()]
-				elif child.dep_ == "prep":
-					if str(child) == "by":
-						for prepchild in child.children:
+				if str(word) in ["up", "down", "left", "right", "center"]:
+					move_direction = str(word)
+				elif word.dep_ == "prep":
+					if str(word) == "by":
+						for prepchild in word.children:
 							if prepchild.dep_ == "pobj":
 								if prepchild.lemma_ == "pixel":
 									for c in prepchild.children:
@@ -60,35 +67,36 @@ class ActionHumanInput(BaseAction):
 											numToken = c
 								elif prepchild.like_num:
 									numToken = prepchild
-					elif str(child) == "to":
-						for prepchild in child.children:
-							if prepchild.dep_ == "pobj":
-								if str(prepchild) in ["left","right","center"]:
-									inputparameters += [str(prepchild).lower()]
-				elif child.lemma_ == "pixel":
-					for c in child.children:
+				elif word.lemma_ == "pixel":
+					for c in word.children:
 						if c.like_num:
 							numToken = c
-				elif child.like_num:
-					numToken = child
-				if numToken != None:
+				elif word.like_num:
+					numToken = word
+				if numToken:
 					try:
-						num = int(str(numToken))
+						move_amount = int(str(numToken))
 					except:
 						try:
-							num = utils.text2int(str(numToken))
+							move_amount = utils.text2int(str(numToken))
 						except Exception as e:
 							log.error("could not parse {}".format(numToken))
 							break
-				if num != None:
-					inputparameters += [num]
-		return inputaction, inputparameters
+
+
+		if inputaction == "click":
+			return inputaction, (click_param,)
+		elif inputaction == "scroll":
+			return inputaction, (scroll_direction, scroll_amount,)
+		elif inputaction == "move":
+			return inputaction, (move_direction, move_amount)
 
 	@classmethod
 	def run(self, doc):
 		inputaction, inputparameters = self.extract_parameters(doc)
-		if inputaction != None:
+		if inputaction:
 			self.human_input(inputaction, parameters=inputparameters)
+			return ActionResponseBasic(ActionResponseType.SUCCESS)
 		else:
 			print("inputaction can't be None")
 
@@ -96,9 +104,6 @@ class ActionHumanInput(BaseAction):
 	def human_input(self, inputaction, parameters=None):
 		log.info("human-input: {} ({})".format(inputaction, parameters))
 		assert inputaction != None, "human-input: inputaction can't be None"
-
-		if inputaction == "click" and not parameters:
-			parameters = ["left"]
 
 		if inputaction == "click":
 			if parameters[0] in ["left","middle","right"]:

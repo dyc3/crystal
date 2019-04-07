@@ -15,20 +15,20 @@ class TestActionHumanInput(unittest.TestCase):
 	def test_extract(self):
 		# query, expected result
 		test_set = [
-			("click", "click", ["left"]),
-			("right click", "click", ["right"]),
-			("double click", "click", ["double"]),
+			("click", "click", ("left",)),
+			("right click", "click", ("right",)),
+			("double click", "click", ("double",)),
 
-			("move the mouse to the left by 300 pixels", "move", ["left", 300]),
-			("move the mouse 300 pixels to the left", "move", ["left", 300]),
-			("move the mouse to the left 300 pixels", "move", ["left", 300]),
-			("move the mouse left 300 pixels", "move", ["left", 300]),
+			("move the mouse to the left by 300 pixels", "move", ("left", 300)),
+			("move the mouse 300 pixels to the left", "move", ("left", 300)),
+			("move the mouse to the left 300 pixels", "move", ("left", 300)),
+			("move the mouse left 300 pixels", "move", ("left", 300)),
 
-			("move the mouse to the right by 300 pixels", "move", ["right", 300]),
-			("move the mouse 300 pixels to the right", "move", ["right", 300]),
+			("move the mouse to the right by 300 pixels", "move", ("right", 300)),
+			("move the mouse 300 pixels to the right", "move", ("right", 300)),
 
-			("move the mouse 300 pixels up", "move", ["up", 300]),
-			("move the mouse 300 pixels down", "move", ["down", 300]),
+			("move the mouse 300 pixels up", "move", ("up", 300)),
+			("move the mouse 300 pixels down", "move", ("down", 300)),
 		]
 		action = human_input.ActionHumanInput()
 		for query, expected_act, expected_params in test_set:
