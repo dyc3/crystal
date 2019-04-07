@@ -1,4 +1,5 @@
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 from crystal import feedback
 import utils
 import pyautogui
@@ -14,14 +15,20 @@ class ActionHumanInput(BaseAction):
 
 	@classmethod
 	def extract_parameters(self, doc):
+		"""
+		Extracts action and parameters for human_input
+
+		Returns a tuple, a string of the action and a tuple of the parameters.
+		"""
 		sentence = next(doc.sents)
 
 		inputaction = None
-		inputparameters = None
+		inputparameters = []
 		# JANKY: bug in spaCy prevents this from being parsed correctly
 		if str(sentence) == "left click":
 			inputaction = "click"
-			inputparameters = "left"
+			inputparameters = ["left"]
+			return inputaction, inputparameters
 
 		if str(sentence.root).lower() in ["click", "move", "type", "press", "scroll"]:
 			if inputaction == None:
@@ -29,24 +36,20 @@ class ActionHumanInput(BaseAction):
 		for child in sentence.root.children:
 			if inputaction == "click":
 				if child.dep_ == "amod" and str(child).lower() in ["left","middle","right","double","triple"]:
-					inputparameters = str(child).lower()
+					inputparameters += [str(child).lower()]
 			elif inputaction == "scroll":
 				if child.dep_ == "prep" and str(child) == "to":
 					for prepchild in child.children:
 						if prepchild.dep_ == "pobj" and str(prepchild) in ["top", "bottom"]:
-							inputparameters = str(prepchild).lower()
+							inputparameters += [str(prepchild).lower()]
 				elif str(child) in ["up","down","left","right"]:
 					if inputparameters == None:
-						inputparameters = str(child).lower()
+						inputparameters += [str(child).lower()]
 			elif inputaction == "move":
 				numToken = None
 				num = None
 				if str(child) in ["up","down","left","right"]:
-					s = "{} ".format(str(child).lower())
-					if inputparameters == None:
-						inputparameters = s
-					else:
-						inputparameters += s
+					inputparameters += [str(child).lower()]
 				elif child.dep_ == "prep":
 					if str(child) == "by":
 						for prepchild in child.children:
@@ -61,11 +64,7 @@ class ActionHumanInput(BaseAction):
 						for prepchild in child.children:
 							if prepchild.dep_ == "pobj":
 								if str(prepchild) in ["left","right","center"]:
-									s = "{} ".format(str(prepchild).lower())
-									if inputparameters == None:
-										inputparameters = s
-									else:
-										inputparameters += s
+									inputparameters += [str(prepchild).lower()]
 				elif child.lemma_ == "pixel":
 					for c in child.children:
 						if c.like_num:
@@ -79,16 +78,10 @@ class ActionHumanInput(BaseAction):
 						try:
 							num = utils.text2int(str(numToken))
 						except Exception as e:
-							print("could not parse {}".format(numToken))
+							log.error("could not parse {}".format(numToken))
 							break
 				if num != None:
-					s = "{} ".format(num)
-					if inputparameters == None:
-						inputparameters = s
-					else:
-						inputparameters += s
-		if inputparameters != None:
-			inputparameters = inputparameters.rstrip()
+					inputparameters += [num]
 		return inputaction, inputparameters
 
 	@classmethod
@@ -104,23 +97,23 @@ class ActionHumanInput(BaseAction):
 		log.info("human-input: {} ({})".format(inputaction, parameters))
 		assert inputaction != None, "human-input: inputaction can't be None"
 
-		if inputaction == "click" and parameters == None:
-			parameters = "left"
+		if inputaction == "click" and not parameters:
+			parameters = ["left"]
 
 		if inputaction == "click":
-			if parameters in ["left","middle","right"]:
-				pyautogui.click(button=parameters)
-			elif parameters == "double":
+			if parameters[0] in ["left","middle","right"]:
+				pyautogui.click(button=parameters[0])
+			elif parameters[0] == "double":
 				pyautogui.doubleClick()
-			elif parameters == "triple":
+			elif parameters[0] == "triple":
 				pyautogui.tripleClick()
 		elif inputaction == "type":
-			if parameters != None:
-				pyautogui.typewrite(parameters, interval=(0.2/len(parameters)))
+			if parameters:
+				pyautogui.typewrite(parameters[0], interval=(0.2/len(parameters)))
 			else:
 				log.warn("human-input: No text specified")
 		elif inputaction == "press":
-			if parameters != None:
+			if parameters:
 				pyautogui.press(parameters)
 			else:
 				log.warn("human-input: No key specified")
@@ -141,7 +134,7 @@ class ActionHumanInput(BaseAction):
 		elif inputaction == "move":
 			mouseact = None
 			value = None
-			for p in parameters.split(' '):
+			for p in parameters:
 				if p == None or p == "":
 					continue
 				if p in ["up","down","left","right","set","center"]:
