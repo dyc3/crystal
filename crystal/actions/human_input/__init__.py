@@ -45,13 +45,12 @@ class ActionHumanInput(BaseAction):
 					break
 
 			elif inputaction == "scroll":
-				if word.lemma_ in ["up", "down"]:
+				if str(word) in ["up", "down"]:
 					scroll_direction = word.lemma_
 					scroll_amount = 8
-				elif word.lemma_ in ["top", "bottom"]:
-					scroll_direction = {"top":"up", "bottom":"down"}[word.lemma_]
-					scroll_amount = 10000
-				break
+				elif str(word) in ["top", "bottom"]:
+					scroll_direction = {"top":"up", "bottom":"down"}[str(word)]
+					scroll_amount = 1000
 
 			elif inputaction == "move":
 				numToken = None
@@ -123,19 +122,11 @@ class ActionHumanInput(BaseAction):
 			else:
 				log.warn("human-input: No key specified")
 		elif inputaction == "scroll":
-			genericScroll = 8
-			superScroll = 100
+			scroll_direction, scroll_amount = parameters
+			if scroll_direction == "down":
+				scroll_amount *= -1
 			# positive number is up, negative number is down
-			if "up" in parameters:
-				pyautogui.scroll(genericScroll)
-			elif "down" in parameters:
-				pyautogui.scroll(-genericScroll)
-			elif "top" in parameters:
-				pyautogui.scroll(superScroll)
-			elif "bottom" in parameters:
-				pyautogui.scroll(-superScroll)
-			else:
-				log.warn("human-input: scrolling in that direction is not supported.")
+			pyautogui.scroll(scroll_amount)
 		elif inputaction == "move":
 			mouseact = None
 			value = None
