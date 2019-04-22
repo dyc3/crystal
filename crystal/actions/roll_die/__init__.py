@@ -1,4 +1,5 @@
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 import random
 from crystal import feedback
 import utils
@@ -11,47 +12,42 @@ class ActionRollDie(BaseAction):
 		self.requires_updater = False
 
 	@classmethod
-	def parse(self, sentence):
+	def parse(self, doc):
 		sides, count = None, None
 
-		if str(sentence[0]) == "roll":
-			for child in sentence:
-				if "d" in str(child):
-					if str(child).lower() == "die":
-						count = 1 # TODO: support multiple dice this way
-						sides = 6
-					else:
-						dice_token = child
-						d_spl = str(dice_token).split("d")
-						if d_spl[0] != "" and d_spl[1] != "":
-							count = int(d_spl[0])
-							sides = int(d_spl[1])
-						else:
-							sides = int(str(dice_token).lstrip("d"))
+		for word in doc:
+			if word.lemma_ == "flip":
+				count = 1 # TOOD: flip multiple coins
+				sides = 2
+				break
+			if "d" in str(word).lower():
+				d_spl = str(word).lower().split("d")
+				if str(word.lemma_).lower() in ["die", "dice"]:
+					sides = 6
+				else:
+					# get sides and count
+					sides = int(d_spl[1])
 
-							count_token = dice_token.nbor(-1)
-							if str(count_token) == "a":
-								count = 1
-							else:
-								try:
-									count = int(str(count_token))
-								except:
-									count = utils.text2int(str(count_token))
-		elif str(sentence.root) == "flip":
-			for child in sentence.root.children:
-				if child.dep_ in ["dobj"]:
-					if child.lemma_ == "coin":
+				if d_spl[0]:
+					count = int(d_spl[0])
+				else:
+					# get count from previous token
+					count_token = word.nbor(-1)
+					if str(count_token) == "a":
 						count = 1
-						sides = 2
-
+					else:
+						try:
+							count = int(str(count_token))
+						except ValueError:
+							count = utils.text2int(str(count_token))
 		return sides, count
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
-		sides, count = self.parse(sentence)
+		# sentence = next(doc.sents)
+		sides, count = self.parse(doc)
 
-		if count != None and sides != None and count >= 1 and sides > 1:
+		if count and sides and count >= 1 and sides > 1:
 			_rolling_str = "rolling {} d{}".format(count, sides)
 			print(_rolling_str)
 			result = rollDie(sides, count)
@@ -61,7 +57,10 @@ class ActionRollDie(BaseAction):
 				outputstr += "{}{}".format(result[n], (" + " if n != len(result) - 1 else ""))
 			if len(result) > 1:
 				outputstr += "\ntotal: {}".format(sum(result))
-			feedback.ShowNotify(outputstr, _rolling_str)
+			# feedback.ShowNotify(outputstr, _rolling_str)
+			return ActionResponseQuery(outputstr)
+		else:
+			return ActionResponseBasic(ActionResponseType.FAILURE, "count needs to be >= 1, got {} and sides needs to be > 1, got {}".format(count, sides))
 
 def getAction():
 	return ActionRollDie()
