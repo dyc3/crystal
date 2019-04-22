@@ -103,11 +103,11 @@ def core_on_action_error():
 	set_status(CrystalStatus.ERROR)
 
 def core_on_action_finish(result: ActionResponseBase):
-	log.info("Action result: {} {}".format(result.type, result))
-
 	if not isinstance(result, ActionResponseBase):
 		log.warn("core_on_action_finish received result not of type ActionResponseBase. got {} ({}) instead".format(type(result), result))
 		return
+
+	log.info("Action result: {} {}".format(result.type, result))
 
 	if result.type == ActionResponseType.SUCCESS:
 		if isinstance(result, ActionResponseQuery):
