@@ -21,8 +21,8 @@ class TestActionHumanInput(unittest.TestCase):
 
 			("scroll up", "scroll", ("up", 8)),
 			("scroll down", "scroll", ("down", 8)),
-			("scroll to the top", "scroll", ("up", 10000)),
-			("scroll to the bottom", "scroll", ("down", 10000)),
+			("scroll to the top", "scroll", ("up", 1000)),
+			("scroll to the bottom", "scroll", ("down", 1000)),
 
 			("move the mouse to the left by 300 pixels", "move", ("left", 300)),
 			("move the mouse 300 pixels to the left", "move", ("left", 300)),
