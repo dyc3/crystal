@@ -7,7 +7,8 @@ nlp = None
 class TestActionRollDie(unittest.TestCase):
 	"""docstring for TestActionRollDie."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -40,12 +41,13 @@ class TestActionRollDie(unittest.TestCase):
 		]
 		action_roll_die = roll_die.ActionRollDie()
 		for query, expected_sides, expected_count in test_set:
-			doc = nlp(query)
-			# sent = next(doc.sents)
-			sides, count = action_roll_die.parse(doc)
+			with self.subTest():
+				doc = nlp(query)
+				# sent = next(doc.sents)
+				sides, count = action_roll_die.parse(doc)
 
-			self.assertEqual(sides, expected_sides, "Sides don't match, {}".format(query))
-			self.assertEqual(count, expected_count, "Count don't match, {}".format(query))
+				self.assertEqual(sides, expected_sides, "Sides don't match, {}".format(query))
+				self.assertEqual(count, expected_count, "Count don't match, {}".format(query))
 
 if __name__ == '__main__':
 	unittest.main()

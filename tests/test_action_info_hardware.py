@@ -7,7 +7,8 @@ nlp = None
 class TestActionInfoHardware(unittest.TestCase):
 	"""docstring for TestActionInfoHardware."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -26,13 +27,14 @@ class TestActionInfoHardware(unittest.TestCase):
 		]
 		action_info_hardware = info_hardware.ActionInfoHardware()
 		for query, expected_type, expected_params in test_set:
-			doc = nlp(query)
-			sent = next(doc.sents)
+			with self.subTest():
+				doc = nlp(query)
+				sent = next(doc.sents)
 
-			result_type, result_params = action_info_hardware.parse(sent)
-			self.assertEqual(result_type, expected_type, msg=query)
-			self.assertEqual(len(result_params), len(expected_params), msg=query)
-			self.assertCountEqual(result_params, expected_params, msg=query)
+				result_type, result_params = action_info_hardware.parse(sent)
+				self.assertEqual(result_type, expected_type, msg=query)
+				self.assertEqual(len(result_params), len(expected_params), msg=query)
+				self.assertCountEqual(result_params, expected_params, msg=query)
 
 if __name__ == '__main__':
 	unittest.main()

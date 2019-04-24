@@ -7,7 +7,8 @@ nlp = None
 class TestActionGithub(unittest.TestCase):
 	"""docstring for TestActionGithub."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -23,11 +24,12 @@ class TestActionGithub(unittest.TestCase):
 		]
 		action_github = github.ActionGithub()
 		for query, expected_command in test_set:
-			doc = nlp(query)
-			sent = next(doc.sents)
-			command = action_github.parse(sent)
+			with self.subTest():
+				doc = nlp(query)
+				sent = next(doc.sents)
+				command = action_github.parse(sent)
 
-			self.assertEqual(command, expected_command, "Command doesn't match, {}".format(query))
+				self.assertEqual(command, expected_command, "Command doesn't match, {}".format(query))
 
 if __name__ == '__main__':
 	unittest.main()

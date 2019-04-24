@@ -8,7 +8,8 @@ nlp = None
 class TestActionDate(unittest.TestCase):
 	"""docstring for TestActionDate."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -30,9 +31,10 @@ class TestActionDate(unittest.TestCase):
 		]
 		action_date = date.ActionDate()
 		for query, expected_query_type in test_set:
-			doc = nlp(query)
-			sent = next(doc.sents)
-			self.assertEqual(action_date.get_query_type(sent), expected_query_type, "Query type did not match, {}".format(query))
+			with self.subTest():
+				doc = nlp(query)
+				sent = next(doc.sents)
+				self.assertEqual(action_date.get_query_type(sent), expected_query_type, "Query type did not match, {}".format(query))
 
 	def test_date_verify(self):
 		# query, expected result
@@ -44,9 +46,10 @@ class TestActionDate(unittest.TestCase):
 		]
 		action_date = date.ActionDate()
 		for query, expected_result in test_set:
-			doc = nlp(query)
-			sent = next(doc.sents)
-			self.assertEqual(action_date.verify(sent), expected_result, "Date verification failed, {}".format(query))
+			with self.subTest():
+				doc = nlp(query)
+				sent = next(doc.sents)
+				self.assertEqual(action_date.verify(sent), expected_result, "Date verification failed, {}".format(query))
 
 	def test_date_count(self):
 		# query, expected result
@@ -66,10 +69,11 @@ class TestActionDate(unittest.TestCase):
 		]
 		action_date = date.ActionDate()
 		for query, expected_result in test_set:
-			doc = nlp(query)
-			sent = next(doc.sents)
-			test_result = action_date.count(sent)
-			self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
+			with self.subTest():
+				doc = nlp(query)
+				sent = next(doc.sents)
+				test_result = action_date.count(sent)
+				self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
 
 if __name__ == '__main__':
 	unittest.main()

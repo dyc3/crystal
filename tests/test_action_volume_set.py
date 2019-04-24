@@ -7,7 +7,8 @@ nlp = None
 class TestActionVolumeSet(unittest.TestCase):
 	"""docstring for TestActionVolumeSet."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 

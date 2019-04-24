@@ -8,7 +8,8 @@ nlp = None
 class TestActionHumanInput(unittest.TestCase):
 	"""docstring for TestActionHumanInput."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -37,10 +38,11 @@ class TestActionHumanInput(unittest.TestCase):
 		]
 		action = human_input.ActionHumanInput()
 		for query, expected_act, expected_params in test_set:
-			doc = nlp(query)
-			act, params = action.extract_parameters(doc)
-			self.assertEqual(act, expected_act, "Action {} does not match expected {}, {}".format(act, expected_act, query))
-			self.assertEqual(params, expected_params, "Params {} does not match expected {}, {}".format(params, expected_params, query))
+			with self.subTest():
+				doc = nlp(query)
+				act, params = action.extract_parameters(doc)
+				self.assertEqual(act, expected_act, "Action {} does not match expected {}, {}".format(act, expected_act, query))
+				self.assertEqual(params, expected_params, "Params {} does not match expected {}, {}".format(params, expected_params, query))
 
 if __name__ == '__main__':
 	unittest.main()

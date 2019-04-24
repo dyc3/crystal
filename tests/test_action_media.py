@@ -8,7 +8,8 @@ nlp = None
 class TestActionMedia(unittest.TestCase):
 	"""docstring for TestActionMedia."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -45,9 +46,10 @@ class TestActionMedia(unittest.TestCase):
 		]
 		action_media = media.ActionMedia()
 		for test, expectedResult in test_set:
-			doc = nlp(test)
-			sent = next(doc.sents)
-			self.assertEqual(action_media.parse(sent), expectedResult, test)
+			with self.subTest():
+				doc = nlp(test)
+				sent = next(doc.sents)
+				self.assertEqual(action_media.parse(sent), expectedResult, test)
 
 if __name__ == '__main__':
 	unittest.main()

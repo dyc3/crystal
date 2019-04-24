@@ -8,7 +8,8 @@ nlp = None
 class TestActionManipulateWm(unittest.TestCase):
 	"""docstring for TestActionManipulateWm."""
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		global nlp
 		nlp = spacy.load("en")
 
@@ -33,9 +34,10 @@ class TestActionManipulateWm(unittest.TestCase):
 		]
 		action = manipulate_wm.ActionManipulateWm()
 		for test, expectedResult in test_set:
-			doc = nlp(test)
-			sent = next(doc.sents)
-			self.assertEqual(action.parse(sent), expectedResult, test)
+			with self.subTest():
+				doc = nlp(test)
+				sent = next(doc.sents)
+				self.assertEqual(action.parse(sent), expectedResult, test)
 
 if __name__ == '__main__':
 	unittest.main()
