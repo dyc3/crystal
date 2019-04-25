@@ -49,11 +49,16 @@ def load_config(path: Path) -> dict:
 			config[spl[0]] = spl[1].rstrip()
 	return config
 
-def get_config(key: str) -> str:
+def get_config(key: str, optional: bool = False) -> str:
+	"""
+	key: Get the value that corresponds to this key.
+	optional: Indicates whether or not this config option is necessary. Default: False.
+	"""
 	try:
 		return config[key]
 	except KeyError:
-		log.critical("Config does not contain value for {}".format(key))
+		if not optional:
+			log.critical("Config does not contain value for {}".format(key))
 		return None
 
 def core_on_utterance_update(text: str):
@@ -76,7 +81,7 @@ def core_on_utterance_finish(text: str):
 
 	classification, confidence = cmdClassifier.predict([text])[0]
 	log.info("Action detected: {}, confidence: {:.2f}%".format(classification, confidence * 100))
-	confidence_threshold = get_config("action_confidence_threshold") or .2
+	confidence_threshold = get_config("action_confidence_threshold", optional=True) or .2
 	if not isinstance(confidence_threshold, float):
 		try:
 			confidence_threshold = float(confidence_threshold)
