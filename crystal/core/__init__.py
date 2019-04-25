@@ -74,10 +74,20 @@ def core_on_utterance_finish(text: str):
 		log.debug("user not talking to me")
 		return
 
+	classification, confidence = cmdClassifier.predict([text])[0]
+	log.info("Action detected: {}, confidence: {:.2f}%".format(classification, confidence * 100))
+	confidence_threshold = get_config("action_confidence_threshold") or .2
+	if not isinstance(confidence_threshold, float):
+		try:
+			confidence_threshold = float(confidence_threshold)
+		except ValueError:
+			log.warn("Found action_confidence_threshold in config, but it wasn't a float. Using default value (.2)")
+			confidence_threshold = .2
+	if confidence < confidence_threshold:
+		log.info("Confidence too low, must be > {}".format(confidence_threshold))
+		return
 	set_status(CrystalStatus.BUSY)
 	try:
-		classification, confidence = cmdClassifier.predict([text])[0]
-		log.info("Action detected: {}, confidence: {:.2f}%".format(classification, confidence * 100))
 		action_result = commands[classification].run(doc)
 		if not action_result:
 			log.warn("Action did not return result. All actions must return result.")
