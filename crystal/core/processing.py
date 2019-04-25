@@ -1,7 +1,9 @@
 import os
+import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
+from sklearn.calibration import CalibratedClassifierCV
 import spacy
 
 import logging
@@ -28,9 +30,10 @@ class CommandClassifier():
 	"""docstring for CommandClassifier."""
 	def __init__(self):
 		super(CommandClassifier, self).__init__()
-		self.clf = LinearSVC()
+		self.clf = CalibratedClassifierCV(LinearSVC())
 		self.vectorizer = CountVectorizer(tokenizer=self._tokenizeText, ngram_range=(1,1))
 		self.pipe = Pipeline([('vectorizer', self.vectorizer), ('clf', self.clf)])
+		self._classes = []
 
 	# A custom function to tokenize the text using spaCy and convert to lemmas
 	def _tokenizeText(self, sample):
@@ -57,7 +60,16 @@ class CommandClassifier():
 		return tokens
 
 	def fit(self, X, y):
-		self.pipe.fit(X, y);
+		self.pipe.fit(X, y)
 
 	def predict(self, X):
-		return self.pipe.predict(X)
+		"""
+		Takes array of string samples `X` and returns an array of tuples that correspond to the input samples (classification, confidence)
+		"""
+		result = []
+		pred = self.pipe.predict(X)
+		pred_proba = self.pipe.predict_proba(X)
+		for class_, prob in zip(pred, pred_proba):
+			idx = np.where(self.clf.classes_ == class_)
+			result += [(class_, float(prob[idx]))]
+		return result

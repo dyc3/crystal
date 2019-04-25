@@ -76,8 +76,8 @@ def core_on_utterance_finish(text: str):
 
 	set_status(CrystalStatus.BUSY)
 	try:
-		classification = cmdClassifier.predict([text])[0]
-		log.info("Action detected: {}".format(classification))
+		classification, confidence = cmdClassifier.predict([text])[0]
+		log.info("Action detected: {}, confidence: {:.2f}%".format(classification, confidence * 100))
 		action_result = commands[classification].run(doc)
 		if not action_result:
 			log.warn("Action did not return result. All actions must return result.")
