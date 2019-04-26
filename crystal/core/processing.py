@@ -33,7 +33,6 @@ class CommandClassifier():
 		self.clf = CalibratedClassifierCV(LinearSVC())
 		self.vectorizer = CountVectorizer(tokenizer=self._tokenizeText, ngram_range=(1,1))
 		self.pipe = Pipeline([('vectorizer', self.vectorizer), ('clf', self.clf)])
-		self._classes = []
 
 	# A custom function to tokenize the text using spaCy and convert to lemmas
 	def _tokenizeText(self, sample):
