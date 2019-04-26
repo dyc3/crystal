@@ -14,7 +14,6 @@ class TestCommandClassifier(unittest.TestCase):
 		crystal.core.processing.load_nlp("en")
 		cmdClassifier = crystal.core.processing.CommandClassifier()
 
-		# TODO: load training data from file
 		train = ["what time is it", "what is today's date", "what's the time", "what time is it in eastern standard time",
 				"is today friday", "give me the date", "what day of the week is it", "what time is it on the west coast",
 				"is tomorrow monday", "what year is it", "what's the date", "is today tuesday", "is today wednesday",
@@ -36,9 +35,9 @@ class TestCommandClassifier(unittest.TestCase):
 		# print("results:")
 		# for (sample, pred) in zip(test, preds):
 		# 	print(sample, ":", pred)
-		accuracy = accuracy_score(labelsTest, preds)
+		accuracy = accuracy_score(labelsTest, [p[0] for p in preds])
 		print("accuracy:", accuracy)
-		assert accuracy >= 1.0
+		self.assertGreaterEqual(accuracy, 1.0)
 
 
 if __name__ == '__main__':
