@@ -19,24 +19,18 @@ class TestCommandClassifier(unittest.TestCase):
 				"is tomorrow monday", "what year is it", "what's the date", "is today tuesday", "is today wednesday",
 				"what day of the month is it", "what month is it", "what's the current military time", "is it still morning",
 				"pause the video", "play media", "resume playback", "suspend playback", "stop the video", "play video",
-				"stop playback", "stop playing music", "set volume to 100%"]
+				"stop playback", "stop playing music", "set volume to 100%", "increase volume by 15", "turn it down"]
 		labelsTrain = ["time", "date", "time", "time", "date", "date", "date", "time", "date", "date", "date", "date", "date",
 				"date", "date", "time", "time", "media-pause", "media-play", "media-play", "media-pause", "media-pause", "media-play",
-				"media-pause", "media-pause", "volume-set"]
+				"media-pause", "media-pause", "volume-set", "volume-set", "volume-set"]
 
 		test = ["give me the time", "is today monday", "give me the date", "what time is it on the east coast in military time",
 				"what time is it in pacific standard time", "pause music", "play the video", "stop playing that"]
 		labelsTest = ["time", "date", "date", "time", "time", "media-pause", "media-play", "media-pause"]
 
 		cmdClassifier.fit(train, labelsTrain)
-
 		preds = cmdClassifier.predict(test)
-
-		# print("results:")
-		# for (sample, pred) in zip(test, preds):
-		# 	print(sample, ":", pred)
 		accuracy = accuracy_score(labelsTest, [p[0] for p in preds])
-		print("accuracy:", accuracy)
 		self.assertGreaterEqual(accuracy, 1.0)
 
 
