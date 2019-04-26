@@ -31,7 +31,7 @@ class TestActionDate(unittest.TestCase):
 		]
 		action_date = date.ActionDate()
 		for query, expected_query_type in test_set:
-			with self.subTest():
+			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_query_type)):
 				doc = nlp(query)
 				sent = next(doc.sents)
 				self.assertEqual(action_date.get_query_type(sent), expected_query_type, "Query type did not match, {}".format(query))
@@ -46,7 +46,7 @@ class TestActionDate(unittest.TestCase):
 		]
 		action_date = date.ActionDate()
 		for query, expected_result in test_set:
-			with self.subTest():
+			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_result)):
 				doc = nlp(query)
 				sent = next(doc.sents)
 				self.assertEqual(action_date.verify(sent), expected_result, "Date verification failed, {}".format(query))
@@ -69,7 +69,7 @@ class TestActionDate(unittest.TestCase):
 		]
 		action_date = date.ActionDate()
 		for query, expected_result in test_set:
-			with self.subTest():
+			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_result)):
 				doc = nlp(query)
 				sent = next(doc.sents)
 				test_result = action_date.count(sent)
