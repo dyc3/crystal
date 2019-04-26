@@ -49,7 +49,8 @@ class TestActionDate(unittest.TestCase):
 			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_result)):
 				doc = nlp(query)
 				sent = next(doc.sents)
-				self.assertEqual(action_date.verify(sent), expected_result, "Date verification failed, {}".format(query))
+				target_date, compare_date = action_date.find_target_and_compare_dates(sent)
+				self.assertEqual(action_date.verify(target_date, compare_date), expected_result, "Date verification failed, {}".format(query))
 
 	def test_date_count(self):
 		# query, expected result
@@ -66,13 +67,16 @@ class TestActionDate(unittest.TestCase):
 			# test specific dates
 			("how many days until {}".format((datetime.date.today() + datetime.timedelta(days=15)).strftime("%B %d")), 15),
 			("how many days until {}".format((datetime.date.today() + datetime.timedelta(days=5)).strftime("%B %d")), 5),
+			("how many days until {}".format((datetime.date.today() + datetime.timedelta(days=30)).strftime("%B %d")), 30),
+			("how many days until {}".format((datetime.date.today() + datetime.timedelta(days=60)).strftime("%B %d")), 60),
 		]
 		action_date = date.ActionDate()
 		for query, expected_result in test_set:
 			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_result)):
 				doc = nlp(query)
 				sent = next(doc.sents)
-				test_result = action_date.count(sent)
+				target_date, compare_date = action_date.find_target_and_compare_dates(sent)
+				test_result = action_date.count(target_date, compare_date)
 				self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
 
 if __name__ == '__main__':

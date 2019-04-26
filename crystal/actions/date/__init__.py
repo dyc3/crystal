@@ -39,6 +39,20 @@ class ActionDate(BaseAction):
 
 	@classmethod
 	def find_target_and_compare_dates(self, sentence):
+		"""
+		Parses the sentence to extract 2 dates: the target date and the compare date.
+		Returns the dates in a tuple: (target_date, compare_date)
+
+		The target date refers to the date we are comparing.
+		The compare date refers to the date that we use for context.
+
+		For example, if the current date was Jan 1, 2000, and we parse the sentence:
+		"How many days until January 2?"
+		The target_date should be January 2, 2000, and
+		the compare_date should be January 1, 2000
+		"""
+		# TODO: I think this method needs a total rewrite because it's super confusing.
+		# target_date and compare_date are not obvious without reading the docstring.
 		target_date = None
 		compare_date = None
 
@@ -82,14 +96,18 @@ class ActionDate(BaseAction):
 		return target_date, compare_date
 
 	@classmethod
-	def verify(self, sentence):
-		target_date, compare_date = self.find_target_and_compare_dates(sentence)
+	def verify(self, target_date: datetime.datetime, compare_date: datetime.datetime) -> bool:
+		"""
+		Check if the dates are equal.
+		"""
 		log.debug("comparing dates - target: {}, compare: {}".format(target_date, compare_date))
 		return compare_date.date() == target_date.date()
 
 	@classmethod
-	def count(self, sentence):
-		target_date, compare_date = self.find_target_and_compare_dates(sentence)
+	def count(self, target_date: datetime.datetime, compare_date: datetime.datetime) -> int:
+		"""
+		Counts the number of days between the 2 dates.
+		"""
 		delta = target_date - compare_date
 		return delta.days
 
@@ -117,13 +135,15 @@ class ActionDate(BaseAction):
 			# feedback.ShowNotify("Date: {}".format(date_str))
 			return ActionResponseQuery(date_str)
 		elif query_type == "verify":
-			result = self.verify(sentence)
+			target_date, compare_date = self.find_target_and_compare_dates(sentence)
+			result = self.verify(target_date, compare_date)
 			if result:
 				return ActionResponseQuery("Yes")
 			else:
 				return ActionResponseQuery("No")
 		elif query_type == "count":
-			result = self.count(sentence)
+			target_date, compare_date = self.find_target_and_compare_dates(sentence)
+			result = self.count(target_date, compare_date)
 			return ActionResponseQuery("{} days".format(result))
 		else:
 			feedback.OnStatus("error")
