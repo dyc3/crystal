@@ -34,13 +34,22 @@ class ActionMedia(BaseAction):
 
 	@classmethod
 	def parse(self, sentence):
-		if sentence.root.lemma_ in ["play", "resume"]:
-			return "play"
-		elif sentence.root.lemma_ in ["pause", "hold"]:
-			return "pause"
-		elif sentence.root.lemma_ in ["skip"]:
+		if sentence.root.lemma_ in ["skip"]:
 			if (sentence.root.n_rights > 0 and list(sentence.root.rights)[0].dep_ == "dobj") or sentence.root.n_rights == 0:
 				return "next"
+
+		for word in sentence:
+			if word.lemma_ in ["play", "resume"]:
+				return "play"
+
+			if word.lemma_ in ["pause", "hold"]:
+				return "pause"
+
+			if word.lemma_ == "next":
+				return "next"
+
+			if word.lemma_ == "previous":
+				return "previous"
 
 		# media seeking
 		if sentence.root.lemma_ in ["go", "seek", "skip"]:
@@ -73,13 +82,6 @@ class ActionMedia(BaseAction):
 					seconds += getSeconds(token)
 
 			return "position {}{}".format(seek_action, seconds)
-
-		for word in sentence:
-			if word.lemma_ == "next":
-				return "next"
-
-			if word.lemma_ == "previous":
-				return "previous"
 
 	@classmethod
 	def run(self, doc):
