@@ -77,6 +77,7 @@ def core_on_utterance_finish(text: str):
 	doc = crystal.core.processing.parse_nlp(text)
 	if args.mode == "voice" and not is_speaking_to_crystal(doc):
 		log.debug("user not talking to me")
+		set_status(CrystalStatus.IDLE)
 		return
 
 	classification, confidence = cmdClassifier.predict([text])[0]
@@ -90,6 +91,7 @@ def core_on_utterance_finish(text: str):
 			confidence_threshold = .2
 	if confidence < confidence_threshold:
 		log.info("Confidence too low, must be > {}".format(confidence_threshold))
+		set_status(CrystalStatus.IDLE)
 		return
 	set_status(CrystalStatus.BUSY)
 	try:
