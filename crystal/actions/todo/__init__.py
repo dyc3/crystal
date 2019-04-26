@@ -26,7 +26,7 @@ class ActionTodo(BaseAction):
 		for word in sentence:
 			if word.lemma_ in ["what", "read"]:
 				return "list"
-			if word.lemma_ == ["add"]:
+			if word.lemma_ in ["add"]:
 				return "add"
 		return
 
