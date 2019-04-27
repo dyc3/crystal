@@ -1,6 +1,8 @@
 from crystal.actions import BaseAction
-from crystal import feedback
+from crystal.actions.responses import *
 import subprocess, os, rofi, shlex, sys
+import logging
+log = logging.getLogger(__name__)
 
 def run_command_output(command):
 	p = subprocess.Popen(shlex.split(command),
@@ -21,18 +23,6 @@ def runFork(command, shell=True):
 					stderr=subprocess.DEVNULL,
 					shell=shell, **kwargs)
 
-def confirmAction(action):
-	promptText = 'Please confim a potentially dangerous action: {}'.format(action)
-	options = ['Confirm', 'Cancel']
-	# if enableRofiPrompts:
-	response = rofi.select(promptText, options, select=1)
-	print('confirmAction: {}'.format(response))
-	return response[0] == 0 and response[1] == 0
-	# else:
-		# confirm = pyautogui.confirm(promptText, buttons=options)
-		# print('confirmAction: {}'.format(confirm))
-		# return confirm == options[0]
-
 class ActionRunProgram(BaseAction):
 	"""docstring for ActionRunProgram."""
 	def __init__(self):
@@ -41,57 +31,69 @@ class ActionRunProgram(BaseAction):
 		self.requires_updater = False
 
 	@classmethod
-	def run(self, doc):
-		sentence = next(doc.sents)
+	def parse(self, doc) -> str:
+		"""
+		Extracts what should be run from the given doc. This does NOT mean the exact program to be run.
 
-		if sentence.root.pos_ == "VERB" and str(sentence.root) in ["open", "run", "start", "give"]:
-			for token in sentence.root.children:
-				if token.dep_ == "dobj":
-					program = str(token).lower()
-					safe = False
-					if program in ["terminal", "shell", "console", "prompt"]:
-						program = "x-terminal-emulator" # TODO: make this configurable
-						safe = True
-					elif program in ["file browser", "file explorer", "nautilus"]:
-						program = "nautilus" # TODO: make this configurable
-						safe = True
-					elif program in ["launcher", "rofi", "dmenu", "rafi"]:
-						program = "rofi" # TODO: make this configurable
-						safe = True
-					elif program in ["calculator"]:
-						program = "gnome-calculator"
-						safe = True
-					elif program in ["calendar"]:
-						program = "gnome-calendar"
-						safe = True
-					elif program.lower() in ["youtube", "twitch", "google", "twitter", "reddit", "github"]:
-						# note: twitch.com redirects to twitch.tv
-						site = program.lower() + (".com" if program.lower() != "twitch" else ".tv")
-						program = "{} {}".format("firefox", site) # TODO: make this configurable
-						safe = True
-					else:
-						safe = False
-						package_list = './getpackages-deb.sh'
-						program = str(token).lower()
-						for package in run_command_output(package_list):
-							if program in str(package):
-								program = package.decode('ascii').rstrip('\n')
-								break
-						print("GUESS: execute {0}".format(program))
-					try:
-						if program == "nautilus":
-							program = "nautilus --no-desktop"
-						elif program == "rofi":
-							program = "rofi -show run"
-						elif program in ["pavucontrol"]:
-							safe = True
-						if safe or confirmAction('run-program {}'.format(program)):
-							runFork(program, shell=(not (program.startswith("chromium-browser") or program.startswith("x-www-browser"))))
-						else:
-							print("Action canceled upon user's request.")
-					except Exception as e:
-						print(e)
-					break
+		Outputs a string indicating the type of program to run. Possible outputs:
+		- terminal
+		- file browser
+		- web browser
+		- launcher
+		- calculator
+		- calendar
+		"""
+		for word in doc:
+			word_strs = [word.lemma_, str(word).lower()]
+			# any([w in [] for w in word_strs])
+			if any([w in ["terminal", "shell", "console", "prompt", "bash"] for w in word_strs]):
+				return "terminal"
+			if any([w in ["nautilus", "file"] for w in word_strs]):
+				return "file browser"
+			if any([w in ["web", "firefox", "chrome"] for w in word_strs]):
+				return "web browser"
+			if any([w in ["launcher", "rofi", "dmenu"] for w in word_strs]):
+				return "launcher"
+			if any([w in ["calculator", "calendar"] for w in word_strs]):
+				return word_strs[0]
+
+	@classmethod
+	def determine_program(self, program_type: str) -> str:
+		"""
+		Determine the exact program to run and the exact arguments.
+		"""
+		if program_type == "terminal":
+			return "x-terminal-emulator"
+		if program_type == "file browser":
+			return "nautilus --no-desktop"
+		if program_type == "web browser":
+			return "x-www-browser"
+		if program_type == "launcher":
+			return "rofi -show run"
+		if program_type in ["calculator", "calendar"]:
+			return "gnome-{}".format(program_type)
+
+	@classmethod
+	def run(self, doc):
+		program_type = self.parse(doc)
+		log.debug("program_type = {}".format(program_type))
+		if not program_type:
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine program_type")
+		program = self.determine_program(program_type)
+		log.debug("program = {}".format(program))
+		if not program:
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine exact program from program type: {}".format(program_type))
+		log.info("Running command: {}".format(program))
+
+		# We need to spawn these processes without crystal's virtualenv, and reset the working directory
+		command = "/bin/bash -c 'unset VIRTUAL_ENV; cd; {}'".format(program)
+		log.debug("Full command: {}".format(command))
+		subprocess.Popen(shlex.split(command),
+						stdin=subprocess.DEVNULL,
+						stdout=subprocess.DEVNULL,
+						stderr=subprocess.DEVNULL,
+						)
+		return ActionResponseQuery("Running {}".format(program))
 
 def getAction():
 	return ActionRunProgram()
