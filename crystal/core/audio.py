@@ -37,7 +37,7 @@ SNOWBOY_TRAIN_ENDPOINT = "https://snowboy.kitt.ai/api/v1/train/"
 SAMPLE_RATE = 16000 # this is a standard sample rate used by a lot of speech recognition solutions
 FRAME_LENGTH = 1024 # i dunno if this is right
 
-snowboy_model_file = Path("./hotword.pmdl")
+snowboy_model_file = Path("./crystal.pmdl")
 wakeword_audio_dir = Path("./data/wakeword")
 
 __detector = None
@@ -97,8 +97,9 @@ def retrain_wakeword_model(files: list) -> Path:
 	"""
 	log.info("Retraining wakeword model...")
 
-	def get_wave(fname):
-		with open(fname) as infile:
+	def get_wave(path):
+		log.debug("Reading {}".format(path))
+		with path.open("rb") as infile:
 			return base64.b64encode(infile.read())
 
 	data = {
@@ -109,9 +110,9 @@ def retrain_wakeword_model(files: list) -> Path:
 		"microphone": "??",
 		"token": crystal.core.get_config("kitt_ai_token"),
 		"voice_samples": [
-			{"wave": get_wave(str(files[0]))},
-			{"wave": get_wave(str(files[1]))},
-			{"wave": get_wave(str(files[2]))}
+			{"wave": get_wave(files[0])},
+			{"wave": get_wave(files[1])},
+			{"wave": get_wave(files[2])}
 		]
 	}
 
@@ -139,10 +140,10 @@ def start_listening():
 		elif not wakeword_audio_dir.is_dir():
 			log.critical("{} is a file and not a directory!".format(wakeword_audio_dir))
 			raise FileExistsError()
-		elif len(wakeword_audio_dir.glob("*.wav")) < 3:
+		elif len(list(wakeword_audio_dir.glob("*.wav"))) < 3:
 			wakeword_files = prompt_user_for_recordings()
 		else:
-			wakeword_files = wakeword_audio_dir.glob("*.wav")
+			wakeword_files = list(wakeword_audio_dir.glob("*.wav"))
 		retrain_wakeword_model(wakeword_files)
 
 	__detector = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
