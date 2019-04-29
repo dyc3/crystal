@@ -25,14 +25,22 @@ import time, struct
 from pathlib import Path
 import threading
 import pyaudio
+import wave
+import base64
+import requests
+import snowboydecoder
 import crystal.core
 import logging
 log = logging.getLogger(__name__)
 
 SNOWBOY_TRAIN_ENDPOINT = "https://snowboy.kitt.ai/api/v1/train/"
+SAMPLE_RATE = 16000 # this is a standard sample rate used by a lot of speech recognition solutions
+FRAME_LENGTH = 1024 # i dunno if this is right
+
 snowboy_model_file = Path("./hotword.pmdl")
 wakeword_audio_dir = Path("./data/wakeword")
 
+__detector = None
 __listening = False
 __listening_thread = None
 
@@ -44,22 +52,105 @@ def prompt_user_for_recordings() -> list:
 	if not wakeword_audio_dir.exists():
 		wakeword_audio_dir.mkdir(parents=True)
 
+	RECORD_SECONDS = 2.5
+	print("We need you to record you saying the wake word \"Crystal\" 3 times.")
+	print("We'll record you for {} seconds at a time. Press enter when you are ready to start.".format(RECORD_SECONDS))
+	input()
+	time.sleep(0.5)
+
+	files = []
+	for take in range(3):
+		print("Recording take {}...".format(take))
+		pa = pyaudio.PyAudio()
+		input_stream = pa.open(
+			rate=SAMPLE_RATE,
+			channels=1,
+			format=pyaudio.paInt16,
+			input=True,
+			frames_per_buffer=FRAME_LENGTH,
+			input_device_index=None
+		)
+		frames = []
+		for i in range(0, int(SAMPLE_RATE / FRAME_LENGTH * RECORD_SECONDS)):
+			data = input_stream.read(FRAME_LENGTH)
+			frames.append(data)
+		input_stream.stop_stream()
+		input_stream.close()
+
+		target_file = wakeword_audio_dir / "{}.wav".format(take)
+		print("Saving to", target_file)
+		with wave.open(str(target_file), 'wb') as wf:
+			wf.setnchannels(1)
+			wf.setsampwidth(pa.get_sample_size(pyaudio.paInt16))
+			wf.setframerate(SAMPLE_RATE)
+			wf.writeframes(b''.join(frames))
+
+		files += [target_file]
+		time.sleep(0.5)
+
+	return files
+
 def retrain_wakeword_model(files: list) -> Path:
 	"""
 	Calls the snowboy API to retrain the wake word detector. Returns the Path
 	to the wake word model.
 	"""
+	log.info("Retraining wakeword model...")
+
+	def get_wave(fname):
+		with open(fname) as infile:
+			return base64.b64encode(infile.read())
+
+	data = {
+		"name": "Crystal",
+		"language": "en",
+		"age_group": "20_29",
+		"gender": "M",
+		"microphone": "??",
+		"token": crystal.core.get_config("kitt_ai_token"),
+		"voice_samples": [
+			{"wave": get_wave(str(files[0]))},
+			{"wave": get_wave(str(files[1]))},
+			{"wave": get_wave(str(files[2]))}
+		]
+	}
+
+	response = requests.post(SNOWBOY_TRAIN_ENDPOINT, json=data)
+	if response.ok:
+		log.info("Success, saving to {}".format(str(snowboy_model_file)))
+		with snowboy_model_file.open("w") as outfile:
+			outfile.write(response.content)
+	else:
+		response.raise_for_status()
+
+	return snowboy_model_file
+
+def interrupt_callback():
+	global __listening
+	return __listening
 
 def start_listening():
+	global __listening, __detector
+
 	if not snowboy_model_file.exists():
 		log.warn("Wake word model not found, checking for audio files")
 		if not wakeword_audio_dir.exists():
-			prompt_user_for_recordings()
+			wakeword_files = prompt_user_for_recordings()
 		elif not wakeword_audio_dir.is_dir():
 			log.critical("{} is a file and not a directory!".format(wakeword_audio_dir))
 			raise FileExistsError()
 		elif len(wakeword_audio_dir.glob("*.wav")) < 3:
-			prompt_user_for_recordings()
+			wakeword_files = prompt_user_for_recordings()
+		else:
+			wakeword_files = wakeword_audio_dir.glob("*.wav")
+		retrain_wakeword_model(wakeword_files)
+
+	__detector = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
+	__listening = True
+	__detector.start(detected_callback=snowboydecoder.play_audio_file,
+					interrupt_check=interrupt_callback,
+					sleep_time=0.03)
+
 
 # 	if not __listening:
 # 		log.debug("starting listener thread")
@@ -75,9 +166,6 @@ def start_listening():
 def do_listening():
 	log.debug("listener thread started")
 	__listening = True
-
-	SAMPLE_RATE = 16000 # this is a standard sample rate used by a lot of speech recognition solutions
-	FRAME_LENGTH = 1024 # i dunno if this is right
 
 	pa = pyaudio.PyAudio()
 	input_stream = pa.open(
