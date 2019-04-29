@@ -157,11 +157,14 @@ def start_listening():
 # 		__listening_thread = threading.Thread(name="ListeningThread", target=do_listening, args=())
 # 		__listening_thread.start()
 
-# def stop_listening():
-# 	if __listening:
-# 		__listening = False
-# 		__listening_thread.join()
-# 		__listening_thread = None
+		# __listening_thread.join()
+		# __listening_thread = None
+
+def stop_listening():
+	global __listening, __detector
+	if __listening:
+		__listening = False
+		__detector.terminate()
 
 def do_listening():
 	log.debug("listener thread started")
