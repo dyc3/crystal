@@ -212,7 +212,7 @@ def do_recording():
 			if len(recording_raw_data) >= SAMPLE_RATE * SAMPLE_WIDTH * MAX_RECORDING_SECONDS or silence_count >= SILENCE_THRESHOLD:
 				log.debug("Done recording, length {:.2f}s".format(len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE))
 				active = False
-				# TODO: send audio samples to be handled by the system via an event
+				crystal.core.on_recording_finish.fire(recording_raw_data, SAMPLE_RATE, SAMPLE_WIDTH)
 		else:
 			recording_raw_data = bytes()
 			silence_count = 0
@@ -225,7 +225,7 @@ def do_recording():
 				# log.debug("wakeword result: {}".format(result))
 				if result == WAKEWORD_DETECTED:
 					log.debug("Wake word detected")
-					# TODO: Trigger an event
+					crystal.core.on_wakeword.fire()
 					active = True
 					recording_raw_data = wakeword_raw_data[:]
 	log.debug("recording thread exiting")

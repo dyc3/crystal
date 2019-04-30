@@ -30,6 +30,8 @@ class EventHook(object):
 			if theHandler.im_self == inObject:
 				self -= theHandler
 
+on_wakeword = EventHook("on_wakeword")
+on_recording_finish = EventHook("on_recording_finish")
 on_utterance_start = EventHook("on_utterance_start")
 on_utterance_update = EventHook("on_utterance_update")
 on_utterance_finish = EventHook("on_utterance_finish")

@@ -14,38 +14,19 @@ class SpeechRecognitionInput(BaseInput):
 		self.recog = sr.Recognizer()
 		self.mic = sr.Microphone()
 
-	def StartListening(self):
-		# adjust for background noise
-		with self.mic as source:
-			self.recog.adjust_for_ambient_noise(source)
-		self._do_stop_listening = self.recog.listen_in_background(self.mic, self.recognizerCallback)
-
-	def StopListening(self):
-		if not self._do_stop_listening:
-			self._do_stop_listening()
-
-	def recognizerCallback(self, recognizer, audio, failcount=0):
-		crystal.core.on_utterance_start.fire()
+	def process_audio(self, raw_audio, sample_rate, sample_width, failcount=0):
+		audio = sr.AudioData(raw_audio, sample_rate, sample_width)
 		try:
-			response = recognizer.recognize_google(audio, show_all=True)
+			response = self.recog.recognize_google(audio, show_all=True)
 			if not str(response) == "[]":
-				self.current_utterance = self.pickMostLikelyRecognition(response['alternative'])
-		except sr.UnknownValueError:
-			# This happens when no speech is recognized in the audio, so
-			# just eat the error and ignore it.
-			return
+				return self.pickMostLikelyRecognition(response['alternative'])
 		except sr.RequestError:
 			if failcount < 3:
 				waittime = 2 * failcount + 2
 				log.debug("retrying in {} seconds...".format(waittime))
 				time.sleep(waittime)
-				self.recognizerCallback(recognizer, audio, failcount + 1)
-			return
-
-		if not self.current_utterance == "":
-			crystal.core.on_utterance_update.fire(self.current_utterance)
-			crystal.core.on_utterance_finish.fire(self.current_utterance)
-		self.current_utterance = ""
+				self.process_audio(raw_audio, sample_rate, sample_width, failcount + 1)
+		return ""
 
 	def pickMostLikelyRecognition(self, recognitions):
 		"""

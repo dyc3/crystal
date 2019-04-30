@@ -14,6 +14,7 @@ from crystal.core.datautil import DataUtil
 from crystal import actions, feedback
 from crystal.actions.responses import *
 import crystal.input.speech_recognition_input
+import crystal.core.audio
 
 import logging
 log = logging.getLogger(__name__)
@@ -141,6 +142,18 @@ def core_on_action_finish(result: ActionResponseBase):
 	else:
 		log.error("Unknown result type: {}".format(result.type))
 
+def core_on_wakeword():
+	set_status(CrystalStatus.LISTENING)
+	crystal.core.on_utterance_start.fire()
+
+def core_on_recording_finish(raw_audio, sample_rate, sample_width):
+	result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
+	if not result_text:
+		log.debug("No text recognized")
+		return
+	crystal.core.on_utterance_update.fire(result_text)
+	crystal.core.on_utterance_finish.fire(result_text)
+
 def is_speaking_to_crystal(doc):
 	sent = next(doc.sents)
 	if str(sent[0]).lower() == "crystal":
@@ -169,13 +182,16 @@ def quit():
 	log.info("Quitting...")
 	on_core_exit.fire()
 	if args.mode == "voice":
-		user_input.StopListening()
+		# user_input.StopListening()
+		crystal.core.audio.stop_listening()
 	os._exit(0)
 
 def signal_handler(signum, frame):
 	quit()
 
 signal.signal(signal.SIGINT, signal_handler)
+on_wakeword += core_on_wakeword
+on_recording_finish += core_on_recording_finish
 on_action_error += core_on_action_error
 on_action_finish += core_on_action_finish
 on_utterance_update += core_on_utterance_update
@@ -227,7 +243,8 @@ def run(in_args):
 	if args.mode == "voice":
 		# start recognizer
 		try:
-			user_input.StartListening()
+			# user_input.StartListening()
+			crystal.core.audio.start_listening()
 		except Exception as e:
 			log.critical("failed to start recognizer")
 			log.exception(e)
