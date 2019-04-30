@@ -13,7 +13,7 @@ Here's how it should work:
 	system event on_wakeword.
 3.	Stop recording after the audio's energy goes below the energy
 	threshold for 1 second, or if the maximum utterance length is reached.
-4.	Pass recorded audio into the system via the event on_utterance_finish.
+4.	Pass recorded audio into the system via the event on_recording_finish.
 
 When starting the wake word detector, we need a model to make it work.
 If no model is found, prompt the user to say the wake word 3 times, and
