@@ -151,24 +151,33 @@ def start_listening():
 	log.debug("Starting wake word detector...")
 	__detector = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
 	__listening = True
-	__detector.start(detected_callback=snowboydecoder.play_audio_file,
+	__detector.start(detected_callback=wakeword_callback, # snowboydecoder.play_audio_file,
 					interrupt_check=interrupt_callback,
 					sleep_time=0.03)
 
 def stop_listening():
 	global __listening, __detector, __recording_thread
-	if __listening:
-		__listening = False
+	log.info("Stop listening")
+
+	__listening = False
+	if __detector:
 		__detector.terminate()
 	if __recording_thread:
 		__recording_thread.join()
 		__recording_thread = None
 
+def wakeword_callback():
+	log.debug("Wakeword detected, start recording")
+	start_recording()
+
 def start_recording():
+	global __recording_thread
 	if not __recording_thread:
 		log.debug("starting recording thread")
 		__recording_thread = threading.Thread(name="RecordingThread", target=do_recording, args=())
 		__recording_thread.start()
+	else:
+		log.warn("recording thread already running")
 
 def do_recording():
 	global __recording_thread
