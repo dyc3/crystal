@@ -18,7 +18,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/main.py",
 			"console": "integratedTerminal",
-			"args": ["--mode", "voice"]
+			"args": ["--mode", "voice", "--log-level", "DEBUG"]
 		},
 		{
 			"name": "Run (Voice Mode) (External Terminal)",
