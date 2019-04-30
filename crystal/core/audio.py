@@ -42,7 +42,7 @@ wakeword_audio_dir = Path("./data/wakeword")
 
 __detector = None
 __listening = False
-__listening_thread = None
+__recording_thread = None
 
 def prompt_user_for_recordings() -> list:
 	"""
@@ -94,6 +94,8 @@ def retrain_wakeword_model(files: list) -> Path:
 	"""
 	Calls the snowboy API to retrain the wake word detector. Returns the Path
 	to the wake word model.
+
+	FIXME: Currently does not work.
 	"""
 	log.info("Retraining wakeword model...")
 
@@ -146,30 +148,31 @@ def start_listening():
 			wakeword_files = list(wakeword_audio_dir.glob("*.wav"))
 		retrain_wakeword_model(wakeword_files)
 
+	log.debug("Starting wake word detector...")
 	__detector = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
 	__listening = True
 	__detector.start(detected_callback=snowboydecoder.play_audio_file,
 					interrupt_check=interrupt_callback,
 					sleep_time=0.03)
 
-
-# 	if not __listening:
-# 		log.debug("starting listener thread")
-# 		__listening_thread = threading.Thread(name="ListeningThread", target=do_listening, args=())
-# 		__listening_thread.start()
-
-		# __listening_thread.join()
-		# __listening_thread = None
-
 def stop_listening():
-	global __listening, __detector
+	global __listening, __detector, __recording_thread
 	if __listening:
 		__listening = False
 		__detector.terminate()
+	if __recording_thread:
+		__recording_thread.join()
+		__recording_thread = None
 
-def do_listening():
-	log.debug("listener thread started")
-	__listening = True
+def start_recording():
+	if not __recording_thread:
+		log.debug("starting recording thread")
+		__recording_thread = threading.Thread(name="RecordingThread", target=do_recording, args=())
+		__recording_thread.start()
+
+def do_recording():
+	global __recording_thread
+	log.debug("recording thread started")
 
 	pa = pyaudio.PyAudio()
 	input_stream = pa.open(
@@ -181,9 +184,16 @@ def do_listening():
 		input_device_index=None
 	)
 
-	while __listening:
+	MAX_RECORDING_SECONDS = 10
+
+	frames = []
+	while __listening and len(frames) < int(SAMPLE_RATE / FRAME_LENGTH * MAX_RECORDING_SECONDS):
 		# reach in a "chunk"; each chunk contains the specified number of frames (i.e samples)
 		pcm = input_stream.read(FRAME_LENGTH)
 		# unpack the chunk to make it processable
 		pcm = struct.unpack_from("h" * FRAME_LENGTH, pcm)
 
+		frames.append(pcm)
+
+	if __recording_thread:
+		__recording_thread = None
