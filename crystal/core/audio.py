@@ -35,12 +35,15 @@ log = logging.getLogger(__name__)
 
 SNOWBOY_TRAIN_ENDPOINT = "https://snowboy.kitt.ai/api/v1/train/"
 SAMPLE_RATE = 16000 # this is a standard sample rate used by a lot of speech recognition solutions
+SAMPLE_WIDTH = 2 # 2 bytes for 16 bit audio
 FRAME_LENGTH = 1024 # i dunno if this is right
+WAKEWORD_SILENCE = -2
+WAKEWORD_VOICE = 0
+WAKEWORD_DETECTED = 1
 
 snowboy_model_file = Path("./crystal.pmdl")
 wakeword_audio_dir = Path("./data/wakeword")
 
-__detector = None
 __listening = False
 __recording_thread = None
 
@@ -128,12 +131,12 @@ def retrain_wakeword_model(files: list) -> Path:
 
 	return snowboy_model_file
 
-def interrupt_callback():
-	global __listening
-	return __listening
-
 def start_listening():
-	global __listening, __detector
+	global __listening, __recording_thread
+
+	if __listening:
+		log.warn("Already listening")
+		return
 
 	if not snowboy_model_file.exists():
 		log.warn("Wake word model not found, checking for audio files")
@@ -148,40 +151,27 @@ def start_listening():
 			wakeword_files = list(wakeword_audio_dir.glob("*.wav"))
 		retrain_wakeword_model(wakeword_files)
 
-	log.debug("Starting wake word detector...")
-	__detector = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
-	__listening = True
-	__detector.start(detected_callback=wakeword_callback, # snowboydecoder.play_audio_file,
-					interrupt_check=interrupt_callback,
-					sleep_time=0.03)
-
-def stop_listening():
-	global __listening, __detector, __recording_thread
-	log.info("Stop listening")
-
-	__listening = False
-	if __detector:
-		__detector.terminate()
-	if __recording_thread:
-		__recording_thread.join()
-		__recording_thread = None
-
-def wakeword_callback():
-	log.debug("Wakeword detected, start recording")
-	start_recording()
-
-def start_recording():
-	global __recording_thread
+	log.debug("Starting recording thread...")
 	if not __recording_thread:
-		log.debug("starting recording thread")
+		__listening = True
 		__recording_thread = threading.Thread(name="RecordingThread", target=do_recording, args=())
 		__recording_thread.start()
 	else:
 		log.warn("recording thread already running")
 
+def stop_listening():
+	global __listening, __recording_thread
+	log.info("Stop listening")
+
+	__listening = False
+	if __recording_thread:
+		__recording_thread.join()
+		__recording_thread = None
+
 def do_recording():
-	global __recording_thread
 	log.debug("recording thread started")
+
+	wakeword = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
 
 	pa = pyaudio.PyAudio()
 	input_stream = pa.open(
@@ -194,15 +184,48 @@ def do_recording():
 	)
 
 	MAX_RECORDING_SECONDS = 10
+	SILENCE_THRESHOLD = 10 # number of frames to wait
 
-	frames = []
-	while __listening and len(frames) < int(SAMPLE_RATE / FRAME_LENGTH * MAX_RECORDING_SECONDS):
+	wakeword_raw_data = bytes()
+	recording_raw_data = bytes()
+	active = False
+	silence_count = 0
+	while __listening:
 		# reach in a "chunk"; each chunk contains the specified number of frames (i.e samples)
-		pcm = input_stream.read(FRAME_LENGTH)
+		data = input_stream.read(FRAME_LENGTH)
 		# unpack the chunk to make it processable
-		pcm = struct.unpack_from("h" * FRAME_LENGTH, pcm)
+		pcm = struct.unpack_from("h" * FRAME_LENGTH, data)
 
-		frames.append(pcm)
+		if active:
+			wakeword_raw_data = bytes()
+			recording_raw_data += data
 
-	if __recording_thread:
-		__recording_thread = None
+			detect_result = wakeword.detector.RunDetection(data)
+			# log.debug("wakeword result: {}".format(detect_result))
+
+			if detect_result == WAKEWORD_SILENCE:
+				silence_count += 1
+			else:
+				silence_count = 0
+
+			# check length of recording
+			if len(recording_raw_data) >= SAMPLE_RATE * SAMPLE_WIDTH * MAX_RECORDING_SECONDS or silence_count >= SILENCE_THRESHOLD:
+				log.debug("Done recording, length {:.2f}s".format(len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE))
+				active = False
+				# TODO: send audio samples to be handled by the system via an event
+		else:
+			recording_raw_data = bytes()
+			silence_count = 0
+			wakeword_raw_data += data
+			while len(wakeword_raw_data) > SAMPLE_RATE * SAMPLE_WIDTH * 2: # sample rate * sample width in bytes (2 bytes for 16 bit) * number of seconds
+				wakeword_raw_data = wakeword_raw_data[SAMPLE_WIDTH:]
+			if len(wakeword_raw_data) > SAMPLE_RATE * SAMPLE_WIDTH:
+				result = wakeword.detector.RunDetection(wakeword_raw_data)
+				# make sure to include the wakeword in the recording
+				# log.debug("wakeword result: {}".format(result))
+				if result == WAKEWORD_DETECTED:
+					log.debug("Wake word detected")
+					# TODO: Trigger an event
+					active = True
+					recording_raw_data = wakeword_raw_data[:]
+	log.debug("recording thread exiting")
