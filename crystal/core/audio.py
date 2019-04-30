@@ -183,6 +183,7 @@ def do_recording():
 		input_device_index=None
 	)
 
+	MIN_RECORDING_SECONDS = 2
 	MAX_RECORDING_SECONDS = 10
 	SILENCE_THRESHOLD = 10 # number of frames to wait
 
@@ -209,7 +210,11 @@ def do_recording():
 				silence_count = 0
 
 			# check length of recording
-			if len(recording_raw_data) >= SAMPLE_RATE * SAMPLE_WIDTH * MAX_RECORDING_SECONDS or silence_count >= SILENCE_THRESHOLD:
+			record_length = len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE
+			if record_length < MIN_RECORDING_SECONDS:
+				continue
+
+			if record_length >= MAX_RECORDING_SECONDS or silence_count >= SILENCE_THRESHOLD:
 				log.debug("Done recording, length {:.2f}s".format(len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE))
 				active = False
 				crystal.core.on_recording_finish.fire(recording_raw_data, SAMPLE_RATE, SAMPLE_WIDTH)
