@@ -17,7 +17,7 @@ class ActionInfoHardware(BaseAction):
 	#TODO: maybe this should be changed to "info-system" so we can include a lot more info
 
 	@classmethod
-	def parse(self, sentence) -> (str, list):
+	def parse(self, doc) -> (str, list):
 		"""
 		Returns a tuple: query type, parameters (str, list)
 
@@ -30,7 +30,7 @@ class ActionInfoHardware(BaseAction):
 		"""
 		query_type = None
 		query_params = []
-		for word in sentence:
+		for word in doc:
 			if word.dep_ == "nsubj" or word.dep_ == "dobj":
 				if word.lemma_ in ["processor", "core", "thread"]:
 					query_type = "processors"
@@ -59,8 +59,7 @@ class ActionInfoHardware(BaseAction):
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
-		query_type, query_params = self.parse(sentence)
+		query_type, query_params = self.parse(doc)
 		log.info("parsed query: {}, {}".format(query_type, query_params))
 
 		if query_type == None:
