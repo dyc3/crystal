@@ -2,7 +2,7 @@
 Handles recording and passes raw audio into the input modules. Tells
 the system when utterances start and when they stop.
 
-The default maximum utterance length is 10 seconds, but this should be
+The default maximum utterance length is 8 seconds, but this should be
 configurable.
 
 Here's how it should work:
@@ -40,6 +40,10 @@ FRAME_LENGTH = 1024 # i dunno if this is right
 WAKEWORD_SILENCE = -2
 WAKEWORD_VOICE = 0
 WAKEWORD_DETECTED = 1
+
+MIN_RECORDING_SECONDS = 2
+MAX_RECORDING_SECONDS = 8
+SILENCE_THRESHOLD = 12 # number of frames to wait to stop recording
 
 snowboy_model_file = Path("./crystal.pmdl")
 wakeword_audio_dir = Path("./data/wakeword")
@@ -182,10 +186,6 @@ def do_recording():
 		frames_per_buffer=FRAME_LENGTH,
 		input_device_index=None
 	)
-
-	MIN_RECORDING_SECONDS = 2
-	MAX_RECORDING_SECONDS = 10
-	SILENCE_THRESHOLD = 10 # number of frames to wait
 
 	wakeword_raw_data = bytes()
 	recording_raw_data = bytes()
