@@ -1,6 +1,6 @@
 import datetime
 from crystal.actions import BaseAction
-from crystal.actions.responses import ActionResponseQuery
+from crystal.actions.responses import *
 from crystal import feedback
 import logging
 log = logging.getLogger(__name__)
@@ -13,22 +13,24 @@ class ActionTime(BaseAction):
 		self.requires_updater = False
 
 	@classmethod
-	def parse(self, sentence):
-		# TODO: implement grabing time from different timezones
-		context_timezone = None # if None, use system's timezone
-		target_timezone = None # if None, get the system time
-		target_time = None # if None, get the current time
-
-		return context_timezone, target_timezone, target_time
+	def parse(self, doc):
+		for word in doc:
+			if word.lemma_ in ["what", "time", "check"]:
+				return "check"
+			if word.lemma_ in ["set", "alarm"]:
+				return "set-alarm"
+		return "check"
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
-		context_timezone, target_timezone, target_time = self.parse(sentence)
+		command = self.parse(doc)
 
-		current_time = datetime.datetime.now().time()
-		log.info("Time: {}".format(current_time.isoformat()))
-		return ActionResponseQuery(current_time.isoformat())
+		if command == "check":
+			current_time = datetime.datetime.now().time()
+			log.info("Time: {}".format(current_time.isoformat()))
+			return ActionResponseQuery(current_time.isoformat())
+		elif command == "set-alarm":
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Can't do that yet")
 
 def getAction():
 	return ActionTime()
