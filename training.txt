@@ -106,6 +106,9 @@ open up youtube,run-program
 give me a calculator,run-program
 run bleachbit,run-program
 open up volume control,run-program
+open reddit,run-program
+show me my inbox,run-program
+open my email,run-program
 click,human-input
 left click,human-input
 middle click,human-input

@@ -34,8 +34,17 @@ class TestActionRunProgram(unittest.TestCase):
 			("open firefox", "web browser"),
 			("open chrome", "web browser"),
 
+			("open mail", "mail"),
+			("show me my email", "mail"),
+			("show me my inbox", "mail"),
+
 			("open calendar", "calendar"),
 			("open up the calculator", "calculator"),
+
+			("open youtube", "youtube"),
+			("open up reddit", "reddit"),
+			("open twitch", "twitch"),
+			("open a new tab for amazon", "amazon"),
 		]
 		action = run_program.getAction()
 		for test, expectedResult in test_set:
@@ -51,6 +60,11 @@ class TestActionRunProgram(unittest.TestCase):
 			("launcher", "rofi -show run"),
 			("calendar", "gnome-calendar"),
 			("calculator", "gnome-calculator"),
+			("mail", "x-www-browser mail.google.com"),
+			("youtube", "x-www-browser youtube.com"),
+			("reddit", "x-www-browser reddit.com"),
+			("twitch", "x-www-browser twitch.tv"),
+			("amazon", "x-www-browser amazon.com"),
 		]
 		action = run_program.getAction()
 		for test, expectedResult in test_set:

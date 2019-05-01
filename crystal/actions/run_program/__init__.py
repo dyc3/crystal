@@ -54,7 +54,11 @@ class ActionRunProgram(BaseAction):
 				return "web browser"
 			if any([w in ["launcher", "rofi", "dmenu"] for w in word_strs]):
 				return "launcher"
+			if any([w in ["mail", "email", "inbox"] for w in word_strs]):
+				return "mail"
 			if any([w in ["calculator", "calendar"] for w in word_strs]):
+				return word_strs[0]
+			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix"] for w in word_strs]):
 				return word_strs[0]
 
 	@classmethod
@@ -70,8 +74,16 @@ class ActionRunProgram(BaseAction):
 			return "x-www-browser"
 		if program_type == "launcher":
 			return "rofi -show run"
+		if program_type == "mail":
+			return "x-www-browser mail.google.com"
 		if program_type in ["calculator", "calendar"]:
 			return "gnome-{}".format(program_type)
+		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix"]:
+			if program_type == "twitch":
+				suffix = ".tv"
+			else:
+				suffix = ".com"
+			return "x-www-browser {}{}".format(program_type, suffix)
 
 	@classmethod
 	def run(self, doc):
