@@ -16,19 +16,18 @@ class ActionRollDie(BaseAction):
 		sides, count = None, None
 
 		for word in doc:
-			if word.lemma_ == "flip":
-				count = 1 # TOOD: flip multiple coins
-				sides = 2
-				break
-			if "d" in str(word).lower():
+			if "d" in str(word).lower() or word.lemma_ == "coin":
 				d_spl = str(word).lower().split("d")
-				if str(word.lemma_).lower() in ["die", "dice"]:
-					sides = 6
+				if word.lemma_ == "coin":
+					sides = 2
 				else:
-					# get sides and count
-					sides = int(d_spl[1])
+					if str(word.lemma_).lower() in ["die", "dice"]:
+						sides = 6
+					else:
+						# get sides and count
+						sides = int(d_spl[1])
 
-				if d_spl[0]:
+				if "d" in str(word).lower() and d_spl[0]:
 					count = int(d_spl[0])
 				else:
 					# get count from previous token

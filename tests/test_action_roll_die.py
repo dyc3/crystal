@@ -38,6 +38,8 @@ class TestActionRollDie(unittest.TestCase):
 			("roll four d6", 6, 4),
 
 			("flip a coin", 2, 1),
+			("flip 2 coins", 2, 2),
+			("flip two coins", 2, 2),
 		]
 		action_roll_die = roll_die.ActionRollDie()
 		for query, expected_sides, expected_count in test_set:
