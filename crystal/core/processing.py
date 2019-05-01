@@ -26,6 +26,9 @@ def load_nlp(model: str):
 def parse_nlp(text: str):
 	return nlp(text)
 
+def get_stop_words():
+	return nlp.Defaults.stop_words
+
 class CommandClassifier():
 	"""docstring for CommandClassifier."""
 	def __init__(self):
@@ -44,7 +47,9 @@ class CommandClassifier():
 		lemmas = []
 		for tok in tokens:
 			lemmas.append(tok.lemma_.lower().strip() if tok.lemma_ != "-PRON-" else tok.lower_)
-		tokens = lemmas
+		# remove stop words
+		stop_words = get_stop_words()
+		tokens = [word for word in lemmas if word not in stop_words]
 
 		# remove large strings of whitespace
 		while "" in tokens:
