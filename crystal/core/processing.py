@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.neural_network import MLPClassifier
 import spacy
 
 import logging
@@ -33,7 +34,8 @@ class CommandClassifier():
 	"""docstring for CommandClassifier."""
 	def __init__(self):
 		super(CommandClassifier, self).__init__()
-		self.clf = CalibratedClassifierCV(LinearSVC())
+		# self.clf = CalibratedClassifierCV(LinearSVC())
+		self.clf = MLPClassifier()
 		self.vectorizer = CountVectorizer(tokenizer=self._tokenizeText, ngram_range=(1,1))
 		self.pipe = Pipeline([('vectorizer', self.vectorizer), ('clf', self.clf)])
 
