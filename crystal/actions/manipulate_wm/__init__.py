@@ -29,15 +29,18 @@ class ActionManipulateWm(BaseAction):
 					command = 'i3-msg "workspace {}"'.format(num)
 		# moving windows to other workspaces
 		elif str(sentence.root) in ["move", "put"]:
+			target_workspace = None
+			for word in sentence:
+				if word.lemma_ in ["workspace", "space", "desktop"]:
+					num_token = word.nbor(1)
+					try:
+						target_workspace = int(str(num_token))
+					except:
+						target_workspace = utils.text2int(str(num_token).lower())
+			if not target_workspace:
+				raise Exception("Unable to parse for target workspace")
 			if str(sentence.root.nbor(1)) == "this":
-				for word in sentence:
-					if word.lemma_ in ["workspace", "space", "desktop"]:
-						num_token = word.nbor(1)
-						try:
-							num = int(str(num_token))
-						except:
-							num = utils.text2int(str(num_token).lower())
-						command = 'i3-msg "move container to workspace number {}"'.format(num)
+				command = 'i3-msg "move container to workspace number {}"'.format(target_workspace)
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
 		else:
@@ -54,7 +57,10 @@ class ActionManipulateWm(BaseAction):
 	def run(self, doc):
 		sentence = next(doc.sents)
 		utils.printSpacy(sentence)
-		command = self.parse(sentence)
+		try:
+			command = self.parse(sentence)
+		except Exception as e:
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Parsing failed: {}".format(e.message))
 
 		if command != None:
 			exitcode = utils.runAndPrint(command)
