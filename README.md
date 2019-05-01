@@ -46,3 +46,29 @@ the system to prompt the user.
 Feedback modules are integrations with other software to provide sensory feedback to
 the user (status indicators, etc). Feedback modules can attach themselves anywhere in
 the input-action pipeline.
+
+# Installation
+
+Proper installation involves setting up a service in systemd. Installation is currently
+not automated and must be done manually.
+
+Create a file `crystal.service` in `/etc/systemd/system` with the contents:
+
+```
+[Unit]
+Description=Crystal
+After=network.target
+
+[Service]
+Type=simple
+User=carson
+WorkingDirectory=/home/carson/Documents/code/crystal
+PIDFile=/var/run/crystal.pid
+ExecStart=/home/carson/Documents/code/crystal/crystal.sh
+Restart=on-failure
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
+```

@@ -66,7 +66,6 @@ def core_on_utterance_update(text: str):
 	global current_utterance
 	# print("Processing:", text)
 	current_utterance = text
-	set_status(CrystalStatus.LISTENING)
 
 def core_on_utterance_finish(text: str):
 	global current_utterance, cmdClassifier
