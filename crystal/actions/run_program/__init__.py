@@ -60,6 +60,8 @@ class ActionRunProgram(BaseAction):
 				return word_strs[0]
 			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix"] for w in word_strs]):
 				return word_strs[0]
+			if any([w.endswith(".com") or w.endswith(".org") or w.endswith(".net") or w.endswith(".io") for w in word_strs]):
+				return word_strs[0]
 
 	@classmethod
 	def determine_program(self, program_type: str) -> str:
@@ -84,6 +86,8 @@ class ActionRunProgram(BaseAction):
 			else:
 				suffix = ".com"
 			return "x-www-browser {}{}".format(program_type, suffix)
+		if any([program_type.endswith(s) for s in [".com", ".org", ".net", ".io"]]):
+			return "x-www-browser {}".format(program_type)
 
 	@classmethod
 	def run(self, doc):
