@@ -16,7 +16,7 @@ class ActionGithub(BaseAction):
 	@classmethod
 	def parse(self, sentence):
 		for word in sentence:
-			if word.lemma_ == "notification":
+			if word.lemma_ in ["notification", "check"]:
 				return "list-notif"
 			if word.lemma_ == "repository":
 				return "list-repos"
