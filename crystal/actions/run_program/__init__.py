@@ -93,9 +93,20 @@ class ActionRunProgram(BaseAction):
 	def run(self, doc):
 		program_type = self.parse(doc)
 		log.debug("program_type = {}".format(program_type))
-		if not program_type:
-			return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine program_type")
-		program = self.determine_program(program_type)
+		program = None
+		if program_type:
+			program = self.determine_program(program_type)
+		else:
+			log.warn("unable to determine program type, attempting heuristic")
+			# heuristic to open arbitrary programs
+			try:
+				for word in doc:
+					if word.lemma_ in ["open", "run"]:
+						program = str(word.nbor(1)).lower()
+			except IndexError:
+				pass
+			if not program:
+				return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine program_type, and heuristic failed")
 		log.debug("program = {}".format(program))
 		if not program:
 			return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine exact program from program type: {}".format(program_type))
