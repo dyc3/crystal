@@ -176,7 +176,7 @@ def do_recording():
 	log.debug("recording thread started")
 
 	# The higher the sensitivity, the easier the wakeword gets triggered
-	wakeword = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.55)
+	wakeword = snowboydecoder.HotwordDetector(str(snowboy_model_file), sensitivity=0.5)
 
 	pa = pyaudio.PyAudio()
 	input_stream = pa.open(
