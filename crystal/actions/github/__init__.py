@@ -50,7 +50,9 @@ class ActionGithub(BaseAction):
 			if command == "count-notif":
 				return ActionResponseQuery("You have {} GitHub notifications.".format(len(notifs)))
 			else:
-				return ActionResponsePromptList("GitHub Notifications", notifs)
+				resp = ActionResponsePromptList("GitHub Notifications", notifs)
+				resp.type = ActionResponseType.SUCCESS
+				return resp
 		elif command == "list-repos" or command == "count-repos":
 			# TODO: list my Github repositories
 			pass
