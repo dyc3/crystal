@@ -55,6 +55,7 @@ class SpeechRecognitionInput(BaseInput):
 			if any("Crystal {}".format(bad) in text for bad in bad_proper_nouns): score -= 1
 			if "default sync" in text: score -= 1
 			if "work Space Nine" in text: score -= 2
+			if "where Space" in text: score -= 1
 			if "focusrite" in text: score -= 1
 			if text.endswith("workspace for"): score -= 1
 			if text.endswith("desktop for"): score -= 1
