@@ -14,13 +14,23 @@ class ActionGithub(BaseAction):
 		self.requires_updater = False
 
 	@classmethod
-	def parse(self, sentence):
-		for word in sentence:
-			if word.lemma_ in ["notification", "check"]:
-				return "list-notif"
-			if word.lemma_ == "repository":
-				return "list-repos"
-		return
+	def parse(self, doc):
+		cmd_type = "" # list, count
+		cmd_target = "" # notif, repos
+		for word in doc:
+			if word.lemma_ in ["list", "show"]:
+				cmd_type = "list"
+			elif word.lemma_ in ["count"]:
+				cmd_type = "count"
+			elif word.lemma_ == "how" and word.nbor(1).lemma_ == "many":
+				cmd_type = "count"
+			elif word.lemma_ in ["notification", "check"]:
+				cmd_target = "notif"
+			elif word.lemma_ == "repository":
+				cmd_target = "repos"
+		if cmd_type and cmd_target:
+			return "{}-{}".format(cmd_type, cmd_target)
+		return None
 
 	@classmethod
 	def get_notifications(self):
@@ -37,8 +47,7 @@ class ActionGithub(BaseAction):
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
-		command = self.parse(sentence)
+		command = self.parse(doc)
 
 		if command == "list-notif" or command == "count-notif":
 			notifs = self.get_notifications()
@@ -55,7 +64,7 @@ class ActionGithub(BaseAction):
 				return resp
 		elif command == "list-repos" or command == "count-repos":
 			# TODO: list my Github repositories
-			pass
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Can't do that yet: {}".format(command))
 		else:
 			return ActionResponseBasic(ActionResponseType.FAILURE, "unknown command: {}".format(command))
 
