@@ -13,25 +13,22 @@ class TestActionTime(unittest.TestCase):
 		nlp = spacy.load("en")
 
 	def test_time_parse(self):
-		# query, context timezone, expected timezone, expected time
+		# query, command
 		test_set = [
-			("what is the time", None, None, None),
-			("what's the time", None, None, None),
-			("what time is it", None, None, None),
-			("give me the time", None, None, None),
+			("what is the time", "check"),
+			("what's the time", "check"),
+			("what time is it", "check"),
+			("give me the time", "check"),
 
-			# ("what is the time on the east coast", None, -5, None),
-			# ("what is the time on the west coast", None, -8, None),
+			("set an alarm for 9 AM", "set-alarm"),
+			("set an alarm for 7", "set-alarm"),
+			("create an alarm for 8", "set-alarm"),
 		]
 		action_time = time.ActionTime()
-		for test, expected_context_timezone, expected_timezone, expected_time in test_set:
+		for test, expected_command in test_set:
 			doc = nlp(test)
-			sent = next(doc.sents)
-
-			result_context_timezone, result_timezone, result_time = action_time.parse(sent)
-			self.assertEqual(result_context_timezone, expected_context_timezone)
-			self.assertEqual(result_timezone, expected_timezone)
-			self.assertEqual(result_time, expected_time)
+			result_command = action_time.parse(doc)
+			self.assertEqual(result_command, expected_command)
 
 if __name__ == '__main__':
 	unittest.main()
