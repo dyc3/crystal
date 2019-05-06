@@ -35,7 +35,7 @@ class CommandClassifier():
 	def __init__(self):
 		super(CommandClassifier, self).__init__()
 		# self.clf = CalibratedClassifierCV(LinearSVC())
-		self.clf = MLPClassifier()
+		self.clf = MLPClassifier(hidden_layer_sizes=(25,25))
 		self.vectorizer = CountVectorizer(tokenizer=self._tokenizeText, ngram_range=(1,1))
 		self.pipe = Pipeline([('vectorizer', self.vectorizer), ('clf', self.clf)])
 
