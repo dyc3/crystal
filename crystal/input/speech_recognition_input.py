@@ -65,6 +65,7 @@ class SpeechRecognitionInput(BaseInput):
 			if text.endswith("close at"): score -= 1
 			if "work space" in text: score -= 1
 			if "wurkspace" in text: score -= 1 # what the fuck even is this?
+			if "werk" in text: score -= 1
 			if "Works face for" in text: score -= 1
 			if "ShowMe" in text: score -= 1
 			if "show me the top five" in text: score -= 1
