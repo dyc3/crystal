@@ -15,12 +15,14 @@ class TestActionGithub(unittest.TestCase):
 	def test_parse(self):
 		# query, expected sides, expected count
 		test_set = [
-			("how many notifications are on Github", "list-notif"),
-			("how many notifications do I have on Github", "list-notif"),
+			("how many notifications are on Github", "count-notif"),
+			("how many notifications do I have on Github", "count-notif"),
 			("check github notifications", "list-notif"),
+			("list github notifications", "list-notif"),
+			("show me my github notifications", "list-notif"),
 
+			("how many repositories do I have", "count-repos"),
 			("list my repositories", "list-repos"),
-			("how many repositories do I have", "list-repos"),
 		]
 		action_github = github.ActionGithub()
 		for query, expected_command in test_set:

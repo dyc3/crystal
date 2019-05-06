@@ -18,13 +18,14 @@ class ActionGithub(BaseAction):
 		cmd_type = "" # list, count
 		cmd_target = "" # notif, repos
 		for word in doc:
-			if word.lemma_ in ["list", "show"]:
+			if word.lemma_ in ["list", "show", "check"]:
 				cmd_type = "list"
 			elif word.lemma_ in ["count"]:
 				cmd_type = "count"
 			elif word.lemma_ == "how" and word.nbor(1).lemma_ == "many":
 				cmd_type = "count"
-			elif word.lemma_ in ["notification", "check"]:
+
+			if word.lemma_ in ["notification", "check"]:
 				cmd_target = "notif"
 			elif word.lemma_ == "repository":
 				cmd_target = "repos"
