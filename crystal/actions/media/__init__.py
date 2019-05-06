@@ -38,6 +38,7 @@ class ActionMedia(BaseAction):
 			if (sentence.root.n_rights > 0 and list(sentence.root.rights)[0].dep_ == "dobj") or sentence.root.n_rights == 0:
 				return "next"
 
+		action = None
 		for word in sentence:
 			if word.lemma_ in ["play", "resume"]:
 				return "play"
@@ -50,6 +51,21 @@ class ActionMedia(BaseAction):
 
 			if word.lemma_ == "previous":
 				return "previous"
+
+			if word.lemma_ in ["shuffle", "shuffling"]:
+				action = "shuffle"
+				break
+
+		if action == "shuffle":
+			target_state = True # default
+			for word in sentence:
+				if word.lemma_ in ["enable", "on"]:
+					target_state = True
+					break
+				elif word.lemma_ in ["disable", "off", "stop"]:
+					target_state = False
+					break
+			return "shuffle {}".format("On" if target_state else "Off")
 
 		# media seeking
 		if sentence.root.lemma_ in ["go", "seek", "skip"]:

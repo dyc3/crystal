@@ -47,6 +47,10 @@ restart the video,media
 play the music from the beginning,media
 seek to 7 minutes and 12 seconds,media
 skip ahead 4 minutes,media
+enable shuffle,media
+disable shuffling,media
+turn on shuffle mode,media
+turn off shuffling mode,media
 set volume to 100%,volume-set
 set volume to 20%,volume-set
 turn down the volume to 50%,volume-set

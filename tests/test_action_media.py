@@ -58,5 +58,25 @@ class TestActionMedia(unittest.TestCase):
 				sent = next(doc.sents)
 				self.assertEqual(action_media.parse(sent), expectedResult, test)
 
+	def test_parse_shuffling(self):
+		# query, expected result
+		test_set = [
+			("enable shuffle", "shuffle On"),
+			("turn on shuffle mode", "shuffle On"),
+			("shuffle the songs", "shuffle On"),
+			("crystal shuffle the songs", "shuffle On"),
+
+			("turn off shuffle mode", "shuffle Off"),
+			("disable shuffle mode", "shuffle Off"),
+			("disable shuffling", "shuffle Off"),
+			("crystal disable shuffling", "shuffle Off"),
+		]
+		action_media = media.ActionMedia()
+		for test, expectedResult in test_set:
+			with self.subTest():
+				doc = nlp(test)
+				sent = next(doc.sents)
+				self.assertEqual(action_media.parse(sent), expectedResult, test)
+
 if __name__ == '__main__':
 	unittest.main()
