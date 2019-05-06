@@ -18,6 +18,8 @@ class TestActionVolumeSet(unittest.TestCase):
 			(0.5, "set volume to 80%", 0.8),
 			(0.5, "set volume to 20 percent", 0.2),
 			(0.5, "set volume to 40", 0.4),
+			(0.5, "turn it up to 70", 0.7),
+			(0.5, "turn it down to 20", 0.2),
 
 			(0.5, "increase volume", 0.6),
 			(0.5, "increase the volume", 0.6),

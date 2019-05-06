@@ -26,12 +26,19 @@ class ActionVolumeSet(BaseAction):
 		assert isinstance(current_volume, float)
 		assert not isinstance(sentence, str)
 
+		percent = None
+		volumeaction = None
+
 		for word in sentence:
 			if word.lemma_ in ["mute", "unmute"]:
 				return word.lemma_
+			if word.lemma_ in ["increase", "decrease", "turn"]:
+				for token in sentence:
+					if token.i < word.i:
+						continue
+					if token.lemma_ == "to":
+						volumeaction = "set"
 
-		percent = None
-		volumeaction = None
 		if str(sentence.root) == "set" or str(sentence.root) == "increase" or str(sentence.root) == "decrease":
 			if volumeaction == None: volumeaction = str(sentence.root)
 		elif str(sentence.root) == "turn":
@@ -46,7 +53,7 @@ class ActionVolumeSet(BaseAction):
 				if str(child) in ["increase", "decrease"]:
 					volumeaction = str(child)
 
-		for child in sentence.root.children:
+		for child in sentence:
 			#print ("child: {0}: {1}".format(child, child.dep_))
 			if child.dep_ == "prep":
 				if str(child) == "to":
