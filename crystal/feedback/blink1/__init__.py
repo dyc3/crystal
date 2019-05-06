@@ -8,7 +8,7 @@ b1 = None
 
 def on_status_update(status):
 	if status == CrystalStatus.IDLE:
-		b1.fade_to_color(100, "purple")
+		b1.fade_to_color(100, "black")
 	elif status == CrystalStatus.LISTENING:
 		b1.fade_to_color(100, "blue")
 	elif status == CrystalStatus.BUSY:
