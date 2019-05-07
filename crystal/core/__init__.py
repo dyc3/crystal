@@ -149,6 +149,7 @@ def core_on_recording_finish(raw_audio, sample_rate, sample_width):
 	result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
 	if not result_text:
 		log.debug("No text recognized")
+		set_status(CrystalStatus.IDLE)
 		return
 	crystal.core.on_utterance_update.fire(result_text)
 	crystal.core.on_utterance_finish.fire(result_text)
