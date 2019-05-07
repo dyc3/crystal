@@ -55,7 +55,7 @@ class SpeechRecognitionInput(BaseInput):
 			if any("Crystal {}".format(bad) in text for bad in bad_proper_nouns): score -= 1
 			if "default sync" in text: score -= 1
 			if "work Space Nine" in text: score -= 2
-			if "where Space" in text: score -= 1
+			if "where space" in text.lower(): score -= 1
 			if "focusrite" in text: score -= 1
 			if text.endswith("workspace for"): score -= 1
 			if text.endswith("desktop for"): score -= 1
@@ -89,6 +89,7 @@ class SpeechRecognitionInput(BaseInput):
 			if "run atom" in text: score += 1
 			if "workspace 4" in text: score += 1
 			if "workspace 9" in text: score += 1
+			if "show me work space" in text: score += 1
 			if "desktop 5" in text: score += 1
 			if "desktop 10" in text: score += 1
 			if "close that" in text: score += 1
