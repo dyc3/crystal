@@ -38,6 +38,9 @@ class TestActionRunProgram(unittest.TestCase):
 			("show me my email", "mail"),
 			("show me my inbox", "mail"),
 
+			("open volume control", "volume-control"),
+			("open the audio panel", "volume-control"),
+
 			("open calendar", "calendar"),
 			("open up the calculator", "calculator"),
 

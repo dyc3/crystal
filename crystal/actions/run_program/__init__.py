@@ -56,9 +56,11 @@ class ActionRunProgram(BaseAction):
 				return "launcher"
 			if any([w in ["mail", "email", "inbox"] for w in word_strs]):
 				return "mail"
+			if any([w in ["volume", "audio"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["control", "panel"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
+				return "volume-control"
 			if any([w in ["calculator", "calendar"] for w in word_strs]):
 				return word_strs[0]
-			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix"] for w in word_strs]):
+			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"] for w in word_strs]):
 				return word_strs[0]
 			if any([w.endswith(".com") or w.endswith(".org") or w.endswith(".net") or w.endswith(".io") for w in word_strs]):
 				return word_strs[0]
@@ -78,9 +80,11 @@ class ActionRunProgram(BaseAction):
 			return "rofi -show run"
 		if program_type == "mail":
 			return "x-www-browser mail.google.com"
+		if program_type == "volume-control":
+			return "pavucontrol"
 		if program_type in ["calculator", "calendar"]:
 			return "gnome-{}".format(program_type)
-		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix"]:
+		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"]:
 			if program_type == "twitch":
 				suffix = ".tv"
 			else:
