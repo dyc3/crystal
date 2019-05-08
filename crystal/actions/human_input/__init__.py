@@ -44,10 +44,9 @@ class ActionHumanInput(BaseAction):
 
 		# extract the parameters
 		if inputaction == "click":
-			for word in sentence:
-				if word.lemma_ in ["left","middle","right","double","triple"]:
-					click_param = word.lemma_
-					break
+			word = utils.find_word(sentence.doc, ["left","middle","right","double","triple"])
+			if word:
+				click_param = word.lemma_
 
 		elif inputaction == "scroll":
 			for word in sentence:
@@ -90,19 +89,13 @@ class ActionHumanInput(BaseAction):
 							break
 
 		elif inputaction == "press":
-			for word in sentence:
-				if word.lemma_ != "press":
-					continue
-				if not word.nbor(1):
-					break
-				press_param = '+'.join(map(str, sentence.doc[word.i + 1:])) # word.nbor(1).text
+			word = utils.find_word(sentence.doc, ["press"])
+			if word and word.nbor(1):
+				press_param = '+'.join(map(str, sentence.doc[word.i + 1:]))
 
 		elif inputaction == "type":
-			for word in sentence:
-				if word.lemma_ not in ["type", "dictate"]:
-					continue
-				if not word.nbor(1):
-					break
+			word = utils.find_word(sentence.doc, ["type", "dictate"])
+			if word and word.nbor(1):
 				type_param = ' '.join(map(str, sentence.doc[word.i + 1:]))
 
 		if inputaction == "click":
