@@ -1,27 +1,8 @@
 from crystal.actions import BaseAction
 from crystal.actions.responses import *
-import subprocess, os, rofi, shlex, sys
+import subprocess, os, shlex, sys
 import logging
 log = logging.getLogger(__name__)
-
-def run_command_output(command):
-	p = subprocess.Popen(shlex.split(command),
-						 stdout=subprocess.PIPE,
-						 stderr=subprocess.STDOUT)
-	return iter(p.stdout.readline, b'')
-
-def runFork(command, shell=True):
-	print("Fork running {}...".format(command))
-	kwargs = {}
-	if sys.version_info < (3, 2):  # assume posix
-		kwargs.update(preexec_fn=os.setsid)
-	else:  # Python 3.2+ and Unix
-		kwargs.update(start_new_session=True)
-	subprocess.Popen(shlex.split(command),
-					stdin=subprocess.DEVNULL,
-					stdout=subprocess.DEVNULL,
-					stderr=subprocess.DEVNULL,
-					shell=shell, **kwargs)
 
 class ActionRunProgram(BaseAction):
 	"""docstring for ActionRunProgram."""
