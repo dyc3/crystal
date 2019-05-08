@@ -26,8 +26,11 @@ class ActionHumanInput(BaseAction):
 
 		# extract the action
 		for word in sentence:
-			if word.lemma_ in ["click", "move", "type", "press", "scroll"]:
+			if word.lemma_ in ["click", "move", "press", "scroll"]:
 				inputaction = word.lemma_
+				break
+			if word.lemma_ in ["type", "dictate"]:
+				inputaction = "type"
 				break
 
 		# default parameters
@@ -36,15 +39,18 @@ class ActionHumanInput(BaseAction):
 		scroll_amount = 0
 		move_direction = ""
 		move_amount = 0
+		press_param = ""
+		type_param = ""
 
 		# extract the parameters
-		for word in sentence:
-			if inputaction == "click":
+		if inputaction == "click":
+			for word in sentence:
 				if word.lemma_ in ["left","middle","right","double","triple"]:
 					click_param = word.lemma_
 					break
 
-			elif inputaction == "scroll":
+		elif inputaction == "scroll":
+			for word in sentence:
 				if str(word) in ["up", "down"]:
 					scroll_direction = word.lemma_
 					scroll_amount = 8
@@ -52,7 +58,8 @@ class ActionHumanInput(BaseAction):
 					scroll_direction = {"top":"up", "bottom":"down"}[str(word)]
 					scroll_amount = 1000
 
-			elif inputaction == "move":
+		elif inputaction == "move":
+			for word in sentence:
 				numToken = None
 				if str(word) in ["up", "down", "left", "right", "center"]:
 					move_direction = str(word)
@@ -82,6 +89,21 @@ class ActionHumanInput(BaseAction):
 							log.error("could not parse {}".format(numToken))
 							break
 
+		elif inputaction == "press":
+			for word in sentence:
+				if word.lemma_ != "press":
+					continue
+				if not word.nbor(1):
+					break
+				press_param = '+'.join(map(str, sentence.doc[word.i + 1:])) # word.nbor(1).text
+
+		elif inputaction == "type":
+			for word in sentence:
+				if word.lemma_ not in ["type", "dictate"]:
+					continue
+				if not word.nbor(1):
+					break
+				type_param = ' '.join(map(str, sentence.doc[word.i + 1:]))
 
 		if inputaction == "click":
 			return inputaction, (click_param,)
@@ -89,6 +111,10 @@ class ActionHumanInput(BaseAction):
 			return inputaction, (scroll_direction, scroll_amount,)
 		elif inputaction == "move":
 			return inputaction, (move_direction, move_amount)
+		elif inputaction == "press":
+			return inputaction, (press_param,)
+		elif inputaction == "type":
+			return inputaction, (type_param,)
 
 	@classmethod
 	def run(self, doc):
@@ -113,7 +139,7 @@ class ActionHumanInput(BaseAction):
 				pyautogui.tripleClick()
 		elif inputaction == "type":
 			if parameters:
-				pyautogui.typewrite(parameters[0], interval=(0.2/len(parameters)))
+				pyautogui.typewrite(parameters[0], interval=(0.05/len(parameters[0])))
 			else:
 				log.warn("human-input: No text specified")
 		elif inputaction == "press":
