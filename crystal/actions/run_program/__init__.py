@@ -39,6 +39,12 @@ class ActionRunProgram(BaseAction):
 				return "mail"
 			if any([w in ["volume", "audio"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["control", "panel"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
 				return "volume-control"
+			if any([w in ["notepad"] for w in word_strs]):
+				return "text editor"
+			if any([w in ["text", "note"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["editor", "edit", "pad"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
+				return "text editor"
+			if any([w in ["g"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["edit"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
+				return "text editor"
 			if any([w in ["calculator", "calendar"] for w in word_strs]):
 				return word_strs[0]
 			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"] for w in word_strs]):
@@ -63,6 +69,8 @@ class ActionRunProgram(BaseAction):
 			return "x-www-browser mail.google.com"
 		if program_type == "volume-control":
 			return "pavucontrol"
+		if program_type == "text editor":
+			return "gedit"
 		if program_type in ["calculator", "calendar"]:
 			return "gnome-{}".format(program_type)
 		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"]:
