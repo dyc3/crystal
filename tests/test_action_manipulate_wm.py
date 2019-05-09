@@ -21,9 +21,15 @@ class TestActionManipulateWm(unittest.TestCase):
 			("pull up desktop 4", 'i3-msg "workspace 4"'),
 			("go to desktop 2", 'i3-msg "workspace 2"'),
 			("switch to workspace 2", 'i3-msg "workspace 2"'),
+			("go to desktop number 2", 'i3-msg "workspace 2"'),
+			("switch to workspace one", 'i3-msg "workspace 1"'),
+			("show me workspace number three", 'i3-msg "workspace 3"'),
 
 			("put this on workspace 2", 'i3-msg "move container to workspace number 2"'),
 			("move this to desktop 5", 'i3-msg "move container to workspace number 5"'),
+			("put this on workspace number 3", 'i3-msg "move container to workspace number 3"'),
+			("move this to workspace six", 'i3-msg "move container to workspace number 6"'),
+			("put this on workspace number eight", 'i3-msg "move container to workspace number 8"'),
 
 			("close this", 'i3-msg "kill"'),
 			("kill this application", 'i3-msg "kill"'),

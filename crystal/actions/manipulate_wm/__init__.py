@@ -16,31 +16,34 @@ class ActionManipulateWm(BaseAction):
 		"""
 		Returns a i3-msg command with arguments to complete the action.
 		"""
+		workspace_token = utils.find_word(sentence.doc, ["workspace", "space", "desktop"])
+		workspace_number = None
+		if workspace_token:
+			num_token = workspace_token.nbor(1)
+			if num_token.lemma_ == "number":
+				num_token = workspace_token.nbor(2)
+			try:
+				workspace_number = int(num_token.text)
+			except:
+				workspace_number = utils.text2int(num_token.text.lower())
+
 		command = None
 		# switching workspaces
 		if str(sentence.root) in ["switch", "focus", "show", "pull", "go"]:
-			for word in sentence:
-				if word.lemma_ in ["workspace", "space", "desktop"]:
-					num_token = word.nbor(1)
-					try:
-						num = int(str(num_token))
-					except:
-						num = utils.text2int(str(num_token).lower())
-					command = 'i3-msg "workspace {}"'.format(num)
+			if workspace_token and workspace_number:
+				command = 'i3-msg "workspace {}"'.format(workspace_number)
+			else:
+				# TODO: create Exception specifically for parsing failures
+				raise Exception("Failed to parse input for workspace number")
 		# moving windows to other workspaces
 		elif str(sentence.root) in ["move", "put"]:
-			target_workspace = None
-			for word in sentence:
-				if word.lemma_ in ["workspace", "space", "desktop"]:
-					num_token = word.nbor(1)
-					try:
-						target_workspace = int(str(num_token))
-					except:
-						target_workspace = utils.text2int(str(num_token).lower())
-			if not target_workspace:
+			if not workspace_token or not workspace_number:
+				# TODO: create Exception specifically for parsing failures
 				raise Exception("Unable to parse for target workspace")
-			if str(sentence.root.nbor(1)) == "this":
-				command = 'i3-msg "move container to workspace number {}"'.format(target_workspace)
+			if sentence.root.nbor(1).text == "this":
+				command = 'i3-msg "move container to workspace number {}"'.format(workspace_number)
+			else:
+				raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' window.")
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
 		else:
@@ -60,7 +63,7 @@ class ActionManipulateWm(BaseAction):
 		try:
 			command = self.parse(sentence)
 		except Exception as e:
-			return ActionResponseBasic(ActionResponseType.FAILURE, "Parsing failed: {}".format(e.message))
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Parsing failed: {}".format(e))
 
 		if command != None:
 			exitcode = utils.runAndPrint(command)
