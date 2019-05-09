@@ -45,7 +45,7 @@ def printSpacy(sentence):
 	for token in sentence:
 		print(token, token.pos_, token.dep_, "parent:", token.head)
 
-def find_word(doc, words):
+def find_word(doc, words, min_idx=0):
 	"""
 	Takes a spaCy doc, and `words`, a list of strings.
 	Returns the first token in `doc` that matches any of the words or their lemma_
@@ -55,6 +55,8 @@ def find_word(doc, words):
 	assert isinstance(words, list) and len(words) > 0
 
 	for token in doc:
+		if token.i < min_idx:
+			continue
 		for word in words:
 			if token.text.lower() == word or token.lemma_ == word:
 				return token
