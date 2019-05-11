@@ -30,6 +30,11 @@ class TestActionHumanInput(unittest.TestCase):
 			("move the mouse to the left 300 pixels", "move", ("left", 300)),
 			("move the mouse left 300 pixels", "move", ("left", 300)),
 
+			("move the mouse to the left by 30 units", "move", ("left", 300)),
+			("move the mouse to the left 30 units", "move", ("left", 300)),
+			("move the mouse 30 units to the left", "move", ("left", 300)),
+			("move the mouse left 30 units", "move", ("left", 300)),
+
 			("move the mouse to the right by 300 pixels", "move", ("right", 300)),
 			("move the mouse 300 pixels to the right", "move", ("right", 300)),
 

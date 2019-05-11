@@ -58,6 +58,7 @@ class ActionHumanInput(BaseAction):
 					scroll_amount = 1000
 
 		elif inputaction == "move":
+			unit_size = 10
 			for word in sentence:
 				numToken = None
 				if str(word) in ["up", "down", "left", "right", "center"]:
@@ -66,13 +67,17 @@ class ActionHumanInput(BaseAction):
 					if str(word) == "by":
 						for prepchild in word.children:
 							if prepchild.dep_ == "pobj":
-								if prepchild.lemma_ == "pixel":
+								if prepchild.lemma_ in ["pixel", "unit"]:
+									if prepchild.lemma_ == "pixel":
+										unit_size = 1
 									for c in prepchild.children:
 										if c.like_num:
 											numToken = c
 								elif prepchild.like_num:
 									numToken = prepchild
-				elif word.lemma_ == "pixel":
+				elif word.lemma_ in ["pixel", "unit"]:
+					if word.lemma_ == "pixel":
+						unit_size = 1
 					for c in word.children:
 						if c.like_num:
 							numToken = c
@@ -87,6 +92,7 @@ class ActionHumanInput(BaseAction):
 						except Exception as e:
 							log.error("could not parse {}".format(numToken))
 							break
+			move_amount *= unit_size
 
 		elif inputaction == "press":
 			word = utils.find_word(sentence.doc, ["press"])
