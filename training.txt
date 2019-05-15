@@ -176,3 +176,12 @@ will it warm up later today,weather
 is it still raining,weather
 show me the weather for today,weather
 is it snowing outside,weather
+spell apple,language
+how do you spell barnacle,language
+how do you spell french,language
+how do you spell ladkfhgpoiasrgfjsedlk,language
+define dystopia,language
+define version,language
+define collegiate,language
+what is the definition of backflip,language
+what is the definition of elongated,language
