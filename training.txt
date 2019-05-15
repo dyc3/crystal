@@ -173,3 +173,6 @@ should I wear a coat,weather
 how cold is it,weather
 is it hot out,weather
 will it warm up later today,weather
+is it still raining,weather
+show me the weather for today,weather
+is it snowing outside,weather
