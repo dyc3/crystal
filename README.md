@@ -47,28 +47,17 @@ Feedback modules are integrations with other software to provide sensory feedbac
 the user (status indicators, etc). Feedback modules can attach themselves anywhere in
 the input-action pipeline.
 
-# Installation
+# Setup
 
-Proper installation involves setting up a service in systemd. Installation is currently
-not automated and must be done manually.
+Here are notes for setting Crystal up on a new system (in no particular order).
 
-Create a file `crystal.service` in `/etc/systemd/system` with the contents:
+Snowboy must be compiled for the version of python that is being used.
 
+blink1 can't be seen without root, UNLESS proper udev rules is set up.
+blink1 udev rules go in file `/etc/udev/rules.d/51-blink1.rules`:
 ```
-[Unit]
-Description=Crystal
-After=network.target
-
-[Service]
-Type=simple
-User=carson
-WorkingDirectory=/home/carson/Documents/code/crystal
-PIDFile=/var/run/crystal.pid
-ExecStart=/home/carson/Documents/code/crystal/crystal.sh
-Restart=on-failure
-StandardOutput=syslog
-StandardError=syslog
-
-[Install]
-WantedBy=multi-user.target
+SUBSYSTEM=="input", GROUP="input", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="27b8", ATTRS{idProduct}=="01ed", MODE:="666", GROUP="plugdev"
+KERNEL=="hidraw*", ATTRS{idVendor}=="27b8", ATTRS{idProduct}=="01ed", MODE="0666", GROUP="plugdev"
 ```
+Reload udev with `sudo udevadm control --reload-rules`. You may need to unplug/replug device for rules to take effect.
