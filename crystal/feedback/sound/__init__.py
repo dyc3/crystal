@@ -17,6 +17,10 @@ def _playfile(file):
 	if nowPlaying and nowPlaying.is_playing():
 		nowPlaying.stop()
 
+	if not os.path.isfile(file):
+		log.error("Could not find file: {}".format(file))
+		return
+
 	wave_obj = sa.WaveObject.from_wave_file(file)
 	nowPlaying = wave_obj.play()
 	return nowPlaying
