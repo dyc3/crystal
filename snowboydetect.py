@@ -9,15 +9,19 @@
 
 
 from sys import version_info as _swig_python_version_info
+LIB_NAME = '_snowboydetect'
+if _swig_python_version_info >= (3, 6, 0):
+    LIB_NAME += '_3_6'
+
 if _swig_python_version_info >= (2, 7, 0):
     def swig_import_helper():
         import importlib
         pkg = __name__.rpartition('.')[0]
-        mname = '.'.join((pkg, '_snowboydetect')).lstrip('.')
+        mname = '.'.join((pkg, LIB_NAME)).lstrip('.')
         try:
             return importlib.import_module(mname)
         except ImportError:
-            return importlib.import_module('_snowboydetect')
+            return importlib.import_module(LIB_NAME)
     _snowboydetect = swig_import_helper()
     del swig_import_helper
 elif _swig_python_version_info >= (2, 6, 0):
@@ -26,13 +30,13 @@ elif _swig_python_version_info >= (2, 6, 0):
         import imp
         fp = None
         try:
-            fp, pathname, description = imp.find_module('_snowboydetect', [dirname(__file__)])
+            fp, pathname, description = imp.find_module(LIB_NAME, [dirname(__file__)])
         except ImportError:
-            import _snowboydetect
-            return _snowboydetect
+            # import _snowboydetect
+            return __import__(LIB_NAME)
         if fp is not None:
             try:
-                _mod = imp.load_module('_snowboydetect', fp, pathname, description)
+                _mod = imp.load_module(LIB_NAME, fp, pathname, description)
             finally:
                 fp.close()
             return _mod
