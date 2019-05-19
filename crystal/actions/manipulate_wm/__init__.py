@@ -40,10 +40,10 @@ class ActionManipulateWm(BaseAction):
 			if not workspace_token or not workspace_number:
 				# TODO: create Exception specifically for parsing failures
 				raise Exception("Unable to parse for target workspace")
-			if sentence.root.nbor(1).text == "this":
+			if sentence.root.nbor(1).text in ["this", "that"]:
 				command = 'i3-msg "move container to workspace number {}"'.format(workspace_number)
 			else:
-				raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' window.")
+				raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' or 'that' window.")
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
 		else:
