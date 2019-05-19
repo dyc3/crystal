@@ -29,6 +29,7 @@ class TestActionManipulateWm(unittest.TestCase):
 			("move this to desktop 5", 'i3-msg "move container to workspace number 5"'),
 			("put this on workspace number 3", 'i3-msg "move container to workspace number 3"'),
 			("move this to workspace six", 'i3-msg "move container to workspace number 6"'),
+			("move that to workspace seven", 'i3-msg "move container to workspace number 7"'),
 			("put this on workspace number eight", 'i3-msg "move container to workspace number 8"'),
 
 			("close this", 'i3-msg "kill"'),
@@ -37,6 +38,22 @@ class TestActionManipulateWm(unittest.TestCase):
 
 			("toggle fullscreen", 'i3-msg "fullscreen toggle"'),
 			("toggle floating", 'i3-msg "floating toggle"'),
+		]
+		action = manipulate_wm.ActionManipulateWm()
+		for test, expectedResult in test_set:
+			with self.subTest():
+				doc = nlp(test)
+				sent = next(doc.sents)
+				self.assertEqual(action.parse(sent), expectedResult, test)
+
+	def test_parse_move_workspace_to_output(self):
+		# query, expected result
+		test_set = [
+			("move this workspace up", 'i3-msg "move workspace to output up"'),
+			("move workspace down", 'i3-msg "move workspace to output down"'),
+			("move work space left", 'i3-msg "move workspace to output left"'),
+			("move this desktop to the right", 'i3-msg "move workspace to output right"'),
+			("move this workspace to the primary display", 'i3-msg "move workspace to output primary"'),
 		]
 		action = manipulate_wm.ActionManipulateWm()
 		for test, expectedResult in test_set:

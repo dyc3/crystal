@@ -25,7 +25,10 @@ class ActionManipulateWm(BaseAction):
 			try:
 				workspace_number = int(num_token.text)
 			except:
-				workspace_number = utils.text2int(num_token.text.lower())
+				try:
+					workspace_number = utils.text2int(num_token.text.lower())
+				except Exception as e:
+					log.debug("Failed to parse workspace number: {}".format(e))
 
 		command = None
 		# switching workspaces
@@ -37,13 +40,24 @@ class ActionManipulateWm(BaseAction):
 				raise Exception("Failed to parse input for workspace number")
 		# moving windows to other workspaces
 		elif str(sentence.root) in ["move", "put"]:
-			if not workspace_token or not workspace_number:
-				# TODO: create Exception specifically for parsing failures
-				raise Exception("Unable to parse for target workspace")
-			if sentence.root.nbor(1).text in ["this", "that"]:
-				command = 'i3-msg "move container to workspace number {}"'.format(workspace_number)
+			if workspace_token.nbor(-1).text in ["to", "on"]:
+				# This means that we are moving a window to the target workspace
+				if not workspace_token or not workspace_number:
+					# TODO: create Exception specifically for parsing failures
+					raise Exception("Unable to parse for target workspace")
+				if sentence.root.nbor(1).text in ["this", "that"]:
+					command = 'i3-msg "move container to workspace number {}"'.format(workspace_number)
+				else:
+					raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' or 'that' window.")
 			else:
-				raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' or 'that' window.")
+				# This means that we are moving the target workspace to a different output
+				direction = utils.find_word(sentence.doc, ["up", "down", "left", "right", "primary"])
+				if not direction:
+					raise Exception("Failed to parse which direction to move the current workspace")
+				# if workspace_number:
+					# NOTE: this is not yet supported by i3
+					# command = 'i3-msg "move workspace {} to output {}"'.format(workspace_number, direction.text)
+				command = 'i3-msg "move workspace to output {}"'.format(direction.text)
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
 		else:
