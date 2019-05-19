@@ -2,6 +2,10 @@ from abc import ABCMeta
 import abc
 import os
 import importlib
+import crystal.core
+
+import logging
+log = logging.getLogger(__name__)
 
 class BaseAction(metaclass=ABCMeta):
 	"""docstring for BaseAction."""
@@ -22,6 +26,8 @@ def load_actions():
 		module = importlib.import_module(name=value)
 		module = importlib.reload(module)
 		action = module.getAction()
+		if action.handled_classifier in crystal.core.args.disable_actions:
+			log.warn("Skip loading {} because it's disabled".format(action.handled_classifier))
 		action_modules[action.handled_classifier] = action
 
 	return action_modules

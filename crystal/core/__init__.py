@@ -233,7 +233,13 @@ def run(in_args):
 	log.info("Training command classifier...")
 	global cmdClassifier
 	cmdClassifier = crystal.core.processing.CommandClassifier()
-	train, labelsTrain = DataUtil.loadTrainingData("training.txt")
+	loaded = DataUtil.loadTrainingData("training.txt")
+	train, labelsTrain = [], []
+	for i in range(len(loaded[0])):
+		if loaded[1][i] in args.disable_actions:
+			continue
+		train.append(loaded[0][i])
+		labelsTrain.append(loaded[1][i])
 	cmdClassifier.fit(train, labelsTrain)
 
 	set_status(CrystalStatus.IDLE)

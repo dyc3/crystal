@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--mode", default="voice", const='voice', nargs='?', choices=["voice", "text"], required=False)
 parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="INFO", help="Set logger log level (default: INFO).")
 parser.add_argument("--verbose", action='store_true', help="Increase verbosity (within confines of provided log level).")
+parser.add_argument("--disable-actions", nargs="+", required=False, help="Disable the specified actions (default: )")
 
 args = parser.parse_args()
 
