@@ -51,6 +51,8 @@ the input-action pipeline.
 
 Here are notes for setting Crystal up on a new system (in no particular order).
 
+Tensorflow currently *still* doesn't support Python 3.7, so Crystal required Python **3.5** or **3.6**.
+
 Snowboy must be compiled for the version of python that is being used.
 
 blink1 can't be seen without root, UNLESS proper udev rules is set up.
