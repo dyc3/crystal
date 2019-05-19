@@ -24,6 +24,9 @@ class TestActionInfoHardware(unittest.TestCase):
 			("how much disk space is available", "disks", []),
 			("how many disk mounts are available", "disks", []),
 			("show me all storage disks", "disks", []),
+
+			("how much battery is left", "battery", []),
+			("how much charge is left", "battery", []),
 		]
 		action_info_hardware = info_hardware.ActionInfoHardware()
 		for query, expected_type, expected_params in test_set:

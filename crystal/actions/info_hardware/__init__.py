@@ -1,4 +1,5 @@
 from crystal.actions import BaseAction
+from crystal.actions.responses import *
 from crystal import feedback
 import psutil
 from pulsectl import Pulse # https://pypi.python.org/pypi/pulsectl
@@ -27,6 +28,7 @@ class ActionInfoHardware(BaseAction):
 		* disks
 		* audio_devices
 		* network_devices
+		* battery
 		"""
 		query_type = None
 		query_params = []
@@ -54,6 +56,8 @@ class ActionInfoHardware(BaseAction):
 							elif child.lemma_ in ["network", "internet"]:
 								query_type = "network_devices"
 							break
+			if word.lemma_ in ["battery", "charge"]:
+				query_type = "battery"
 
 		return query_type, query_params
 
@@ -119,6 +123,12 @@ class ActionInfoHardware(BaseAction):
 											(str(n) for n in net[interface] if net[interface].family == AddressFamily.AF_INET6), \
 											(str(n) for n in net[interface] if net[interface].family == AddressFamily.AF_LINK))
 			feedback.ShowNotify(netstring)
+		elif query_type == "battery":
+			battery = psutil.sensors_battery()
+			plugged = "Plugged in" if battery.power_plugged else "Not plugged in"
+			percent = str(battery.percent)
+			result = "{}: {}%".format(plugged, percent)
+			return ActionResponseQuery(result)
 
 def getAction():
 	return ActionInfoHardware()
