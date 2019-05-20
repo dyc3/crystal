@@ -28,6 +28,7 @@ class CrystalStatus(Enum):
 status = CrystalStatus.IDLE
 config = {}
 current_utterance = None
+args = None
 
 def set_status(s: CrystalStatus):
 	global status
