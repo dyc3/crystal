@@ -73,7 +73,6 @@ class ActionManipulateWm(BaseAction):
 	@classmethod
 	def run(self, doc):
 		sentence = next(doc.sents)
-		utils.printSpacy(sentence)
 		try:
 			command = self.parse(sentence)
 		except Exception as e:
