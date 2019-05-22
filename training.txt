@@ -91,6 +91,8 @@ quit this application,manipulate-wm
 close that,manipulate-wm
 toggle fullscreen,manipulate-wm
 toggle floating,manipulate-wm
+show me work space 3,manipulate-wm
+switch to workspace three,manipulate-wm
 lock the computer,system-lock
 lock my computer,system-lock
 lock it up,system-lock
