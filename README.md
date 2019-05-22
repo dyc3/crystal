@@ -1,8 +1,6 @@
 # Crystal
 
-## Design
-
-**NOTE: This isn't the way it's set up now, but it's the goal.**
+# Design
 
 There are 3 types of modules:
 * Input
