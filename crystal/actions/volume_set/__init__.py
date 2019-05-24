@@ -29,6 +29,8 @@ class ActionVolumeSet(BaseAction):
 		percent = None
 		volumeaction = None
 
+		# TODO: rewrite this mess using the new util functions
+
 		for word in sentence:
 			if word.lemma_ in ["mute", "unmute"]:
 				return word.lemma_
@@ -36,12 +38,18 @@ class ActionVolumeSet(BaseAction):
 				for token in sentence:
 					if token.i < word.i:
 						continue
+					if not volumeaction:
+						if token.lemma_ == "up" or word.lemma_ == "increase":
+							volumeaction = "increase"
+						if token.lemma_ == "down" or word.lemma_ == "decrease":
+							volumeaction = "decrease"
 					if token.lemma_ == "to":
 						volumeaction = "set"
+						break
 
 		if str(sentence.root) == "set" or str(sentence.root) == "increase" or str(sentence.root) == "decrease":
 			if volumeaction == None: volumeaction = str(sentence.root)
-		elif str(sentence.root) == "turn":
+		elif sentence.root.text.lower() == "turn":
 			for child in sentence.root.children:
 				if child.dep_ == "prt":
 					if str(child) == "up":
