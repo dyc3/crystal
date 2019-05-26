@@ -72,12 +72,7 @@ def on_status_update(status):
 		error()
 
 def on_action_finish(result):
-	if str(result).lower() == "yes" or result == True:
-		sayaffirmative()
-	elif str(result).lower() == "no" or result == False:
-		saynegative()
-	else:
-		ack()
+	ack()
 
 def register():
 	crystal.core.on_status_update += on_status_update
