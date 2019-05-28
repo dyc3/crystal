@@ -31,7 +31,7 @@ class ActionRunProgram(BaseAction):
 				return "terminal"
 			if any([w in ["nautilus", "file"] for w in word_strs]):
 				return "file browser"
-			if any([w in ["web", "firefox", "chrome"] for w in word_strs]):
+			if any([w in ["web", "internet"] for w in word_strs]):
 				return "web browser"
 			if any([w in ["launcher", "rofi", "dmenu"] for w in word_strs]):
 				return "launcher"
