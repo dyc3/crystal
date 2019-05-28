@@ -58,6 +58,7 @@ class SpeechRecognitionInput(BaseInput):
 			if "where space" in text.lower(): score -= 1
 			if "focusrite" in text: score -= 1
 			if text.endswith("workspace for"): score -= 1
+			if text.endswith("desktop to"): score -= 1
 			if text.endswith("desktop for"): score -= 1
 			if text.endswith("the stock for"): score -= 1
 			if text.endswith(" for"): score -= 1
@@ -88,6 +89,7 @@ class SpeechRecognitionInput(BaseInput):
 			if "open up atom" in text: score += 1
 			if "run atom" in text: score += 1
 			if "workspace 4" in text: score += 1
+			if text.endswith("desktop 2"): score += 1
 			if "workspace 9" in text: score += 1
 			if "show me work space" in text: score += 1
 			if "desktop 5" in text: score += 1
