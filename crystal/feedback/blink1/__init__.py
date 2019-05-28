@@ -15,6 +15,8 @@ def on_status_update(status):
 		b1.fade_to_color(100, "orange")
 	elif status == CrystalStatus.ERROR:
 		b1.fade_to_color(100, "red")
+	elif status == CrystalStatus.SEMILISTENING:
+		b1.fade_to_color(100, "SpringGreen")
 
 def on_core_exit():
 	b1.fade_to_color(2000, "black")

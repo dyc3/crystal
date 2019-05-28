@@ -42,6 +42,7 @@ WAKEWORD_VOICE = 0
 WAKEWORD_DETECTED = 1
 
 MIN_RECORDING_SECONDS = 2
+MIN_RECORDING_SECONDS_SEMILISTENING = 6
 MAX_RECORDING_SECONDS = 8
 SILENCE_THRESHOLD = 12 # number of frames to wait to stop recording
 
@@ -212,8 +213,12 @@ def do_recording():
 
 			# check length of recording
 			record_length = len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE
-			if record_length < MIN_RECORDING_SECONDS:
-				continue
+			if crystal.core.status == crystal.core.CrystalStatus.SEMILISTENING:
+				if record_length < MIN_RECORDING_SECONDS_SEMILISTENING:
+					continue
+			else:
+				if record_length < MIN_RECORDING_SECONDS:
+					continue
 
 			if record_length >= MAX_RECORDING_SECONDS or silence_count >= SILENCE_THRESHOLD:
 				log.debug("Done recording, length {:.2f}s".format(len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE))
@@ -223,6 +228,11 @@ def do_recording():
 			recording_raw_data = bytes()
 			silence_count = 0
 			wakeword_raw_data += data
+
+			if crystal.core.status == crystal.core.CrystalStatus.SEMILISTENING:
+				active = True
+				continue
+
 			while len(wakeword_raw_data) > SAMPLE_RATE * SAMPLE_WIDTH * 2: # sample rate * sample width in bytes (2 bytes for 16 bit) * number of seconds
 				wakeword_raw_data = wakeword_raw_data[SAMPLE_WIDTH:]
 			if len(wakeword_raw_data) > SAMPLE_RATE * SAMPLE_WIDTH:

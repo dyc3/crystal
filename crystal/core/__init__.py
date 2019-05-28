@@ -24,6 +24,7 @@ class CrystalStatus(Enum):
 	LISTENING = 1
 	BUSY = 2
 	ERROR = 3
+	SEMILISTENING = 4
 
 status = CrystalStatus.IDLE
 config = {}
@@ -76,10 +77,11 @@ def core_on_utterance_finish(text: str):
 	text = text.replace("crystal", "Crystal")
 
 	doc = crystal.core.processing.parse_nlp(text)
-	if args.mode == "voice" and not is_speaking_to_crystal(doc):
-		log.debug("user not talking to me")
-		set_status(CrystalStatus.IDLE)
-		return
+	if args.mode == "voice":
+		if status == CrystalStatus.LISTENING and not is_speaking_to_crystal(doc):
+			log.debug("user not talking to me")
+			set_status(CrystalStatus.IDLE)
+			return
 
 	classification, confidence = cmdClassifier.predict([text])[0]
 	log.info("Action detected: {}, confidence: {:.2f}%".format(classification, confidence * 100))
@@ -90,6 +92,11 @@ def core_on_utterance_finish(text: str):
 		except ValueError:
 			log.warn("Found action_confidence_threshold in config, but it wasn't a float. Using default value (.2)")
 			confidence_threshold = .2
+
+	if status == CrystalStatus.SEMILISTENING:
+		confidence_threshold = min(0.85, confidence_threshold + 0.2)
+		log.info("Semi-listening, adjusted confidence threshold to {}".format(confidence_threshold))
+
 	if confidence < confidence_threshold:
 		log.info("Confidence too low, must be > {}".format(confidence_threshold))
 		set_status(CrystalStatus.IDLE)
@@ -112,7 +119,7 @@ def core_on_utterance_finish(text: str):
 		traceback.print_exc()
 		on_action_error.fire()
 
-	set_status(CrystalStatus.IDLE)
+	set_status(CrystalStatus.SEMILISTENING)
 
 def core_on_action_error():
 	"""
