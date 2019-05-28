@@ -20,8 +20,14 @@ class ActionManipulateWm(BaseAction):
 		workspace_number = None
 		if workspace_token:
 			num_token = workspace_token.nbor(1)
+
 			if num_token.lemma_ == "number":
 				num_token = workspace_token.nbor(2)
+
+			# just in case the input filtering doesn't catch these cases
+			if num_token.text.lower() in ["to", "for"]:
+				workspace_number = { "to": 2, "for": 4 }[num_token.text.lower()]
+
 			try:
 				workspace_number = int(num_token.text)
 			except:
