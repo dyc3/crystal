@@ -86,13 +86,16 @@ show me desktop 5,manipulate-wm
 focus desktop 3,manipulate-wm
 show me work space four,manipulate-wm
 show me desktop three,manipulate-wm
+show me desktop number 2,manipulate-wm
+switch to desktop number seven,manipulate-wm
+switch to workspace number 1,manipulate-wm
+show me work space 3,manipulate-wm
+switch to workspace three,manipulate-wm
 kill this program,manipulate-wm
 quit this application,manipulate-wm
 close that,manipulate-wm
 toggle fullscreen,manipulate-wm
 toggle floating,manipulate-wm
-show me work space 3,manipulate-wm
-switch to workspace three,manipulate-wm
 lock the computer,system-lock
 lock my computer,system-lock
 lock it up,system-lock
@@ -133,6 +136,8 @@ move the cursor up by 100 pixels,human-input
 move the cursor 200 pixels down,human-input
 scroll up,human-input
 scroll down,human-input
+scroll to the top,human-input
+scroll to the bottom,human-input
 how many CPU threads do I have,info-hardware
 how many logical processors do I have,info-hardware
 show me the number of logical cores in this machine,info-hardware
@@ -189,3 +194,4 @@ define version,language
 define collegiate,language
 what is the definition of backflip,language
 what is the definition of elongated,language
+what is the definition of eorituwpo,language
