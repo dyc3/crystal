@@ -31,8 +31,8 @@ class TestActionRunProgram(unittest.TestCase):
 			("open my files", "file browser"),
 
 			("open a web browser", "web browser"),
-			("open firefox", "web browser"),
-			("open chrome", "web browser"),
+			("open firefox", None),
+			("open chrome", None),
 
 			("open mail", "mail"),
 			("show me my email", "mail"),
