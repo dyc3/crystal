@@ -17,6 +17,9 @@ class ActionGithub(BaseAction):
 
 	@classmethod
 	def init(self):
+		self.GITHUB_ACCESS_TOKEN = core.get_config("github_access_token")
+		if not self.GITHUB_ACCESS_TOKEN:
+			log.warn("No github_access_token found in config!")
 		self.last_notif_check = datetime.datetime.now()
 		self.last_notif_count = 0
 
@@ -42,8 +45,6 @@ class ActionGithub(BaseAction):
 
 	@classmethod
 	def get_notifications(self):
-		self.GITHUB_ACCESS_TOKEN = core.get_config("github_access_token")
-
 		resp = requests.get("https://api.github.com/notifications?access_token={}".format(self.GITHUB_ACCESS_TOKEN))
 		if resp.status_code == 200:
 			log.debug(resp)
