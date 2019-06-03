@@ -21,7 +21,7 @@ class EventHook(object):
 		return self
 
 	def fire(self, *args, **keywargs):
-		log.debug("event triggered: {}, {}, {}".format(self.name, args, keywargs))
+		log.debug("event triggered: {}, {}, {}".format(self.name, args, keywargs)[:300])
 		for handler in self.__handlers:
 			handler(*args, **keywargs)
 
