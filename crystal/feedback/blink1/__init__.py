@@ -33,5 +33,6 @@ def register():
 	crystal.core.on_core_exit += on_core_exit
 
 def unregister():
-	crystal.core.on_status_update -= on_status_update
-	crystal.core.on_core_exit -= on_core_exit
+	if b1:
+		crystal.core.on_status_update -= on_status_update
+		crystal.core.on_core_exit -= on_core_exit

@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 from crystal.actions import BaseAction
 from crystal.actions.responses import ActionResponseType, ActionResponseBasic, ActionResponseQuery, ActionResponsePromptList
@@ -11,7 +12,16 @@ class ActionGithub(BaseAction):
 	def __init__(self):
 		super(ActionGithub, self).__init__()
 		self.handled_classifier = "github"
-		self.requires_updater = False
+		self.requires_updater = True
+		self.init()
+
+	@classmethod
+	def init(self):
+		self.GITHUB_ACCESS_TOKEN = core.get_config("github_access_token")
+		if not self.GITHUB_ACCESS_TOKEN:
+			log.warn("No github_access_token found in config!")
+		self.last_notif_check = datetime.datetime.now()
+		self.last_notif_count = 0
 
 	@classmethod
 	def parse(self, doc):
@@ -35,8 +45,6 @@ class ActionGithub(BaseAction):
 
 	@classmethod
 	def get_notifications(self):
-		self.GITHUB_ACCESS_TOKEN = core.get_config("github_access_token")
-
 		resp = requests.get("https://api.github.com/notifications?access_token={}".format(self.GITHUB_ACCESS_TOKEN))
 		if resp.status_code == 200:
 			log.debug(resp)
@@ -68,6 +76,17 @@ class ActionGithub(BaseAction):
 			return ActionResponseBasic(ActionResponseType.FAILURE, "Can't do that yet: {}".format(command))
 		else:
 			return ActionResponseBasic(ActionResponseType.FAILURE, "unknown command: {}".format(command))
+
+	@classmethod
+	def update(self):
+		delta = datetime.datetime.now() - self.last_notif_check
+		if delta.total_seconds() >= 60:
+			self.last_notif_check = datetime.datetime.now()
+
+			notif_count = len(self.get_notifications())
+			if notif_count != self.last_notif_count and notif_count > 0:
+				feedback.ShowNotify("You have {} GitHub notifications")
+			self.last_notif_count = notif_count
 
 def getAction():
 	return ActionGithub()

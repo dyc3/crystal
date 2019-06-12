@@ -5,6 +5,7 @@ from pathlib import Path
 from crystal.actions import BaseAction
 from crystal.actions.responses import ActionResponseType, ActionResponseBasic, ActionResponseQuery, ActionResponsePromptList
 from crystal import core, feedback
+import utils
 import logging
 log = logging.getLogger(__name__)
 
@@ -18,7 +19,10 @@ class ActionWeather(BaseAction):
 		self.requires_updater = False
 
 	@classmethod
-	def parse(self, sentence):
+	def parse(self, doc):
+		word = utils.find_word(doc, "tomorrow")
+		if word:
+			return "forecast"
 		return "current"
 
 	@classmethod
@@ -56,8 +60,7 @@ class ActionWeather(BaseAction):
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
-		command = self.parse(sentence)
+		command = self.parse(doc)
 
 		if command == "current":
 			zipcode = core.get_config("zipcode")
