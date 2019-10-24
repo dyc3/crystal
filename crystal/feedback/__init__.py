@@ -34,9 +34,13 @@ def ShowNotify(body, title="Crystal"):
 	log.info("notify: {} - {}".format(title, body))
 	if not enableNotify:
 		return None
-	notification = Notify.Notification.new(title, body, None)
-	notification.show()
-	return notification
+	try:
+		notification = Notify.Notification.new(title, body, None)
+		notification.show()
+		return notification
+	except:
+		log.warn("Failed to show notification (deprecated method)")
+		return None
 
 def load_feedback():
 	feedback_modules_str = ["crystal.feedback."+a for a in os.listdir("crystal/feedback") if "." not in a and a != "__pycache__"]

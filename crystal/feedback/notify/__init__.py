@@ -12,23 +12,35 @@ log = logging.getLogger(__name__)
 current_utterance_notif = Notify.Notification.new("Crystal", "User:", None)
 
 def on_utterance_start():
-	current_utterance_notif.update("Crystal", "User:", None)
+	try:
+		current_utterance_notif.update("Crystal", "User:", None)
+	except:
+		log.warn("Failed to show notification")
 
 def on_utterance_update(text):
 	if not text.startswith("Crystal"):
 		return
-	current_utterance_notif.update("Crystal", "User: {}".format(text), None)
-	current_utterance_notif.show()
+	try:
+		current_utterance_notif.update("Crystal", "User: {}".format(text), None)
+		current_utterance_notif.show()
+	except:
+		log.warn("Failed to show notification")
 
 def on_utterance_finish(text):
 	if not text.startswith("Crystal"):
 		return
-	current_utterance_notif.update("Crystal", "User: {}".format(text), None)
-	current_utterance_notif.show()
+	try:
+		current_utterance_notif.update("Crystal", "User: {}".format(text), None)
+		current_utterance_notif.show()
+	except:
+		log.warn("Failed to show notification")
 
 def on_action_error():
-	notification = Notify.Notification.new("Crystal", "Action failed", None)
-	notification.show()
+	try:
+		notification = Notify.Notification.new("Crystal", "Action failed", None)
+		notification.show()
+	except:
+		log.warn("Failed to show notification")
 
 def register():
 	try:
