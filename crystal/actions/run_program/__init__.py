@@ -106,13 +106,14 @@ class ActionRunProgram(BaseAction):
 		log.info("Running command: {}".format(program))
 
 		# We need to spawn these processes without crystal's virtualenv, and reset the working directory
+		# We also need to spawn these processes such that Crystal is not the parent process
 		command = "/usr/bin/env sh -c 'unset VIRTUAL_ENV; cd; {} & disown'".format(program)
 		log.debug("Full command: {}".format(command))
 		subprocess.Popen(shlex.split(command),
 						stdin=subprocess.DEVNULL,
 						stdout=subprocess.DEVNULL,
 						stderr=subprocess.DEVNULL,
-						)
+						start_new_session=True)
 		return ActionResponseQuery("Running {}".format(program))
 
 def getAction():
