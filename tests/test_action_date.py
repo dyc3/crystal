@@ -41,6 +41,7 @@ class TestActionDate(unittest.TestCase):
 		test_set = [
 			("is today {}".format(datetime.date.today().strftime("%A")), True),
 			("is tomorrow {}".format((datetime.date.today() + datetime.timedelta(days=1)).strftime("%A")), True),
+			("was yesterday {}".format((datetime.date.today() - datetime.timedelta(days=1)).strftime("%A")), True),
 			("was yesterday {}".format(datetime.date.today().strftime("%A")), False),
 			("is tomorrow {}".format(datetime.date.today().strftime("%A")), False),
 		]
