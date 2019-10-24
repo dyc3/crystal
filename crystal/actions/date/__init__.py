@@ -50,6 +50,11 @@ class ActionDate(BaseAction):
 		"How many days until January 2?"
 		The target_date should be January 2, 2000, and
 		the compare_date should be January 1, 2000
+
+		Another example, if the current date was Jan 1, 2000, and we parse the sentence:
+		"Is tomorrow Monday?"
+		The target_date should be January 3, 2000 (the next Monday), and
+		the compare_date should be January 2, 2000 (tomorrow)
 		"""
 		# TODO: I think this method needs a total rewrite because it's super confusing.
 		# target_date and compare_date are not obvious without reading the docstring.
@@ -60,7 +65,8 @@ class ActionDate(BaseAction):
 		target_token = [word for word in sentence if word.ent_type_ == "DATE" and word.lemma_ not in ["day", "the", "many"]][0]
 		# the entity that the target token is in might have more than one word, eg. "Jan 20"
 		# so make sure target_token has the *entire* date entity
-		target_token = [ent for ent in sentence.doc.ents if ent.start == target_token.i][0].merge()
+		if target_token.lemma_ not in ["yesterday", "today", "tomorrow"]:
+			target_token = [ent for ent in sentence.doc.ents if ent.start == target_token.i][0].merge()
 
 		parse_string = str(target_token)
 		log.debug("parsing target date: {}".format(parse_string))
