@@ -17,6 +17,8 @@ class TestActionGithub(unittest.TestCase):
 		test_set = [
 			("how many notifications are on Github", "count-notif"),
 			("how many notifications do I have on Github", "count-notif"),
+			("do I have any Github notifications", "count-notif"),
+			("are there any Github notifications", "count-notif"),
 			("check github notifications", "list-notif"),
 			("list github notifications", "list-notif"),
 			("show me my github notifications", "list-notif"),
@@ -26,7 +28,7 @@ class TestActionGithub(unittest.TestCase):
 		]
 		action_github = github.ActionGithub()
 		for query, expected_command in test_set:
-			with self.subTest():
+			with self.subTest("Testing query \"{}\", expecting {}".format(query, expected_command)):
 				doc = nlp(query)
 				sent = next(doc.sents)
 				command = action_github.parse(sent)

@@ -34,6 +34,9 @@ class ActionGithub(BaseAction):
 				cmd_type = "count"
 			elif word.lemma_ == "how" and word.nbor(1).lemma_ == "many":
 				cmd_type = "count"
+			elif word.lemma_ == "any" and (word.nbor(-2).lemma_ == "be" or word.nbor(-1).lemma_ == "have"):
+				# the lemma_ property of the word "are" is "be"
+				cmd_type = "count"
 
 			if word.lemma_ in ["notification", "check"]:
 				cmd_target = "notif"
@@ -41,6 +44,10 @@ class ActionGithub(BaseAction):
 				cmd_target = "repos"
 		if cmd_type and cmd_target:
 			return "{}-{}".format(cmd_type, cmd_target)
+		if not cmd_type:
+			log.warn("Unable to determine command type")
+		if not cmd_type:
+			log.warn("Unable to determine command target")
 		return None
 
 	@classmethod
