@@ -52,13 +52,17 @@ class ActionGithub(BaseAction):
 
 	@classmethod
 	def get_notifications(self):
-		resp = requests.get("https://api.github.com/notifications?access_token={}".format(self.GITHUB_ACCESS_TOKEN))
-		if resp.status_code == 200:
-			log.debug(resp)
-			return resp.json()
-		else:
-			log.error(resp)
-			log.error(resp.url)
+		try:
+			resp = requests.get("https://api.github.com/notifications?access_token={}".format(self.GITHUB_ACCESS_TOKEN))
+			if resp.status_code == 200:
+				log.debug(resp)
+				return resp.json()
+			else:
+				log.error(resp)
+				log.error(resp.url)
+				return None
+		except requests.exceptions.Timeout:
+			log.warn("Timed out when getting notifications")
 			return None
 
 	@classmethod
