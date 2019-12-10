@@ -96,7 +96,7 @@ class ActionGithub(BaseAction):
 
 			notif_count = len(self.get_notifications())
 			if notif_count != self.last_notif_count and notif_count > 0:
-				feedback.ShowNotify("You have {} GitHub notifications")
+				feedback.ShowNotify(f"You have {notif_count} GitHub notifications")
 			self.last_notif_count = notif_count
 
 def getAction():
