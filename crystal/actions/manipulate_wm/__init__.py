@@ -1,8 +1,17 @@
+import subprocess
+import json
+
 from crystal.actions import BaseAction
 from crystal.actions.responses import *
 import utils
 import logging
 log = logging.getLogger(__name__)
+
+# TODO: don't rely on i3-msg to set commands, this should actually establish an IPC connection, see:
+# - https://i3wm.org/docs/ipc.html#_establishing_a_connection
+# - https://github.com/Ceryn/i3msg-python
+
+# TODO: create layer of abstraction to allow for different window managers to be used
 
 class ActionManipulateWm(BaseAction):
 	"""docstring for ActionManipulateWm."""
@@ -10,6 +19,53 @@ class ActionManipulateWm(BaseAction):
 		super(ActionManipulateWm, self).__init__()
 		self.handled_classifier = "manipulate-wm"
 		self.requires_updater = False
+
+	@staticmethod
+	def _i3_msg(command_type, msg=None):
+		"""
+		Runs i3-msg and returns the JSON object response
+		"""
+		assert command_type != "subscribe", "The subscribe command type is invalid here."
+
+		command = ["i3-msg", "-t", command_type]
+		if msg:
+			command += [msg]
+		result = subprocess.Popen(command,
+								stdin=subprocess.DEVNULL,
+								stdout=subprocess.PIPE,
+								stderr=subprocess.DEVNULL)
+		out, err = result.communicate()
+		return json.loads(out)
+
+	@classmethod
+	def get_workspaces(self):
+		return self._i3_msg("get_workspaces")
+
+	@classmethod
+	def get_outputs(self):
+		return self._i3_msg("get_outputs")
+
+	@classmethod
+	def get_tree(self):
+		return self._i3_msg("get_tree")
+
+	@classmethod
+	def get_marks(self):
+		return self._i3_msg("get_marks")
+
+	@classmethod
+	def find_matching_windows_in_tree(self, i3_tree, query):
+		results = []
+		if "window" in i3_tree and i3_tree["window"] and "window_properties" in i3_tree:
+			if any([prop in i3_tree["window_properties"] and query in i3_tree["window_properties"][prop] for prop in ["class", "instance", "title"]]):
+				log.debug(f"Found node in tree: {i3_tree}")
+				results += [{
+					"id": i3_tree["id"], # C pointer to identify i3 container
+					"window": i3_tree["window"], # X11 window reference
+				}]
+		for node in i3_tree["nodes"]:
+			results += self.find_matching_windows_in_tree(node, query)
+		return results
 
 	@classmethod
 	def parse(self, sentence):
@@ -36,10 +92,22 @@ class ActionManipulateWm(BaseAction):
 				except Exception as e:
 					log.debug("Failed to parse workspace number: {}".format(e))
 
+		# target_token indicates the target entity the request is referencing
+		# used for requests like "show me steam" or "switch to the web browser"
+		# FIXME: do something more robust
+		target_token = utils.find_word(sentence.doc, ["this", "steam", "browser", "firefox", "discord", "telegram"])
+
 		command = None
 		# switching workspaces
 		if str(sentence.root) in ["switch", "focus", "show", "pull", "go"]:
-			if workspace_token and workspace_number:
+			if target_token:
+				matching_windows = self.find_matching_windows_in_tree(self.get_tree(), str(target_token))
+				log.info(f"Found {len(matching_windows)} matching windows")
+				if len(matching_windows) > 0:
+					command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus\''
+				else:
+					raise Exception("Could not find any windows matching query")
+			elif workspace_token and workspace_number:
 				command = 'i3-msg "workspace {}"'.format(workspace_number)
 			else:
 				# TODO: create Exception specifically for parsing failures
@@ -82,6 +150,7 @@ class ActionManipulateWm(BaseAction):
 		try:
 			command = self.parse(sentence)
 		except Exception as e:
+			log.exception(e)
 			return ActionResponseBasic(ActionResponseType.FAILURE, "Parsing failed: {}".format(e))
 
 		if command != None:

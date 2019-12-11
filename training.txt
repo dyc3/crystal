@@ -96,6 +96,12 @@ quit this application,manipulate-wm
 close that,manipulate-wm
 toggle fullscreen,manipulate-wm
 toggle floating,manipulate-wm
+show me steam,manipulate-wm
+show me firefox,manipulate-wm
+switch to discord,manipulate-wm
+switch to the web browser,manipulate-wm
+go to firefox,manipulate-wm
+show me the steam window,manipulate-wm
 lock the computer,system-lock
 lock my computer,system-lock
 lock it up,system-lock
