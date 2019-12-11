@@ -35,7 +35,8 @@ class CommandClassifier():
 	def __init__(self):
 		super(CommandClassifier, self).__init__()
 		# self.clf = CalibratedClassifierCV(LinearSVC())
-		self.clf = MLPClassifier(hidden_layer_sizes=(25,25))
+		# TODO: make a model that uses spacy's vectors
+		self.clf = MLPClassifier(hidden_layer_sizes=(100,25), max_iter=500, random_state=419)
 		self.vectorizer = CountVectorizer(tokenizer=self._tokenizeText, ngram_range=(1,1))
 		self.pipe = Pipeline([('vectorizer', self.vectorizer), ('clf', self.clf)])
 
