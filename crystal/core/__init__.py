@@ -244,7 +244,7 @@ def run(in_args):
 	loaded = DataUtil.loadTrainingData("training.txt")
 	train, labelsTrain = [], []
 	for i in range(len(loaded[0])):
-		if loaded[1][i] in args.disable_actions:
+		if args.disable_actions and loaded[1][i] in args.disable_actions:
 			continue
 		train.append(loaded[0][i])
 		labelsTrain.append(loaded[1][i])

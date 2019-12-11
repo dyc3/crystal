@@ -26,8 +26,10 @@ def load_actions():
 		module = importlib.import_module(name=value)
 		module = importlib.reload(module)
 		action = module.getAction()
-		if crystal.core.args and action.handled_classifier in crystal.core.args.disable_actions:
+		if crystal.core.args and crystal.core.args.disable_actions and action.handled_classifier in crystal.core.args.disable_actions:
 			log.warn("Skip loading {} because it's disabled".format(action.handled_classifier))
+			del action
+			continue
 		action_modules[action.handled_classifier] = action
 
 	return action_modules
