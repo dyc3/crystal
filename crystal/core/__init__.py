@@ -85,13 +85,13 @@ def core_on_utterance_finish(text: str):
 
 	classification, confidence = cmdClassifier.predict([text])[0]
 	log.info("Action detected: {}, confidence: {:.2f}%".format(classification, confidence * 100))
-	confidence_threshold = get_config("action_confidence_threshold", optional=True) or .2
+	confidence_threshold = get_config("action_confidence_threshold", optional=True) or .6
 	if not isinstance(confidence_threshold, float):
 		try:
 			confidence_threshold = float(confidence_threshold)
 		except ValueError:
-			log.warn("Found action_confidence_threshold in config, but it wasn't a float. Using default value (.2)")
-			confidence_threshold = .2
+			log.warn("Found action_confidence_threshold in config, but it wasn't a float. Using default value (.6)")
+			confidence_threshold = .6
 
 	if status == CrystalStatus.SEMILISTENING:
 		confidence_threshold = min(0.85, confidence_threshold + 0.2)
