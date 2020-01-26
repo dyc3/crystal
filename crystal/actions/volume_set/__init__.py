@@ -64,7 +64,7 @@ class ActionVolumeSet(BaseAction):
 		for child in sentence:
 			#print ("child: {0}: {1}".format(child, child.dep_))
 			if child.dep_ == "prep":
-				if str(child) == "to":
+				if str(child) == "to" or str(child) == "at":
 					volumeaction = "set"
 				elif str(child) == "by":
 					pass
