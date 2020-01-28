@@ -53,6 +53,8 @@ class ActionRunProgram(BaseAction):
 				return "togethertube"
 			if any([w in ["dab"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["room"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
 				return "togethertube-dab"
+			if any([w in ["dc"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["universe"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
+				return "dc-universe"
 			if any([w.endswith(".com") or w.endswith(".org") or w.endswith(".net") or w.endswith(".io") for w in word_strs]):
 				return word_strs[0]
 
@@ -87,6 +89,8 @@ class ActionRunProgram(BaseAction):
 			return "x-www-browser opentogethertube.com"
 		if program_type == "togethertube-dab":
 			return "x-www-browser opentogethertube.com/room/dab"
+		if program_type == "dc-universe":
+			return "x-www-browser dcuniverse.com"
 		if any([program_type.endswith(s) for s in [".com", ".org", ".net", ".io"]]):
 			return "x-www-browser {}".format(program_type)
 
