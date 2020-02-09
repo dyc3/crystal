@@ -53,7 +53,7 @@ class ActionGithub(BaseAction):
 	@classmethod
 	def get_notifications(self):
 		try:
-			resp = requests.get("https://api.github.com/notifications?access_token={}".format(self.GITHUB_ACCESS_TOKEN))
+			resp = requests.get("https://api.github.com/notifications", auth=("dyc3", self.GITHUB_ACCESS_TOKEN))
 			if resp.status_code == 200:
 				log.debug(resp)
 				return resp.json()
