@@ -81,6 +81,7 @@ class SpeechRecognitionInput(BaseInput):
 			if "Crystal Puzzle" in text: score -= 1
 			if "Crystal Palace" in text: score -= 1
 			if "words Phase" in text: score -= 1
+			if "opens creeps" in text: score -= 1
 
 			if text.lower().startswith("crystal"):
 				score += 1
@@ -98,6 +99,8 @@ class SpeechRecognitionInput(BaseInput):
 			if "default sink" in text: score += 1
 			if "fullscreen" in text: score += 1
 			if "switch chromium's audio" in text: score += 1
+			if "open screeps" in text: score += 1
+			if "screeps documentation" in text: score += 1
 
 			scores.append((text, score))
 
