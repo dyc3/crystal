@@ -85,6 +85,8 @@ class ActionRunProgram(BaseAction):
 		if program_type in ["calculator", "calendar"]:
 			return "gnome-{}".format(program_type)
 		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"]:
+			if program_type == "github":
+				return "x-www-browser https://github.com/notifications"
 			if program_type == "twitch":
 				suffix = ".tv"
 			else:
