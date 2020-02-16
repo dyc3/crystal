@@ -30,6 +30,8 @@ class TestActionVolumeSet(unittest.TestCase):
 			(0.5, "turn up the volume", 0.6),
 			(0.5, "turn it up by 30", 0.8),
 			(0.5, "Turn It Up by 20%", 0.7),
+			(0.5, "volume up", 0.6),
+			(0.5, "turn the volume up", 0.6),
 
 			(0.5, "decrease volume", 0.4),
 			(0.5, "decrease the volume", 0.4),
@@ -37,6 +39,8 @@ class TestActionVolumeSet(unittest.TestCase):
 			(0.5, "turn down the volume", 0.4),
 			(0.5, "turn it down by 30", 0.2),
 			(0.5, "turn it down by 20%", 0.3),
+			(0.5, "volume down", 0.4),
+			(0.5, "turn the volume down", 0.4),
 
 			(0.5, "mute the sound", "mute"),
 			(0.5, "unmute audio", "unmute"),

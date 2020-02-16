@@ -34,7 +34,7 @@ class ActionVolumeSet(BaseAction):
 		for word in sentence:
 			if word.lemma_ in ["mute", "unmute"]:
 				return word.lemma_
-			if word.lemma_ in ["increase", "decrease", "turn"]:
+			if word.lemma_ in ["increase", "decrease", "turn", "volume"]:
 				for token in sentence:
 					if token.i < word.i:
 						continue
@@ -85,7 +85,7 @@ class ActionVolumeSet(BaseAction):
 						percent = float(p.rstrip('%')) / 100
 						break
 
-		if percent == None:
+		if volumeaction != "set" and percent == None:
 			percent = 0.10
 			log.debug("percent unspecified, using arbitrary percentage: {}".format(percent))
 
