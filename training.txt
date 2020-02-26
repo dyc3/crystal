@@ -98,6 +98,7 @@ toggle fullscreen,manipulate-wm
 toggle floating,manipulate-wm
 show me steam,manipulate-wm
 show me firefox,manipulate-wm
+show me Spotify,manipulate-wm
 switch to discord,manipulate-wm
 switch to the web browser,manipulate-wm
 go to firefox,manipulate-wm
