@@ -46,6 +46,8 @@ class ActionVolumeSet(BaseAction):
 					if token.lemma_ == "to":
 						volumeaction = "set"
 						break
+				if not volumeaction:
+					volumeaction = "set"
 
 		if str(sentence.root) == "set" or str(sentence.root) == "increase" or str(sentence.root) == "decrease":
 			if volumeaction == None: volumeaction = str(sentence.root)
@@ -84,8 +86,10 @@ class ActionVolumeSet(BaseAction):
 							p = str(prepchild)
 						percent = float(p.rstrip('%')) / 100
 						break
+			elif child.is_digit:
+				percent = float(child.text.rstrip('%')) / 100
 
-		if volumeaction != "set" and percent == None:
+		if volumeaction and volumeaction != "set" and percent == None:
 			percent = 0.10
 			log.debug("percent unspecified, using arbitrary percentage: {}".format(percent))
 
@@ -94,6 +98,9 @@ class ActionVolumeSet(BaseAction):
 		elif volumeaction == "decrease":
 			return round(current_volume - percent, 2)
 
+		if not percent:
+			raise Exception("Unable to parse input")
+
 		return round(percent, 2)
 
 	@classmethod
@@ -101,7 +108,10 @@ class ActionVolumeSet(BaseAction):
 		sentence = next(doc.sents)
 		for sink in pulse.sink_list():
 			if sink.name == pulse.server_info().default_sink_name:
-				result = self.parse(sink.volume.value_flat, sentence)
+				try:
+					result = self.parse(sink.volume.value_flat, sentence)
+				except Exception as e:
+					return ActionResponseBasic(ActionResponseType.FAILURE, e.message)
 				if result == "mute":
 					log.info("muting default sink")
 					utils.runAndPrint("pactl set-sink-mute @DEFAULT_SINK@ on")

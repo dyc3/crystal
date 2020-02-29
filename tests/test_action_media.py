@@ -27,6 +27,7 @@ class TestActionMedia(unittest.TestCase):
 			("pause media playback", "pause"),
 			("hold playback", "pause"),
 			("crystal pause the music", "pause"),
+			("crystal pause", "pause"),
 
 			("skip this song", "next"),
 			("next song", "next"),

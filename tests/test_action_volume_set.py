@@ -23,6 +23,9 @@ class TestActionVolumeSet(unittest.TestCase):
 			(0.5, "put volume at 40", 0.4),
 			(0.5, "put the volume at 60", 0.6),
 			(0.5, "put the volume to 75", 0.75),
+			(0.3, "crystal volume 50%", 0.5),
+			(0.3, "crystal volume 50 percent", 0.5),
+			(0.3, "crystal volume 60", 0.6),
 
 			(0.5, "increase volume", 0.6),
 			(0.5, "increase the volume", 0.6),
@@ -47,9 +50,10 @@ class TestActionVolumeSet(unittest.TestCase):
 		]
 		action_volume_set = volume_set.ActionVolumeSet()
 		for current_vol, query, expected_result in test_set:
-			doc = nlp(query)
-			sent = next(doc.sents)
-			self.assertEqual(action_volume_set.parse(current_vol, sent), expected_result, msg=query)
+			with self.subTest(query=query):
+				doc = nlp(query)
+				sent = next(doc.sents)
+				self.assertEqual(action_volume_set.parse(current_vol, sent), expected_result, msg=query)
 
 if __name__ == '__main__':
 	unittest.main()
