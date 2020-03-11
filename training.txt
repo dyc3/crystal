@@ -96,6 +96,10 @@ quit this application,manipulate-wm
 close that,manipulate-wm
 toggle fullscreen,manipulate-wm
 toggle floating,manipulate-wm
+make this full screen,manipulate-wm
+enable full screen,manipulate-wm
+disable full screen,manipulate-wm
+make this window float,manipulate-wm
 show me steam,manipulate-wm
 show me firefox,manipulate-wm
 show me Spotify,manipulate-wm

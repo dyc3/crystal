@@ -135,12 +135,20 @@ class ActionManipulateWm(BaseAction):
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
 		else:
-			word = utils.find_word(sentence.doc, "toggle")
-			if word:
-				if word.nbor(1).text in ["fullscreen"]:
-					command = 'i3-msg "fullscreen toggle"'
-				elif word.nbor(1).text in ["floating"]:
-					command = 'i3-msg "floating toggle"'
+			verb_word = utils.find_word(sentence.doc, ["toggle", "enable", "disable", "make"])
+			attribute_word = utils.find_word(sentence.doc, ["fullscreen", "floating", "full", "float"])
+			if verb_word and attribute_word:
+				verb = verb_word.text
+				if verb == "make":
+					verb = "enable"
+				attribute = attribute_word.text
+				if attribute == "full":
+					attribute = "fullscreen"
+				elif attribute == "float":
+					attribute = "floating"
+				command = f'i3-msg "{attribute} {verb}"'
+			else:
+				log.error(f"verb_word ({verb_word}) or attribute_word ({attribute_word}) not found")
 
 		return command
 

@@ -36,12 +36,25 @@ class TestActionManipulateWm(unittest.TestCase):
 			("kill this application", 'i3-msg "kill"'),
 			("quit this program", 'i3-msg "kill"'),
 
-			("toggle fullscreen", 'i3-msg "fullscreen toggle"'),
 			("toggle floating", 'i3-msg "floating toggle"'),
+			("make this float", 'i3-msg "floating enable"'),
+			("make this window float", 'i3-msg "floating enable"'),
+			("enable floating", 'i3-msg "floating enable"'),
+			("enable float", 'i3-msg "floating enable"'),
+			("disable floating", 'i3-msg "floating disable"'),
+			("disable float", 'i3-msg "floating disable"'),
+
+			("toggle fullscreen", 'i3-msg "fullscreen toggle"'),
+			("make this full screen", 'i3-msg "fullscreen enable"'),
+			("make this fullscreen", 'i3-msg "fullscreen enable"'),
+			("enable full screen", 'i3-msg "fullscreen enable"'),
+			("enable fullscreen", 'i3-msg "fullscreen enable"'),
+			("disable full screen", 'i3-msg "fullscreen disable"'),
+			("disable fullscreen", 'i3-msg "fullscreen disable"'),
 		]
 		action = manipulate_wm.ActionManipulateWm()
 		for test, expectedResult in test_set:
-			with self.subTest():
+			with self.subTest(test):
 				doc = nlp(test)
 				sent = next(doc.sents)
 				self.assertEqual(action.parse(sent), expectedResult, test)
