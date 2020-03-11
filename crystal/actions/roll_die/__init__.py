@@ -3,6 +3,8 @@ from crystal.actions.responses import *
 import random
 from crystal import feedback
 import utils
+import logging
+log = logging.getLogger(__name__)
 
 class ActionRollDie(BaseAction):
 	"""docstring for ActionRollDie."""
@@ -21,7 +23,7 @@ class ActionRollDie(BaseAction):
 				if word.lemma_ == "coin":
 					sides = 2
 				else:
-					if str(word.lemma_).lower() in ["die", "dice"]:
+					if word.lemma_ in ["die", "dice"]:
 						sides = 6
 					else:
 						# get sides and count
@@ -47,19 +49,17 @@ class ActionRollDie(BaseAction):
 		sides, count = self.parse(doc)
 
 		if count and sides and count >= 1 and sides > 1:
-			_rolling_str = "rolling {} d{}".format(count, sides)
-			print(_rolling_str)
+			log.info(f"rolling {count} d{sides}")
 			result = rollDie(sides, count)
-			dice = "{} d{}".format(count, sides)
-			outputstr = "ROLL: {}\n".format(dice)
+			dice = f"{count} d{sides}"
+			outputstr = f"ROLL: {dice}\n"
 			for n in range(len(result)):
-				outputstr += "{}{}".format(result[n], (" + " if n != len(result) - 1 else ""))
+				outputstr += f"{result[n]}{' + ' if n != len(result) - 1 else ''}"
 			if len(result) > 1:
-				outputstr += "\ntotal: {}".format(sum(result))
-			# feedback.ShowNotify(outputstr, _rolling_str)
+				outputstr += f"\ntotal: {sum(result)}"
 			return ActionResponseQuery(outputstr)
 		else:
-			return ActionResponseBasic(ActionResponseType.FAILURE, "count needs to be >= 1, got {} and sides needs to be > 1, got {}".format(count, sides))
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"count needs to be >= 1, got {count} and sides needs to be > 1, got {sides}")
 
 def getAction():
 	return ActionRollDie()
