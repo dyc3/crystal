@@ -55,15 +55,18 @@ class ActionManipulateWm(BaseAction):
 
 	@classmethod
 	def find_matching_windows_in_tree(self, i3_tree, query):
+		log.debug(f"Looking for {query} in i3 window tree")
 		results = []
 		if "window" in i3_tree and i3_tree["window"] and "window_properties" in i3_tree:
-			if any([prop in i3_tree["window_properties"] and query in i3_tree["window_properties"][prop] for prop in ["class", "instance", "title"]]):
+			if any([prop in i3_tree["window_properties"] and query in i3_tree["window_properties"][prop].lower() for prop in ["class", "instance", "title"]]):
 				log.debug(f"Found node in tree: {i3_tree}")
 				results += [{
 					"id": i3_tree["id"], # C pointer to identify i3 container
 					"window": i3_tree["window"], # X11 window reference
 				}]
 		for node in i3_tree["nodes"]:
+			results += self.find_matching_windows_in_tree(node, query)
+		for node in i3_tree["floating_nodes"]:
 			results += self.find_matching_windows_in_tree(node, query)
 		return results
 
@@ -92,17 +95,19 @@ class ActionManipulateWm(BaseAction):
 				except Exception as e:
 					log.debug(f"Failed to parse workspace number: {e}")
 
+		verb_word = utils.find_word(sentence.doc, ["switch", "focus", "show", "pull", "go", "move", "put", "kill", "close", "quit", "toggle", "enable", "disable", "make"])
+
 		# target_token indicates the target entity the request is referencing
 		# used for requests like "show me steam" or "switch to the web browser"
 		# FIXME: do something more robust
-		target_token = utils.find_word(sentence.doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram"])
+		target_token = utils.find_word(sentence.doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram", "calculator", "gedit", "editor", "studio", "blender"])
 		if target_token and target_token.text not in ["this", "that"]:
-			matching_windows = self.find_matching_windows_in_tree(self.get_tree(), str(target_token))
+			matching_windows = self.find_matching_windows_in_tree(self.get_tree(), target_token.text.lower())
 			log.info(f"Found {len(matching_windows)} matching windows")
 
 		command = None
 		# switching workspaces
-		if str(sentence.root) in ["switch", "focus", "show", "pull", "go"]:
+		if verb_word.lower_ in ["switch", "focus", "show", "pull", "go"]:
 			if target_token:
 				if len(matching_windows) > 0:
 					command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus\''
@@ -114,7 +119,7 @@ class ActionManipulateWm(BaseAction):
 				# TODO: create Exception specifically for parsing failures
 				raise Exception("Failed to parse input for workspace number")
 		# moving windows to other workspaces
-		elif str(sentence.root) in ["move", "put"]:
+		elif verb_word.lower_ in ["move", "put"]:
 			if workspace_token.nbor(-1).text in ["to", "on"]:
 				# This means that we are moving a window to the target workspace
 				if not workspace_token or not workspace_number:
@@ -133,9 +138,17 @@ class ActionManipulateWm(BaseAction):
 					# NOTE: this is not yet supported by i3
 					# command = 'i3-msg "move workspace {} to output {}"'.format(workspace_number, direction.text)
 				command = f'i3-msg "move workspace to output {direction.text}"'
-		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
-			command = 'i3-msg "kill"'
-		else:
+		elif verb_word.lower_ in ["kill", "close", "quit"]:
+			if target_token and target_token.text not in ["this", "that"]:
+				if len(matching_windows) > 0:
+					command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus; kill\''
+				else:
+					raise Exception("Could not find any windows matching query")
+			elif target_token and target_token.text in ["this", "that"]:
+				command = 'i3-msg "kill"'
+			else:
+				raise Exception("Failed to parse which program to kill")
+		elif verb_word.lower_ in ["toggle", "enable", "disable", "make"]:
 			verb_word = utils.find_word(sentence.doc, ["toggle", "enable", "disable", "make"])
 			attribute_word = utils.find_word(sentence.doc, ["fullscreen", "floating", "full", "float"])
 			if verb_word and attribute_word:
@@ -148,11 +161,16 @@ class ActionManipulateWm(BaseAction):
 				elif attribute == "float":
 					attribute = "floating"
 				if target_token and target_token.text not in ["this", "that"]:
-					command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus; {attribute} {verb}\''
+					if len(matching_windows) > 0:
+						command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus; {attribute} {verb}\''
+					else:
+						raise Exception("Could not find any windows matching query")
 				else:
 					command = f'i3-msg "{attribute} {verb}"'
 			else:
 				raise Exception(f"verb_word ({verb_word}) or attribute_word ({attribute_word}) not found")
+		else:
+			raise Exception(f"Unknown verb {verb_word.text}")
 
 		return command
 

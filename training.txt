@@ -91,9 +91,11 @@ switch to desktop number seven,manipulate-wm
 switch to workspace number 1,manipulate-wm
 show me work space 3,manipulate-wm
 switch to workspace three,manipulate-wm
+focus calculator,manipulate-wm
 kill this program,manipulate-wm
 quit this application,manipulate-wm
 close that,manipulate-wm
+close calculator,manipulate-wm
 toggle fullscreen,manipulate-wm
 toggle floating,manipulate-wm
 make this full screen,manipulate-wm
