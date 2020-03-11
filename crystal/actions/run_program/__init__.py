@@ -25,7 +25,7 @@ class ActionRunProgram(BaseAction):
 		- calendar
 		"""
 		for word in doc:
-			word_strs = [word.lemma_, str(word).lower()]
+			word_strs = [word.lemma_, word.lower_]
 			# any([w in [] for w in word_strs])
 			if any([w in ["terminal", "shell", "console", "prompt", "bash"] for w in word_strs]):
 				return "terminal"
@@ -46,9 +46,9 @@ class ActionRunProgram(BaseAction):
 			if any([w in ["g"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["edit"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
 				return "text editor"
 			if any([w in ["calculator", "calendar"] for w in word_strs]):
-				return word_strs[0]
+				return word_strs[0].lower()
 			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"] for w in word_strs]):
-				return word_strs[0]
+				return word_strs[0].lower()
 			if any([w in ["together"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["tube"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
 				return "togethertube"
 			if any([w in ["dab"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["room"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
