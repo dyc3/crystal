@@ -90,7 +90,7 @@ class ActionManipulateWm(BaseAction):
 				try:
 					workspace_number = utils.text2int(num_token.text.lower())
 				except Exception as e:
-					log.debug("Failed to parse workspace number: {}".format(e))
+					log.debug(f"Failed to parse workspace number: {e}")
 
 		# target_token indicates the target entity the request is referencing
 		# used for requests like "show me steam" or "switch to the web browser"
@@ -109,7 +109,7 @@ class ActionManipulateWm(BaseAction):
 				else:
 					raise Exception("Could not find any windows matching query")
 			elif workspace_token and workspace_number:
-				command = 'i3-msg "workspace {}"'.format(workspace_number)
+				command = f'i3-msg "workspace {workspace_number}"'
 			else:
 				# TODO: create Exception specifically for parsing failures
 				raise Exception("Failed to parse input for workspace number")
@@ -121,7 +121,7 @@ class ActionManipulateWm(BaseAction):
 					# TODO: create Exception specifically for parsing failures
 					raise Exception("Unable to parse for target workspace")
 				if target_token.text in ["this", "that"]:
-					command = 'i3-msg "move container to workspace number {}"'.format(workspace_number)
+					command = f'i3-msg "move container to workspace number {workspace_number}"'
 				else:
 					raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' or 'that' window.")
 			else:
@@ -132,7 +132,7 @@ class ActionManipulateWm(BaseAction):
 				# if workspace_number:
 					# NOTE: this is not yet supported by i3
 					# command = 'i3-msg "move workspace {} to output {}"'.format(workspace_number, direction.text)
-				command = 'i3-msg "move workspace to output {}"'.format(direction.text)
+				command = f'i3-msg "move workspace to output {direction.text}"'
 		elif sentence.root.lemma_ in ["kill", "close", "quit"]:
 			command = 'i3-msg "kill"'
 		else:
@@ -163,11 +163,11 @@ class ActionManipulateWm(BaseAction):
 			command = self.parse(sentence)
 		except Exception as e:
 			log.exception(e)
-			return ActionResponseBasic(ActionResponseType.FAILURE, "Parsing failed: {}".format(e))
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"Parsing failed: {e}")
 
 		if command != None:
 			exitcode = utils.runAndPrint(command)
-			log.debug("exit: {}".format(exitcode))
+			log.debug(f"exit: {exitcode}")
 			return ActionResponseBasic(ActionResponseType.SUCCESS)
 		else:
 			log.error("command == None")
