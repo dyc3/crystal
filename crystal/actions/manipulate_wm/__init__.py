@@ -95,14 +95,15 @@ class ActionManipulateWm(BaseAction):
 		# target_token indicates the target entity the request is referencing
 		# used for requests like "show me steam" or "switch to the web browser"
 		# FIXME: do something more robust
-		target_token = utils.find_word(sentence.doc, ["this", "steam", "browser", "firefox", "discord", "telegram"])
+		target_token = utils.find_word(sentence.doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram"])
+		if target_token and target_token.text not in ["this", "that"]:
+			matching_windows = self.find_matching_windows_in_tree(self.get_tree(), str(target_token))
+			log.info(f"Found {len(matching_windows)} matching windows")
 
 		command = None
 		# switching workspaces
 		if str(sentence.root) in ["switch", "focus", "show", "pull", "go"]:
 			if target_token:
-				matching_windows = self.find_matching_windows_in_tree(self.get_tree(), str(target_token))
-				log.info(f"Found {len(matching_windows)} matching windows")
 				if len(matching_windows) > 0:
 					command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus\''
 				else:
@@ -119,7 +120,7 @@ class ActionManipulateWm(BaseAction):
 				if not workspace_token or not workspace_number:
 					# TODO: create Exception specifically for parsing failures
 					raise Exception("Unable to parse for target workspace")
-				if sentence.root.nbor(1).text in ["this", "that"]:
+				if target_token.text in ["this", "that"]:
 					command = 'i3-msg "move container to workspace number {}"'.format(workspace_number)
 				else:
 					raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' or 'that' window.")
@@ -146,7 +147,10 @@ class ActionManipulateWm(BaseAction):
 					attribute = "fullscreen"
 				elif attribute == "float":
 					attribute = "floating"
-				command = f'i3-msg "{attribute} {verb}"'
+				if target_token and target_token.text not in ["this", "that"]:
+					command = f'i3-msg "[con_id=\'{matching_windows[0]["id"]}\'] focus; {attribute} {verb}"'
+				else:
+					command = f'i3-msg "{attribute} {verb}"'
 			else:
 				log.error(f"verb_word ({verb_word}) or attribute_word ({attribute_word}) not found")
 
