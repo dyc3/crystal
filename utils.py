@@ -61,3 +61,11 @@ def find_word(doc, words, min_idx=0):
 			if token.text.lower() == word or token.lemma_ == word:
 				return token
 	return None
+
+def parse_duration_to_seconds(tokens):
+	"""
+	TODO: implement this
+	Takes a spacy span of tokens that represent a span of time.
+	Returns the duration of the time span in seconds.
+	"""
+	pass
