@@ -148,7 +148,7 @@ class ActionManipulateWm(BaseAction):
 				elif attribute == "float":
 					attribute = "floating"
 				if target_token and target_token.text not in ["this", "that"]:
-					command = f'i3-msg "[con_id=\'{matching_windows[0]["id"]}\'] focus; {attribute} {verb}"'
+					command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus; {attribute} {verb}\''
 				else:
 					command = f'i3-msg "{attribute} {verb}"'
 			else:
