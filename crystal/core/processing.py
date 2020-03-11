@@ -15,13 +15,13 @@ def load_nlp(model: str):
 	model: specify spaCy model to use
 	"""
 	global nlp
-	log.debug("spaCy using GPU: {}".format(spacy.prefer_gpu()))
+	log.debug(f"spaCy using GPU: {spacy.prefer_gpu()}")
 	try:
 		nlp = spacy.load(model)
 	except OSError:
 		# model loading failed, it probably doesn't exist
 		# download it
-		os.system("python -m spacy download {}".format(model))
+		os.system(f"python3 -m spacy download {model}")
 		nlp = spacy.load(model)
 
 def parse_nlp(text: str):

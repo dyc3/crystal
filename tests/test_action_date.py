@@ -11,7 +11,7 @@ class TestActionDate(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		global nlp
-		nlp = spacy.load("en")
+		nlp = spacy.load("en_core_web_sm")
 
 	def test_get_query_type(self):
 		# query, expected query type

@@ -10,7 +10,7 @@ class TestActionRollDie(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		global nlp
-		nlp = spacy.load("en")
+		nlp = spacy.load("en_core_web_sm")
 
 	def test_roll_die(self):
 		result = roll_die.rollDie(6)

@@ -10,7 +10,7 @@ class TestActionTime(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		global nlp
-		nlp = spacy.load("en")
+		nlp = spacy.load("en_core_web_sm")
 
 	def test_time_parse(self):
 		# query, command

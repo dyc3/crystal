@@ -223,7 +223,7 @@ def run(in_args):
 	log.info("Config loaded, found {} items".format(len(config)))
 
 	log.info("Loading NLP model...")
-	crystal.core.processing.load_nlp("en")
+	crystal.core.processing.load_nlp(get_config("spacy_model", True) or "en_core_web_sm")
 
 	log.info("Loading modules...")
 	global user_input, commands, feedback_modules

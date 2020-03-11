@@ -11,7 +11,7 @@ class TestActionTodo(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		global nlp
-		nlp = spacy.load("en")
+		nlp = spacy.load("en_core_web_sm")
 
 	def test_parse(self):
 		# query, expected result

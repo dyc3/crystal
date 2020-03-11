@@ -10,7 +10,7 @@ class TestActionVolumeSet(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		global nlp
-		nlp = spacy.load("en")
+		nlp = spacy.load("en_core_web_sm")
 
 	def test_action_volume_set(self):
 		# current_volume, query string, expected result
