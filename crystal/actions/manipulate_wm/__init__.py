@@ -152,7 +152,7 @@ class ActionManipulateWm(BaseAction):
 				else:
 					command = f'i3-msg "{attribute} {verb}"'
 			else:
-				log.error(f"verb_word ({verb_word}) or attribute_word ({attribute_word}) not found")
+				raise Exception(f"verb_word ({verb_word}) or attribute_word ({attribute_word}) not found")
 
 		return command
 
