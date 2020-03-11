@@ -39,12 +39,15 @@ class TestActionMedia(unittest.TestCase):
 
 			("go to 8 seconds", "position 8"),
 			("seek position to 2 minutes", "position 120"),
+			("seek position to two minutes", "position 120"),
 			("go to 2 minutes 30 seconds", "position 150"),
 			("go to 2 minutes and 30 seconds", "position 150"),
 			("crystal go to 3 minutes and 45 seconds", "position 225"),
 
 			("skip ahead 4 seconds", "position +4"),
+			("skip ahead four seconds", "position +4"),
 			("go forward 1 minute", "position +60"),
+			("go forward a minute", "position +60"),
 			("crystal skip ahead 2 minutes and 10 seconds", "position +130"),
 
 			("skip back 30 seconds", "position -30"),
@@ -54,7 +57,7 @@ class TestActionMedia(unittest.TestCase):
 		]
 		action_media = media.ActionMedia()
 		for test, expectedResult in test_set:
-			with self.subTest():
+			with self.subTest(test):
 				doc = nlp(test)
 				sent = next(doc.sents)
 				self.assertEqual(action_media.parse(sent), expectedResult, test)
@@ -74,7 +77,7 @@ class TestActionMedia(unittest.TestCase):
 		]
 		action_media = media.ActionMedia()
 		for test, expectedResult in test_set:
-			with self.subTest():
+			with self.subTest(test):
 				doc = nlp(test)
 				sent = next(doc.sents)
 				self.assertEqual(action_media.parse(sent), expectedResult, test)

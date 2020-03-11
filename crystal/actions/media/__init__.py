@@ -20,9 +20,12 @@ def getTimeInSeconds(token):
 	#return int(str(token).split(" ")[0])
 	num = 0
 	for child in token.children:
-		log.debug("{} child: {}".format(token, child))
-		if child.dep_ == "nummod":
-			num = str(child)
+		log.debug(f"{token} child: {child}")
+		if child.like_num or child.text == "a":
+			try:
+				num = int(child.text)
+			except ValueError:
+				num = utils.text2int(child.text)
 	return int(num) * multiplier
 
 class ActionMedia(BaseAction):
@@ -65,7 +68,7 @@ class ActionMedia(BaseAction):
 				elif word.lemma_ in ["disable", "off", "stop"]:
 					target_state = False
 					break
-			return "shuffle {}".format("On" if target_state else "Off")
+			return f"shuffle {'On' if target_state else 'Off'}"
 
 		# media seeking
 		if sentence.root.lemma_ in ["go", "seek", "skip"]:
@@ -82,33 +85,33 @@ class ActionMedia(BaseAction):
 
 			for token in sentence:
 				if token.dep_ == "prep":
-					if str(token) == "to":
+					if token.text == "to":
 						seek_action = ""
 						for prepchild in token.children:
 							if prepchild.dep_ == "pobj":
 								if seconds == None: seconds = 0
 								seconds += getSeconds(prepchild)
-				elif str(token.dep_) in ["advmod","amod","acomp"]:
-					if str(token) in ["back", "backward"]:
+				elif token.dep_ in ["advmod","amod","acomp"]:
+					if token.text in ["back", "backward"]:
 						if seek_action == None: seek_action = "-"
-					elif str(token) in ["ahead", "forward"]:
+					elif token.text in ["ahead", "forward"]:
 						if seek_action == None: seek_action = "+"
 				elif token.dep_ in ["npadvmod","dobj"]:
 					if seconds == None: seconds = 0
 					seconds += getSeconds(token)
 
-			return "position {}{}".format(seek_action, seconds)
+			return f"position {seek_action}{seconds}"
 
 	@classmethod
 	def run(self, doc):
 		sentence = next(doc.sents)
 		command = self.parse(sentence)
-		exitcode = utils.runAndPrint("playerctl {}".format(command))
+		exitcode = utils.runAndPrint(f"playerctl {command}")
 
 		if exitcode == 0:
 			return ActionResponseBasic(ActionResponseType.SUCCESS)
 		else:
-			return ActionResponseBasic(ActionResponseType.FAILURE, "playerctl exit code: {}".format(exitcode))
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"playerctl exit code: {exitcode}")
 
 def getAction():
 	return ActionMedia()

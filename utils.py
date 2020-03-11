@@ -21,6 +21,9 @@ def text2int(textnum, numwords={}):
 		for idx, word in enumerate(tens):	 numwords[word] = (1, idx * 10)
 		for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
 
+	if textnum == "a":
+		return 1
+
 	current = result = 0
 	for word in textnum.split():
 		if word not in numwords:
