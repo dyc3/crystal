@@ -1,8 +1,0 @@
-Goals:
-
-easy to use
-look cool - separate front end
-expandable
-configurable
-no setup
-low latency
