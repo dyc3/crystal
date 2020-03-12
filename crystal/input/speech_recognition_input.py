@@ -82,6 +82,7 @@ class SpeechRecognitionInput(BaseInput):
 			if "Crystal Palace" in text: score -= 1
 			if "words Phase" in text: score -= 1
 			if "opens creeps" in text: score -= 1
+			if "opencanvas" in text: score -= 1
 
 			if text.lower().startswith("crystal"):
 				score += 1

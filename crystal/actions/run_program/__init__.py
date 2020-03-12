@@ -47,7 +47,7 @@ class ActionRunProgram(BaseAction):
 				return "text editor"
 			if any([w in ["calculator", "calendar"] for w in word_strs]):
 				return word_strs[0].lower()
-			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"] for w in word_strs]):
+			if any([w in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github", "canvas"] for w in word_strs]):
 				return word_strs[0].lower()
 			if any([w in ["together"] for w in word_strs]) and word.i < len(doc) - 1 and any([w in ["tube"] for w in [word.nbor(1).lemma_, str(word.nbor(1)).lower()]]):
 				return "togethertube"
@@ -84,9 +84,11 @@ class ActionRunProgram(BaseAction):
 			return "gedit"
 		if program_type in ["calculator", "calendar"]:
 			return "gnome-{}".format(program_type)
-		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github"]:
+		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github", "canvas"]:
 			if program_type == "github":
 				return "x-www-browser https://github.com/notifications"
+			if program_type == "canvas":
+				return "x-www-browser https://sit.instructure.com"
 			if program_type == "twitch":
 				suffix = ".tv"
 			else:
