@@ -1,5 +1,77 @@
 # Crystal
 
+Crystal is my custom virtual assistant, tailor made for my setup.
+
+# Features
+
+- Modularity
+- Hotword detection
+- Semi-Listening mode so you don't have to keep saying the hotword
+- Can roughly differentiate between commands that were intended for Crystal, and sentences that happen to contain the word "crystal"
+- Deep integration with i3wm
+- Cool Star Trek sound effects
+
+These are examples of queries that Crystal can respond to accurately.
+
+## Date and Time
+
+- What is the date?
+- What is the time?
+- What is tomorrow's date?
+- Is tomorrow monday?
+- Was yesterday friday?
+- How many days until monday?
+
+## Hardware Info
+
+- How many processors are available?
+- How many CPU threads do I have?
+- How many physical cores are in the system?
+- How much memory is available?
+- How much disk space is available?
+- Show me all storage disks.
+- How much battery is left?
+
+## Human Input
+
+*Not a great user experience...*
+
+- Left click.
+- Type deuteranopia.
+- Scroll up.
+- Move the mouse 20 pixels to the left.
+- Move the mouse right by 40.
+
+## Language
+
+- How do you spell dystopia?
+- Define deuteranopia.
+
+## Program Launching
+
+- open spotify
+
+## Media Control
+
+- Pause the music.
+- Toggle shuffling.
+- Skip this song.
+- Set volume to 50%.
+- Turn it up by 30%.
+
+## Window Manager Manipulation
+
+- Show me desktop 5.
+- Switch to workspace 3.
+- Show me firefox.
+- Close this.
+- Kill calculator.
+- Toggle floating.
+- Toggle fullscreen.
+- Put this on workspace 2.
+- Move this workspace up.
+- Move this workspace to the primary display.
+
 # Design
 
 There are 3 types of modules:
@@ -49,7 +121,7 @@ the input-action pipeline.
 
 Here are notes for setting Crystal up on a new system (in no particular order).
 
-Tensorflow currently *still* doesn't support Python 3.7, so Crystal required Python **3.5** or **3.6**.
+Tensorflow currently *still* doesn't support Python 3.7, so Crystal requires Python **3.5** or **3.6**.
 
 Snowboy must be compiled for the version of python that is being used.
 
