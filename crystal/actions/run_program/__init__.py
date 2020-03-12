@@ -83,7 +83,7 @@ class ActionRunProgram(BaseAction):
 		if program_type == "text editor":
 			return "gedit"
 		if program_type in ["calculator", "calendar"]:
-			return "gnome-{}".format(program_type)
+			return f"gnome-{program_type}"
 		if program_type in ["youtube", "reddit", "twitch", "amazon", "google", "netflix", "github", "canvas"]:
 			if program_type == "github":
 				return "x-www-browser https://github.com/notifications"
@@ -93,7 +93,7 @@ class ActionRunProgram(BaseAction):
 				suffix = ".tv"
 			else:
 				suffix = ".com"
-			return "x-www-browser {}{}".format(program_type, suffix)
+			return f"x-www-browser {program_type}{suffix}"
 		if program_type == "togethertube":
 			return "x-www-browser opentogethertube.com"
 		if program_type == "togethertube-dab":
@@ -105,7 +105,7 @@ class ActionRunProgram(BaseAction):
 		if program_type == "screeps-docs":
 			return "x-www-browser https://docs.screeps.com/api/"
 		if any([program_type.endswith(s) for s in [".com", ".org", ".net", ".io"]]):
-			return "x-www-browser {}".format(program_type)
+			return f"x-www-browser {program_type}"
 
 	@classmethod
 	def run(self, doc):
@@ -127,19 +127,19 @@ class ActionRunProgram(BaseAction):
 				return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine program_type, and heuristic failed")
 		log.debug("program = {}".format(program))
 		if not program:
-			return ActionResponseBasic(ActionResponseType.FAILURE, "Unable to determine exact program from program type: {}".format(program_type))
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"Unable to determine exact program from program type: {program_type}")
 		log.info("Running command: {}".format(program))
 
 		# We need to spawn these processes without crystal's virtualenv, and reset the working directory
 		# We also need to spawn these processes such that Crystal is not the parent process
-		command = "/usr/bin/env sh -c 'unset VIRTUAL_ENV; cd; {} & disown'".format(program)
-		log.debug("Full command: {}".format(command))
+		command = f"/usr/bin/env sh -c 'unset VIRTUAL_ENV; cd; {program} & disown'"
+		log.debug(f"Full command: {command}")
 		subprocess.Popen(shlex.split(command),
 						stdin=subprocess.DEVNULL,
 						stdout=subprocess.DEVNULL,
 						stderr=subprocess.DEVNULL,
 						start_new_session=True)
-		return ActionResponseQuery("Running {}".format(program))
+		return ActionResponseQuery(f"Running {program}")
 
 def getAction():
 	return ActionRunProgram()
