@@ -107,6 +107,7 @@ show me steam,manipulate-wm
 show me firefox,manipulate-wm
 show me Spotify,manipulate-wm
 switch to discord,manipulate-wm
+switch to minecraft,manipulate-wm
 switch to the web browser,manipulate-wm
 go to firefox,manipulate-wm
 show me the steam window,manipulate-wm
@@ -119,6 +120,7 @@ ok thanks,small-talk
 how was your day today,small-talk
 what is your favorite color,small-talk
 open chrome,run-program
+open minecraft,run-program
 start a terminal,run-program
 open up teamspeak,run-program
 run chromium,run-program
