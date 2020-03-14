@@ -60,6 +60,8 @@ class ActionRunProgram(BaseAction):
 					return "screeps-docs"
 				else:
 					return "screeps"
+			if any([w in ["minecraft"] for w in word_strs]):
+				return "minecraft"
 			if any([w.endswith(".com") or w.endswith(".org") or w.endswith(".net") or w.endswith(".io") for w in word_strs]):
 				return word_strs[0]
 
@@ -104,6 +106,8 @@ class ActionRunProgram(BaseAction):
 			return "x-www-browser https://screeps.com/a/#!/map"
 		if program_type == "screeps-docs":
 			return "x-www-browser https://docs.screeps.com/api/"
+		if program_type == "minecraft":
+			return "minecraft-launcher"
 		if any([program_type.endswith(s) for s in [".com", ".org", ".net", ".io"]]):
 			return f"x-www-browser {program_type}"
 
