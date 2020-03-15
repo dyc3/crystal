@@ -76,7 +76,7 @@ sklearn==0.0
 spacy==2.2.3
 SpeechRecognition==3.7.1
 sputnik==0.9.3
-tensorflow==1.0.0
+tensorflow==1.15.2
 Theano==0.9.0
 thinc==7.3.0
 todoist-python==7.0.19
