@@ -51,7 +51,7 @@ pylint==2.2.0
 PyMsgBox==1.0.6
 PyOpenGL==3.1.0
 PyOpenGL-accelerate==3.1.0
-pyOpenSSL==16.2.0
+pyOpenSSL==17.5.0
 pyparsing==2.2.0
 PyQt5==5.9
 PyScreeze==0.1.18
