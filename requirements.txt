@@ -85,7 +85,7 @@ tqdm==4.28.1
 txaio==2.6.0
 typed-ast==1.1.0
 ujson==1.35
-urllib3==1.24.1
+urllib3==1.24.2
 webcolors==1.7
 webrtcvad==2.0.10
 websocket-client==0.40.0
