@@ -13,6 +13,7 @@ class TestCoreIsTalkingToMe(unittest.TestCase):
 		test_set = [
 			("Crystal what day is it", True),
 			("what day is it Crystal", True),
+			("what day is it, Crystal?", True),
 
 			("Crystal tell me what day it is", True),
 			("tell me what day it is Crystal", True),
@@ -20,11 +21,13 @@ class TestCoreIsTalkingToMe(unittest.TestCase):
 			("Crystal what's the date", True),
 			("what's the date Crystal", True),
 
-			("I'm talking about Crystal and she shouldn't activate", False)
+			("I'm talking about Crystal and she shouldn't activate", False),
+			("Working on Crystal is fun", False),
 		]
 
 		for query, expected_result in test_set:
 			doc = nlp(query)
+			# displacy.serve(doc, style="dep")
 			result = crystal.core.is_speaking_to_crystal(doc)
 			self.assertEqual(result, expected_result, "Results did not match. Expected: {} Got: {}, {}".format(expected_result, result, query))
 
