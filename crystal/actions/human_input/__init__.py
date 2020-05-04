@@ -4,6 +4,7 @@ from crystal import feedback
 import utils
 import pyautogui
 import logging
+import re
 log = logging.getLogger(__name__)
 
 class ActionHumanInput(BaseAction):
@@ -102,7 +103,39 @@ class ActionHumanInput(BaseAction):
 		elif inputaction == "type":
 			word = utils.find_word(sentence.doc, ["type", "dictate"])
 			if word and word.nbor(1):
-				type_param = ' '.join(map(str, sentence.doc[word.i + 1:]))
+				objective_span = sentence.doc[word.i + 1:]
+				if len(objective_span) >= 3 and str(objective_span[0:2]).startswith("the word"):
+					symbol_to_word = {
+						"(": "parenthesis",
+						")": "closed parenthesis",
+						"[": "square bracket",
+						"]": "closed square bracket",
+						"&": "ampersand",
+					}
+					type_param = symbol_to_word[str(objective_span[2])]
+				else:
+					type_param = ' '.join(map(str, objective_span))
+					# remove spaces in front of dollar signs if preceding a number
+					dollar_with_num_regex = re.compile(r"(\$) (\d)")
+					type_param = re.sub(dollar_with_num_regex, lambda m: m.group(1) + m.group(2), type_param)
+
+					# HACK: quick fix to make dictating longer numbers easier
+					broken_num_regex = re.compile(r"(\d+\.?(\d+)?|\d*\.(\d+)).([A-Za-z-:]+| |\d)\s?\d+")
+					if broken_num_regex.match(type_param):
+						def _to_string_num_filtered(s):
+							s = str(s).replace(":", "").replace("-", "")
+							if not s:
+								return s
+							if s == "to":
+								return "2"
+							if s in ["point", "dot"]:
+								return "."
+							try:
+								float(s)
+								return s
+							except ValueError:
+								return str(utils.text2int(str(s)))
+						type_param = ''.join(map(_to_string_num_filtered, objective_span))
 
 		if inputaction == "click":
 			return inputaction, (click_param,)
