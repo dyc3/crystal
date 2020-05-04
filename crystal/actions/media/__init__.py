@@ -79,7 +79,7 @@ class ActionMedia(BaseAction):
 				sec = 0
 				sec += getTimeInSeconds(token)
 				for child in token.children:
-					if child.dep_ in ["conj","appos"]:
+					if child.dep_ in ["conj", "appos", "nummod"]:
 						sec += getSeconds(child)
 				return sec
 

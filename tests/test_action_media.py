@@ -1,6 +1,7 @@
 import unittest
 import datetime
 import spacy
+from spacy import displacy
 from crystal.actions import media
 
 nlp = None
@@ -43,6 +44,7 @@ class TestActionMedia(unittest.TestCase):
 			("go to 2 minutes 30 seconds", "position 150"),
 			("go to 2 minutes and 30 seconds", "position 150"),
 			("crystal go to 3 minutes and 45 seconds", "position 225"),
+			("crystal go to 2 hours, 34 minutes and 20 seconds", "position 9260"),
 
 			("skip ahead 4 seconds", "position +4"),
 			("skip ahead four seconds", "position +4"),
@@ -59,6 +61,7 @@ class TestActionMedia(unittest.TestCase):
 		for test, expectedResult in test_set:
 			with self.subTest(test):
 				doc = nlp(test)
+				# displacy.serve(doc, style="dep")
 				sent = next(doc.sents)
 				self.assertEqual(action_media.parse(sent), expectedResult, test)
 
