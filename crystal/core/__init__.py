@@ -6,6 +6,7 @@ from pathlib import Path
 import uuid
 import hashlib
 import wave
+import utils
 
 import spacy
 from spacy import displacy
@@ -159,14 +160,17 @@ def core_on_wakeword():
 	crystal.core.on_utterance_start.fire()
 
 def core_on_recording_finish(raw_audio, sample_rate, sample_width):
-	result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
+	with utils.ExecutionTimer(log, "Audio processing"):
+		result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
 	if not result_text:
 		log.debug("No text recognized")
 		set_status(CrystalStatus.IDLE)
 		return
 	crystal.core.on_utterance_update.fire(result_text)
-	crystal.core.on_utterance_finish.fire(result_text)
-	save_audio_with_transcript(raw_audio, sample_rate, sample_width, result_text)
+	with utils.ExecutionTimer(log, "Utterance processing"):
+		crystal.core.on_utterance_finish.fire(result_text)
+	with utils.ExecutionTimer(log, "Saving audio to disk"):
+		save_audio_with_transcript(raw_audio, sample_rate, sample_width, result_text)
 
 def is_speaking_to_crystal(doc):
 	sent = next(doc.sents)

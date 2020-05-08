@@ -1,6 +1,7 @@
 # TODO: move to crystal.core
 
 import os
+from timeit import default_timer as timer
 import logging
 log = logging.getLogger(__name__)
 
@@ -72,3 +73,15 @@ def parse_duration_to_seconds(tokens):
 	Returns the duration of the time span in seconds.
 	"""
 	pass
+
+class ExecutionTimer():
+	def __init__(self, log, name="Timer"):
+		self.name = name
+		self.log = log
+
+	def __enter__(self):
+		self.start = timer()
+
+	def __exit__(self, type, value, traceback):
+		end = timer()
+		self.log.debug(f"{self.name} took {end - self.start:.4f} seconds")
