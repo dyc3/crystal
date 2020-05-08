@@ -67,6 +67,8 @@ class TestActionHumanInput(unittest.TestCase):
 			("type 712-8347", "type", ("7128347",)),
 			("type 1 284 8.4", "type", ("12848.4",)),
 			("type 7 two 8 point 7", "type", ("728.7",)),
+			("type for 109 .769", "type", ("4109.769",)),
+			("type to 509 .769", "type", ("2509.769",)),
 		]
 		action = human_input.ActionHumanInput()
 		for query, expected_act, expected_params in test_set:

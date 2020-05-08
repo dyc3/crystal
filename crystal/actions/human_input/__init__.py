@@ -120,7 +120,7 @@ class ActionHumanInput(BaseAction):
 					type_param = re.sub(dollar_with_num_regex, lambda m: m.group(1) + m.group(2), type_param)
 
 					# HACK: quick fix to make dictating longer numbers easier
-					broken_num_regex = re.compile(r"(\d+\.?(\d+)?|\d*\.(\d+)).([A-Za-z-:]+| |\d)\s?\d+")
+					broken_num_regex = re.compile(r"((\d+\.?(\d+)?|\d*\.(\d+)).([A-Za-z-:]+| |\d)|for|to)\s?\d+")
 					if broken_num_regex.match(type_param):
 						def _to_string_num_filtered(s):
 							s = str(s).replace(":", "").replace("-", "")
@@ -128,6 +128,8 @@ class ActionHumanInput(BaseAction):
 								return s
 							if s == "to":
 								return "2"
+							if s == "for":
+								return "4"
 							if s in ["point", "dot"]:
 								return "."
 							try:
