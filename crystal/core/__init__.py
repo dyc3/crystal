@@ -3,6 +3,9 @@ from abc import ABCMeta
 import os, sys, time, signal
 import traceback
 from pathlib import Path
+import uuid
+import hashlib
+import wave
 
 import spacy
 from spacy import displacy
@@ -30,6 +33,8 @@ status = CrystalStatus.IDLE
 config = {}
 current_utterance = None
 args = None
+speech_audio_dir = Path("./data/speech")
+speech_transcripts = speech_audio_dir / "transcripts.csv"
 
 def set_status(s: CrystalStatus):
 	global status
@@ -161,6 +166,7 @@ def core_on_recording_finish(raw_audio, sample_rate, sample_width):
 		return
 	crystal.core.on_utterance_update.fire(result_text)
 	crystal.core.on_utterance_finish.fire(result_text)
+	save_audio_with_transcript(raw_audio, sample_rate, sample_width, result_text)
 
 def is_speaking_to_crystal(doc):
 	sent = next(doc.sents)
@@ -196,6 +202,25 @@ def quit():
 
 def signal_handler(signum, frame):
 	quit()
+
+def save_audio_with_transcript(raw_audio: bytes, sample_rate: int, sample_width: int, transcript: str):
+	if not speech_audio_dir.exists():
+		speech_audio_dir.mkdir(parents=True)
+	if not speech_transcripts.exists():
+		with speech_transcripts.open("w") as f:
+			f.write("file_id,transcript\n")
+
+	sha256 = hashlib.sha256()
+	sha256.update(raw_audio)
+	audio_hash = sha256.hexdigest()
+	file_id = uuid.uuid5(uuid.NAMESPACE_X500, audio_hash)
+	with wave.open(str(speech_audio_dir / f"{file_id}.wav"), "wb") as wave_file:
+		wave_file.setnchannels(1)
+		wave_file.setframerate(sample_rate)
+		wave_file.setsampwidth(sample_width)
+		wave_file.writeframes(raw_audio)
+	with speech_transcripts.open("a") as f:
+		f.write(f'{file_id},"{transcript}"\n')
 
 signal.signal(signal.SIGINT, signal_handler)
 on_wakeword += core_on_wakeword
