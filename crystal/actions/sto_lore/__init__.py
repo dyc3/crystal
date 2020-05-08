@@ -44,7 +44,7 @@ class ActionStoLore(BaseAction):
 			log.info(f"lore answer: {answer}")
 			return ActionResponseQuery(answer)
 		else:
-			return ActionResponseBasic(ActionResponseType.FAILURE, f"count needs to be >= 1, got {volume} and sides needs to be > 1, got {chapter}")
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"volume needs to be >= 1, got {volume} and chapter needs to be >= 1, got {chapter}")
 
 def getAction():
 	return ActionStoLore()
