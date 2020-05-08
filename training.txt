@@ -211,3 +211,9 @@ define collegiate,language
 what is the definition of backflip,language
 what is the definition of elongated,language
 what is the definition of eorituwpo,language
+star trek online lore volume 1 chapter 3,sto-lore
+star trek online lore volume 6 chapter 8,sto-lore
+star trek online lore volume 9 chapter 2,sto-lore
+star trek online lore volume 15 chapter 7,sto-lore
+star trek online lore volume 17 chapter 9,sto-lore
+what is the answer to star trek online lore volume 24 chapter 8,sto-lore
