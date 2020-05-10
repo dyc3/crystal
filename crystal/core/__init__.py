@@ -18,6 +18,7 @@ from crystal.core.datautil import DataUtil
 from crystal import actions, feedback
 from crystal.actions.responses import *
 import crystal.input.speech_recognition_input
+import crystal.input.vosk_input
 import crystal.core.audio
 
 import logging
@@ -72,7 +73,7 @@ def get_config(key: str, optional: bool = False) -> str:
 
 def core_on_utterance_update(text: str):
 	global current_utterance
-	# print("Processing:", text)
+	log.info(f"Processing: {text}")
 	current_utterance = text
 
 def core_on_utterance_finish(text: str):
@@ -159,7 +160,11 @@ def core_on_wakeword():
 	set_status(CrystalStatus.LISTENING)
 	crystal.core.on_utterance_start.fire()
 
-def core_on_recording_finish(raw_audio, sample_rate, sample_width):
+def core_on_record_buffer(raw_audio: bytes, sample_rate: int, sample_width: int):
+	with utils.ExecutionTimer(log, "Audio processing"):
+		on_utterance_update.fire(user_input.process_audio(raw_audio, sample_rate, sample_width))
+
+def core_on_recording_finish(raw_audio: bytes, sample_rate: int, sample_width: int):
 	with utils.ExecutionTimer(log, "Audio processing"):
 		result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
 	if not result_text:
@@ -228,6 +233,7 @@ def save_audio_with_transcript(raw_audio: bytes, sample_rate: int, sample_width:
 
 signal.signal(signal.SIGINT, signal_handler)
 on_wakeword += core_on_wakeword
+on_record_buffer += core_on_record_buffer
 on_recording_finish += core_on_recording_finish
 on_action_error += core_on_action_error
 on_action_finish += core_on_action_finish
@@ -259,7 +265,8 @@ def run(in_args):
 	# recognizer = BaseSpeechRecognizer() # placeholder
 	# recognizer = WatsonSpeechRecognizer(core.get_config("watson_username"), core.get_config("watson_password"))
 	# recognizer = SphinxSpeechRecognizer()
-	user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
+	# user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
+	user_input = crystal.input.vosk_input.VoskInput()
 	commands = actions.load_actions()
 	log.info("{} action modules loaded".format(len(commands)))
 	log.debug(commands)

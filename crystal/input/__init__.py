@@ -4,7 +4,7 @@ class BaseInput(object):
 	def __init__(self):
 		super(BaseInput, self).__init__()
 
-	def process_audio(self, raw_audio, sample_rate, sample_width):
+	def process_audio(self, raw_audio: bytes, sample_rate: int, sample_width: int):
 		"""
 		Process the given audio input into text. raw_audio should be of type `bytes`
 		"""

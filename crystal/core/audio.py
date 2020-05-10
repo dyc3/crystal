@@ -220,6 +220,7 @@ def do_recording():
 				if record_length < MIN_RECORDING_SECONDS:
 					continue
 
+			crystal.core.on_record_buffer.fire(data, SAMPLE_RATE, SAMPLE_WIDTH)
 			if record_length >= MAX_RECORDING_SECONDS or silence_count >= SILENCE_THRESHOLD:
 				log.debug("Done recording, length {:.2f}s".format(len(recording_raw_data) / SAMPLE_WIDTH / SAMPLE_RATE))
 				active = False
@@ -244,4 +245,5 @@ def do_recording():
 					crystal.core.on_wakeword.fire()
 					active = True
 					recording_raw_data = wakeword_raw_data[:]
+					crystal.core.on_record_buffer.fire(recording_raw_data, SAMPLE_RATE, SAMPLE_WIDTH)
 	log.debug("recording thread exiting")

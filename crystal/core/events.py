@@ -31,6 +31,7 @@ class EventHook(object):
 				self -= theHandler
 
 on_wakeword = EventHook("on_wakeword")
+on_record_buffer = EventHook("on_record_buffer")
 on_recording_finish = EventHook("on_recording_finish")
 on_utterance_start = EventHook("on_utterance_start")
 on_utterance_update = EventHook("on_utterance_update")
