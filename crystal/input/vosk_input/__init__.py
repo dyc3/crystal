@@ -18,6 +18,7 @@ class VoskInput(BaseInput):
 
 		self.model = Model("models/vosk-model-small-en-us-0.3")
 		self.rec = None
+		self.__final_result = None
 
 	def process_audio(self, raw_audio: bytes, sample_rate: int, sample_width: int):
 		if not self.rec:
@@ -27,7 +28,10 @@ class VoskInput(BaseInput):
 			result = self.rec.Result()
 		else:
 			result = self.rec.PartialResult()
+		log.debug(result)
 		result = json.loads(result)
+		if "result" in result:
+			self.__final_result = result
 		if "text" in result:
 			text = result["text"]
 		elif "partial" in result:
@@ -37,6 +41,13 @@ class VoskInput(BaseInput):
 		return self.current_utterance
 
 	def get_full_result(self):
-		result = json.loads(self.rec.FinalResult())
+		if self.__final_result:
+			result = self.__final_result
+		else:
+			result = self.rec.FinalResult()
+			result = json.loads(result)
+		log.debug(result)
 		self.rec = None
+		self.current_utterance = ""
+		self.__final_result = None
 		return result["text"]
