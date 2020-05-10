@@ -73,7 +73,7 @@ def get_config(key: str, optional: bool = False) -> str:
 
 def core_on_utterance_update(text: str):
 	global current_utterance
-	log.info(f"Processing: {text}")
+	log.debug(f"Processing: {text}")
 	current_utterance = text
 
 def core_on_utterance_finish(text: str):
@@ -161,12 +161,18 @@ def core_on_wakeword():
 	crystal.core.on_utterance_start.fire()
 
 def core_on_record_buffer(raw_audio: bytes, sample_rate: int, sample_width: int):
-	with utils.ExecutionTimer(log, "Audio processing"):
-		on_utterance_update.fire(user_input.process_audio(raw_audio, sample_rate, sample_width))
+	if user_input.realtime:
+		with utils.ExecutionTimer(log, "Audio processing"):
+			transcript = user_input.process_audio(raw_audio, sample_rate, sample_width)
+		if transcript != current_utterance:
+			on_utterance_update.fire(transcript)
 
 def core_on_recording_finish(raw_audio: bytes, sample_rate: int, sample_width: int):
-	with utils.ExecutionTimer(log, "Audio processing"):
-		result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
+	if not user_input.realtime:
+		with utils.ExecutionTimer(log, "Audio processing"):
+			result_text = user_input.process_audio(raw_audio, sample_rate, sample_width)
+	else:
+		result_text = user_input.get_full_result()
 	if not result_text:
 		log.debug("No text recognized")
 		set_status(CrystalStatus.IDLE)

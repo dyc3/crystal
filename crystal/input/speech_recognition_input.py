@@ -10,6 +10,7 @@ class SpeechRecognitionInput(BaseInput):
 	def __init__(self):
 		super(SpeechRecognitionInput, self).__init__()
 		self.current_utterance = ""
+		self.realtime = False
 
 		self.recog = sr.Recognizer()
 		self.mic = sr.Microphone()

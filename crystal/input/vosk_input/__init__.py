@@ -14,11 +14,14 @@ class VoskInput(BaseInput):
 	def __init__(self):
 		super(VoskInput, self).__init__()
 		self.current_utterance = ""
+		self.realtime = True # indicates that audio can be streamed in
 
 		self.model = Model("models/vosk-model-small-en-us-0.3")
-		self.rec = KaldiRecognizer(self.model, 16000)
+		self.rec = None
 
 	def process_audio(self, raw_audio: bytes, sample_rate: int, sample_width: int):
+		if not self.rec:
+			self.rec = KaldiRecognizer(self.model, sample_rate)
 		full = self.rec.AcceptWaveform(raw_audio)
 		if full:
 			result = self.rec.Result()
@@ -26,7 +29,14 @@ class VoskInput(BaseInput):
 			result = self.rec.PartialResult()
 		result = json.loads(result)
 		if "text" in result:
-			self.current_utterance = result["text"]
+			text = result["text"]
 		elif "partial" in result:
-			self.current_utterance = result["partial"]
+			text = result["partial"]
+		if text:
+			self.current_utterance = text
 		return self.current_utterance
+
+	def get_full_result(self):
+		result = json.loads(self.rec.FinalResult())
+		self.rec = None
+		return result["text"]
