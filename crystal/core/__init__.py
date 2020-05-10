@@ -162,8 +162,7 @@ def core_on_wakeword():
 
 def core_on_record_buffer(raw_audio: bytes, sample_rate: int, sample_width: int):
 	if user_input.realtime:
-		with utils.ExecutionTimer(log, "Audio processing"):
-			transcript = user_input.process_audio(raw_audio, sample_rate, sample_width)
+		transcript = user_input.process_audio(raw_audio, sample_rate, sample_width)
 		if transcript != current_utterance:
 			on_utterance_update.fire(transcript)
 
