@@ -34,6 +34,7 @@ class CrystalStatus(Enum):
 status = CrystalStatus.IDLE
 config = {}
 current_utterance = None
+previous_utterance = None
 args = None
 speech_audio_dir = Path("./data/speech")
 speech_transcripts = speech_audio_dir / "transcripts.csv"
@@ -77,8 +78,9 @@ def core_on_utterance_update(text: str):
 	current_utterance = text
 
 def core_on_utterance_finish(text: str):
-	global current_utterance, cmdClassifier
+	global current_utterance, previous_utterance, cmdClassifier
 	log.info("User said: {}".format(text))
+	previous_utterance = text
 	current_utterance = None
 
 	text = text.replace("crystal", "Crystal")
@@ -324,13 +326,25 @@ def run(in_args):
 					action.update()
 	elif args.mode == "text":
 		while True:
-			text_input = input("> ")
+			text_input = input("> ").strip()
 			if text_input == "":
 				continue
 			if text_input == "/quit":
 				break
 			if text_input == "/reload":
 				reload_commands()
+				continue
+			if text_input.startswith("/debug"):
+				text_spl =  text_input.split()
+				if len(text_spl) <= 1:
+					log.error("subcommand required: depend, entity")
+				subcommand = text_spl[1]
+				if subcommand in ["dep", "depend"]:
+					displacy.serve(crystal.core.processing.parse_nlp(previous_utterance), style="dep")
+				elif subcommand in ["ent", "entity"]:
+					displacy.serve(crystal.core.processing.parse_nlp(previous_utterance), style="ent")
+				else:
+					log.error("invalid subcommand")
 				continue
 			on_utterance_finish.fire(text_input)
 		quit()
