@@ -20,7 +20,7 @@ def render_status():
 			f.write(f" - {crystal.core.current_utterance}")
 		if last_action_response:
 			f.write(f" - {last_action_response.type.name}")
-			if last_action_response.message:
+			if last_action_response.name in ["ActionResponseBasic", "ActionResponseQuery"]:
 				f.write(f": {last_action_response.message}")
 		f.truncate()
 

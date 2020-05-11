@@ -10,11 +10,13 @@ class ActionResponseType(Enum):
 
 class ActionResponseBase(metaclass=ABCMeta):
 	def __init__(self):
+		self.name = "ActionResponseBase"
 		self.type = ActionResponseType.UNKNOWN
 
 class ActionResponseBasic(ActionResponseBase):
 	def __init__(self, response_type, message=""):
 		super(ActionResponseBasic, self).__init__()
+		self.name = "ActionResponseBasic"
 		self.type = response_type
 		self.message = message
 
@@ -25,12 +27,14 @@ class ActionResponseQuery(ActionResponseBase):
 	"""
 	def __init__(self, message):
 		super(ActionResponseQuery, self).__init__()
+		self.name = "ActionResponseQuery"
 		self.type = ActionResponseType.SUCCESS
 		self.message = message
 
 class ActionResponsePromptList(ActionResponseBase):
 	def __init__(self, prompt, items):
 		super(ActionResponsePromptList, self).__init__()
+		self.name = "ActionResponsePromptList"
 		self.type = ActionResponseType.REQUEST_INFO
 		self.prompt = prompt # the query to prompt the user with
 		self.items = items
