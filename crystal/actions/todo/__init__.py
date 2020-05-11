@@ -22,8 +22,8 @@ class ActionTodo(BaseAction):
 		self.todo_api = todoist.api.TodoistAPI(token=self.TODOIST_ACCESS_TOKEN)
 
 	@classmethod
-	def parse(self, sentence):
-		for word in sentence:
+	def parse(self, doc):
+		for word in doc:
 			if word.lemma_ in ["what", "read"]:
 				return "list"
 			if word.lemma_ in ["add"]:
@@ -55,8 +55,7 @@ class ActionTodo(BaseAction):
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
-		command = self.parse(sentence)
+		command = self.parse(doc)
 
 		log.info("Grabbing state...")
 		todo_state = self.get_todo_list_state()
@@ -69,9 +68,11 @@ class ActionTodo(BaseAction):
 			response = ActionResponsePromptList("Todo list", todo_items)
 			response.type = ActionResponseType.SUCCESS
 			return response
-
-		if command == "add":
+		elif command == "add":
 			return ActionResponseBasic(ActionResponseType.FAILURE, "Can't do that yet")
+		else:
+			log.error(f"Unknown command: {command}")
+			return ActionResponseBasic(ActionResponseType.FAILURE, "Unknown command: {command}")
 
 def getAction():
 	return ActionTodo()
