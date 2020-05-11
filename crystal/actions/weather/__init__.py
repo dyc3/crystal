@@ -33,6 +33,8 @@ class ActionWeather(BaseAction):
 		if zipcode_cache_path.exists():
 			with zipcode_cache_path.open("r") as zipcode_cache_file:
 				for line in zipcode_cache_file:
+					if "=" not in line:
+						continue
 					spl = line.split("=")
 					zipcode_cache[spl[0]] = spl[1]
 
