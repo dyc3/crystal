@@ -79,7 +79,7 @@ sputnik==0.9.3
 tensorflow==1.15.2
 Theano==0.9.0
 thinc==7.3.0
-todoist-python==7.0.19
+todoist-python==8.1.1
 toolz==0.9.0
 tqdm==4.28.1
 txaio==2.6.0
