@@ -17,6 +17,7 @@ class TestActionStoLore(unittest.TestCase):
 		test_set = [
 			("volume 1 chapter 1", 1, 1),
 			("volume 24 chapter 6", 24, 6),
+			("star trek lower volume nineteen chapter four", 19, 4),
 		]
 		action_sto_lore = sto_lore.ActionStoLore()
 		for query, expected_volume, expected_chapter in test_set:

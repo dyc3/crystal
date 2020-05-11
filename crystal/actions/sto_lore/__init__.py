@@ -32,7 +32,13 @@ class ActionStoLore(BaseAction):
 	def parse(self, doc):
 		volume_token = utils.find_word(doc, "volume")
 		chapter_token = utils.find_word(doc, "chapter")
-		return int(volume_token.nbor(1).text), int(chapter_token.nbor(1).text)
+		nums = [volume_token.nbor(1).text, chapter_token.nbor(1).text]
+		def _to_num(text):
+			try:
+				return int(text)
+			except ValueError:
+				return utils.text2int(text)
+		return map(_to_num, nums)
 
 	@classmethod
 	def run(self, doc):
