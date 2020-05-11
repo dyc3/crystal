@@ -34,6 +34,10 @@ class ActionStoLore(BaseAction):
 		chapter_token = utils.find_word(doc, "chapter")
 		nums = [volume_token.nbor(1).text, chapter_token.nbor(1).text]
 		def _to_num(text):
+			if text == "to":
+				return 2
+			elif text == "for":
+				return 4
 			try:
 				return int(text)
 			except ValueError:
