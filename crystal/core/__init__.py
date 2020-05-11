@@ -302,7 +302,6 @@ def run(in_args):
 	if args.mode == "voice":
 		# start recognizer
 		try:
-			# user_input.StartListening()
 			crystal.core.audio.start_listening()
 		except Exception as e:
 			log.critical("failed to start recognizer")
@@ -320,7 +319,8 @@ def run(in_args):
 					# This is useful for reminders, alarms, etc.
 					# Anything that user wants Crystal do that
 					# requires Crystal to do it automatically.
-					log.debug("Running update() for {}".format(name))
+					if args.verbose:
+						log.debug("Running update() for {}".format(name))
 					action.update()
 	elif args.mode == "text":
 		while True:
