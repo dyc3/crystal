@@ -24,9 +24,9 @@ class ActionTodo(BaseAction):
 	@classmethod
 	def parse(self, doc):
 		for word in doc:
-			if word.lemma_ in ["what", "read"]:
+			if word.lemma_ in ["what", "read", "get", "show"]:
 				return "list"
-			if word.lemma_ in ["add"]:
+			if word.lemma_ in ["add", "put"]:
 				return "add"
 		return
 

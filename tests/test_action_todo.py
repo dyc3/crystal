@@ -18,6 +18,9 @@ class TestActionTodo(unittest.TestCase):
 		test_set = [
 			("what's on my to-do list", "list"),
 			("read my to-do list", "list"),
+			("get my to-do list", "list"),
+			("show me my to-do list", "list"),
+			("what do i have to do today", "list"),
 			("add clean board to my todo list", "add"),
 		]
 		action = todo.getAction()
