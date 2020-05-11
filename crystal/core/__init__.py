@@ -270,8 +270,12 @@ def run(in_args):
 	# recognizer = BaseSpeechRecognizer() # placeholder
 	# recognizer = WatsonSpeechRecognizer(core.get_config("watson_username"), core.get_config("watson_password"))
 	# recognizer = SphinxSpeechRecognizer()
-	# user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
-	user_input = crystal.input.vosk_input.VoskInput()
+	config_user_input = get_config("input") or "vosk"
+	if config_user_input == "sr-google":
+		user_input = crystal.input.speech_recognition_input.SpeechRecognitionInput()
+	elif config_user_input == "vosk":
+		user_input = crystal.input.vosk_input.VoskInput()
+	log.info(f"Selected input module: {type(user_input)}")
 	commands = actions.load_actions()
 	log.info("{} action modules loaded".format(len(commands)))
 	log.debug(commands)
