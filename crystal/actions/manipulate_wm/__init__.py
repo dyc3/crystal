@@ -100,7 +100,7 @@ class ActionManipulateWm(BaseAction):
 		# target_token indicates the target entity the request is referencing
 		# used for requests like "show me steam" or "switch to the web browser"
 		# FIXME: do something more robust
-		target_token = utils.find_word(sentence.doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram", "calculator", "gedit", "editor", "studio", "blender"])
+		target_token = utils.find_word(sentence.doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram", "calculator", "gedit", "editor", "studio", "blender", "spotify", "vlc"])
 		if target_token and target_token.text not in ["this", "that"]:
 			matching_windows = self.find_matching_windows_in_tree(self.get_tree(), target_token.text.lower())
 			log.info(f"Found {len(matching_windows)} matching windows")
@@ -120,15 +120,20 @@ class ActionManipulateWm(BaseAction):
 				raise Exception("Failed to parse input for workspace number")
 		# moving windows to other workspaces
 		elif verb_word.lower_ in ["move", "put"]:
-			if workspace_token.nbor(-1).text in ["to", "on"]:
+			if workspace_token.nbor(-1).text in ["to", "on"] or workspace_token.nbor(-2).text in ["to", "on"]:
 				# This means that we are moving a window to the target workspace
 				if not workspace_token or not workspace_number:
 					# TODO: create Exception specifically for parsing failures
 					raise Exception("Unable to parse for target workspace")
-				if target_token.text in ["this", "that"]:
+				if target_token and target_token.text not in ["this", "that"]:
+					if len(matching_windows) > 0:
+						command = f'i3-msg \'[con_id="{matching_windows[0]["id"]}"] focus; move container to workspace number {workspace_number}\''
+					else:
+						raise Exception("Could not find any windows matching query")
+				elif target_token and target_token.text in ["this", "that"]:
 					command = f'i3-msg "move container to workspace number {workspace_number}"'
 				else:
-					raise Exception("Can't move other windows than the active window. You must specify that you want to move 'this' or 'that' window.")
+					raise Exception("Failed to parse which program to move")
 			else:
 				# This means that we are moving the target workspace to a different output
 				direction = utils.find_word(sentence.doc, ["up", "down", "left", "right", "primary"])
