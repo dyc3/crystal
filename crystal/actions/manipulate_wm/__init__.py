@@ -71,11 +71,11 @@ class ActionManipulateWm(BaseAction):
 		return results
 
 	@classmethod
-	def parse(self, sentence):
+	def parse(self, doc):
 		"""
 		Returns a i3-msg command with arguments to complete the action.
 		"""
-		workspace_token = utils.find_word(sentence.doc, ["workspace", "space", "desktop"])
+		workspace_token = utils.find_word(doc, ["workspace", "space", "desktop"])
 		workspace_number = None
 		if workspace_token:
 			num_token = workspace_token.nbor(1)
@@ -95,12 +95,12 @@ class ActionManipulateWm(BaseAction):
 				except Exception as e:
 					log.debug(f"Failed to parse workspace number: {e}")
 
-		verb_word = utils.find_word(sentence.doc, ["switch", "focus", "show", "pull", "go", "move", "put", "kill", "close", "quit", "toggle", "enable", "disable", "make"])
+		verb_word = utils.find_word(doc, ["switch", "focus", "show", "pull", "go", "move", "put", "kill", "close", "quit", "toggle", "enable", "disable", "make"])
 
 		# target_token indicates the target entity the request is referencing
 		# used for requests like "show me steam" or "switch to the web browser"
 		# FIXME: do something more robust
-		target_token = utils.find_word(sentence.doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram", "calculator", "gedit", "editor", "studio", "blender", "spotify", "vlc"])
+		target_token = utils.find_word(doc, ["this", "that", "steam", "browser", "firefox", "discord", "telegram", "calculator", "gedit", "editor", "studio", "blender", "spotify", "vlc"])
 		if target_token and target_token.text not in ["this", "that"]:
 			matching_windows = self.find_matching_windows_in_tree(self.get_tree(), target_token.text.lower())
 			log.info(f"Found {len(matching_windows)} matching windows")
@@ -120,7 +120,7 @@ class ActionManipulateWm(BaseAction):
 				raise Exception("Failed to parse input for workspace number")
 		# moving windows to other workspaces
 		elif verb_word.lower_ in ["move", "put"]:
-			if workspace_token.nbor(-1).text in ["to", "on"] or workspace_token.nbor(-2).text in ["to", "on"]:
+			if workspace_token.nbor(-1).text in ["to", "on"] or (workspace_token.i >= 2 and workspace_token.nbor(-2).text in ["to", "on"]):
 				# This means that we are moving a window to the target workspace
 				if not workspace_token or not workspace_number:
 					# TODO: create Exception specifically for parsing failures
@@ -136,7 +136,7 @@ class ActionManipulateWm(BaseAction):
 					raise Exception("Failed to parse which program to move")
 			else:
 				# This means that we are moving the target workspace to a different output
-				direction = utils.find_word(sentence.doc, ["up", "down", "left", "right", "primary"])
+				direction = utils.find_word(doc, ["up", "down", "left", "right", "primary"])
 				if not direction:
 					raise Exception("Failed to parse which direction to move the current workspace")
 				# if workspace_number:
@@ -154,8 +154,8 @@ class ActionManipulateWm(BaseAction):
 			else:
 				raise Exception("Failed to parse which program to kill")
 		elif verb_word.lower_ in ["toggle", "enable", "disable", "make"]:
-			verb_word = utils.find_word(sentence.doc, ["toggle", "enable", "disable", "make"])
-			attribute_word = utils.find_word(sentence.doc, ["fullscreen", "floating", "full", "float"])
+			verb_word = utils.find_word(doc, ["toggle", "enable", "disable", "make"])
+			attribute_word = utils.find_word(doc, ["fullscreen", "floating", "full", "float"])
 			if verb_word and attribute_word:
 				verb = verb_word.text
 				if verb == "make":
@@ -181,9 +181,8 @@ class ActionManipulateWm(BaseAction):
 
 	@classmethod
 	def run(self, doc):
-		sentence = next(doc.sents)
 		try:
-			command = self.parse(sentence)
+			command = self.parse(doc)
 		except Exception as e:
 			log.exception(e)
 			return ActionResponseBasic(ActionResponseType.FAILURE, f"Parsing failed: {e}")
