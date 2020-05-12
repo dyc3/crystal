@@ -335,7 +335,7 @@ def run(in_args):
 				reload_commands()
 				continue
 			if text_input.startswith("/debug"):
-				text_spl =  text_input.split()
+				text_spl = text_input.split()
 				if len(text_spl) <= 1:
 					log.error("subcommand required: depend, entity")
 				subcommand = text_spl[1]
