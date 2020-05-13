@@ -1,3 +1,4 @@
+import threading
 import logging
 log = logging.getLogger(__name__)
 
@@ -22,8 +23,13 @@ class EventHook(object):
 
 	def fire(self, *args, **keywargs):
 		log.debug("event triggered: {}, {}, {}".format(self.name, args, keywargs)[:300])
+		threads = []
 		for handler in self.__handlers:
-			handler(*args, **keywargs)
+			thread = threading.Thread(name=f"{self.name}_handler", target=handler, args=args, kwargs=keywargs)
+			threads.append(thread)
+			thread.start()
+		for thread in threads:
+			thread.join()
 
 	def clearObjectHandlers(self, inObject):
 		for theHandler in self.__handlers:
