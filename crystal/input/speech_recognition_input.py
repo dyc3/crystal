@@ -16,6 +16,7 @@ class SpeechRecognitionInput(BaseInput):
 		self.mic = sr.Microphone()
 
 	def process_audio(self, raw_audio, sample_rate, sample_width, failcount=0):
+		log.debug(f"Processing audio, sample rate: {sample_rate}...")
 		audio = sr.AudioData(raw_audio, sample_rate, sample_width)
 		try:
 			response = self.recog.recognize_google(audio, show_all=True)
