@@ -225,3 +225,5 @@ turn off my lamp,smart-home
 turn on my nightlight,smart-home
 toggle nightlight,smart-home
 toggle room lights,smart-home
+scan for devices,smart-home
+look for new devices,smart-home

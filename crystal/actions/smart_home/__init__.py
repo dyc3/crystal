@@ -21,7 +21,14 @@ class ActionSmartHome(BaseAction):
 		self.last_device_scan = datetime.datetime.now() - datetime.timedelta(seconds=5*60)
 
 	@classmethod
-	def parse(self, doc):
+	def get_query_type(self, doc):
+		if utils.find_word(doc, ["toggle", "turn"]):
+			return "interact"
+		if utils.find_word(doc, ["scan", "look"]):
+			return "scan"
+
+	@classmethod
+	def parse_interact(self, doc):
 		verb_token = utils.find_word(doc, ["toggle", "turn"])
 		if not verb_token:
 			raise Exception("Unable to find verb")
@@ -43,27 +50,7 @@ class ActionSmartHome(BaseAction):
 		return device_name, objective_state
 
 	@classmethod
-	def run(self, doc):
-		device_name, objective_state = self.parse(doc)
-		log.info(f"Set {device_name}: {objective_state}")
-		target_device = None
-		for device in self.devices:
-			if device_name in device.name.lower():
-				target_device = device
-				break
-		log.info(f"Selected: {target_device}")
-		if objective_state == "toggle":
-			target_device.toggle()
-		else:
-			target_device.set_state(objective_state)
-		return ActionResponseBasic(ActionResponseType.SUCCESS)
-
-	@classmethod
-	def update(self):
-		delta = datetime.datetime.now() - self.last_device_scan
-		if delta.total_seconds() < 5 * 60:
-			return
-
+	def scan_for_devices(self):
 		self.devices = pywemo.discover_devices()
 		self.devices += [
 			pywemo.discovery.device_from_description(f'http://192.168.0.10:{pywemo.ouimeaux_device.probe_wemo("192.168.0.10")}/setup.xml', None),
@@ -72,6 +59,36 @@ class ActionSmartHome(BaseAction):
 		# self.devices[0].toggle()
 		log.info(f"found {len(self.devices)} devices")
 		self.last_device_scan = datetime.datetime.now()
+
+	@classmethod
+	def run(self, doc):
+		query_type = self.get_query_type(doc)
+		if query_type == "interact":
+			device_name, objective_state = self.parse_interact(doc)
+			log.info(f"Set {device_name}: {objective_state}")
+			target_device = None
+			for device in self.devices:
+				if device_name in device.name.lower():
+					target_device = device
+					break
+			log.info(f"Selected: {target_device}")
+			if objective_state == "toggle":
+				target_device.toggle()
+			else:
+				target_device.set_state(objective_state)
+			return ActionResponseBasic(ActionResponseType.SUCCESS)
+		elif query_type == "scan":
+			self.scan_for_devices()
+			return ActionResponseQuery(f"Found {len(self.devices)} devices")
+		else:
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"Unknown query type: {query_type}")
+
+	@classmethod
+	def update(self):
+		delta = datetime.datetime.now() - self.last_device_scan
+		if delta.total_seconds() < 5 * 60:
+			return
+		self.scan_for_devices()
 
 def getAction():
 	return ActionSmartHome()
