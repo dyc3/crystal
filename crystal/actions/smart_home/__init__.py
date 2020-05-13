@@ -46,6 +46,14 @@ class ActionSmartHome(BaseAction):
 			objective_state = 1 if verb_token.nbor(1).text == "on" else 0
 
 		device_name = target_token.text
+		target_prev_token = target_token.nbor(-1)
+		while target_token.dep_ == "compound":
+			device_name += f" {target_token.nbor(1).text}"
+			target_token = target_token.nbor(1)
+		if target_prev_token.pos_ == "PROPN":
+			device_name = f"{target_prev_token.text} {device_name}"
+		elif list(target_token.children)[0].dep_ == "poss":
+			device_name = f"{list(target_token.children)[0].text} {device_name}"
 
 		return device_name, objective_state
 
