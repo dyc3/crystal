@@ -1,7 +1,7 @@
 astroid==2.1.0
 attrs==16.3.0
 audioread==2.1.4
-blink1==0.0.12
+blink1==0.3.1
 certifi==2018.11.29
 cffi==1.9.1
 chardet==3.0.4
