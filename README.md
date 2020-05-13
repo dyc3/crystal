@@ -121,7 +121,16 @@ the input-action pipeline.
 
 Here are notes for setting Crystal up on a new system (in no particular order).
 
-Tensorflow currently *still* doesn't support Python 3.7, so Crystal requires Python **3.5** or **3.6**.
+## Dependencies
+
+*Not necessarily a complete list.*
+
+Requires Python >= 3.6
+
+### Ubuntu
+```bash
+apt install python-dev libusb-1.0-0-dev libudev-dev
+```
 
 Snowboy must be compiled for the version of python that is being used.
 
