@@ -1,0 +1,50 @@
+{
+	// Place your crystal workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	"blank action module": {
+		"prefix": "action",
+		"body": [
+			"from crystal.actions import BaseAction",
+			"from crystal.actions.responses import *",
+			"import random",
+			"from crystal import feedback",
+			"import utils",
+			"import logging",
+			"log = logging.getLogger(__name__)",
+			"",
+			"class Action$1(BaseAction):",
+			"	\"\"\"docstring for Action$1.\"\"\"",
+			"	def __init__(self):",
+			"		super(Action$1, self).__init__()",
+			"		self.handled_classifier = \"$2\"",
+			"		self.requires_updater = False",
+			"",
+			"	@classmethod",
+			"	def parse(self, doc):",
+			"		return None",
+			"",
+			"	@classmethod",
+			"	def run(self, doc):",
+			"		args = self.parse(doc)",
+			"		return ActionResponseBasic(ActionResponseType.FAILURE, \"Not implemented\")",
+			"",
+			"def getAction():",
+			"	return Action$1()",
+			""
+		],
+	}
+}
