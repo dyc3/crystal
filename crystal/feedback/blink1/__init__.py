@@ -23,7 +23,7 @@ def on_core_exit():
 	b1.fade_to_color(2000, "black")
 
 def on_recording_finish(raw_audio: bytes, sample_rate: int, sample_width: int):
-	pattern_str = '0, blue,0.3,1, orange,0.1,2,  black,0.3,2'
+	pattern_str = '0, yellow,0.3,1, orange,0.2,1, yellow,0.3,2, red,0.2,2, red,0.2,1, orange,0.3,2'
 	b1.play_pattern(pattern_str)
 
 def register():
