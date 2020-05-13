@@ -219,3 +219,9 @@ star trek online lore volume 17 chapter 9,sto-lore
 Star Trek volume 3 chapter 5,sto-lore
 Star Trek volume 2 chapter 6,sto-lore
 what is the answer to star trek online lore volume 24 chapter 8,sto-lore
+turn on the lamp,smart-home
+turn on the light,smart-home
+turn off my lamp,smart-home
+turn on my nightlight,smart-home
+toggle nightlight,smart-home
+toggle room lights,smart-home
