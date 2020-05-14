@@ -3,6 +3,7 @@ import datetime
 import spacy
 from spacy import displacy
 from crystal.actions import smart_home
+import crystal.core.processing
 
 nlp = None
 
@@ -12,7 +13,8 @@ class TestActionSmartHome(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		global nlp
-		nlp = spacy.load("en_core_web_sm")
+		nlp = spacy.load("en_core_web_md")
+		crystal.core.processing.nlp = nlp
 
 	def test_get_query_type(self):
 		# query, expected query type
@@ -67,8 +69,10 @@ class TestActionSmartHome(unittest.TestCase):
 			("paul room light", "Pauls Room Light"),
 		]
 		for device_name_input, expected_device_name in test_set:
-			with self.subTest(device_name_input):
-				self.assertEqual(action_smart_home.select_device(device_name_input).name, expected_device_name)
+			with self.subTest(f"{device_name_input} -> {expected_device_name}"):
+				device = action_smart_home.select_device(device_name_input)
+				self.assertIsNotNone(device)
+				self.assertEqual(device.name, expected_device_name)
 
 if __name__ == '__main__':
 	unittest.main()
