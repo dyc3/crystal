@@ -20,7 +20,6 @@
 		"body": [
 			"from crystal.actions import BaseAction",
 			"from crystal.actions.responses import *",
-			"import random",
 			"from crystal import feedback",
 			"import utils",
 			"import logging",
