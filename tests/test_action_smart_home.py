@@ -68,7 +68,7 @@ class TestActionSmartHome(unittest.TestCase):
 		]
 		for device_name_input, expected_device_name in test_set:
 			with self.subTest(device_name_input):
-				self.assertEqual(action_smart_home.select_device(device_name_input), expected_device_name)
+				self.assertEqual(action_smart_home.select_device(device_name_input).name, expected_device_name)
 
 if __name__ == '__main__':
 	unittest.main()
