@@ -6,6 +6,7 @@ from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.neural_network import MLPClassifier
 import spacy
+from spacy.tokens import Doc
 
 import logging
 log = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ def load_nlp(model: str):
 		os.system(f"python3 -m spacy download {model}")
 		nlp = spacy.load(model)
 
-def parse_nlp(text: str):
+def parse_nlp(text: str) -> Doc:
 	return nlp(text)
 
 def get_stop_words():
