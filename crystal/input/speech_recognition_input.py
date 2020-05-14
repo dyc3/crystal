@@ -19,7 +19,7 @@ class SpeechRecognitionInput(BaseInput):
 		log.debug(f"Processing audio, sample rate: {sample_rate}...")
 		audio = sr.AudioData(raw_audio, sample_rate, sample_width)
 		try:
-			response = self.recog.recognize_google(audio, show_all=True)
+			response = self.recog.recognize_google(audio, key=crystal.core.get_config("google_speech_apikey", optional=True) or None, show_all=True, pfilter=0)
 			if not str(response) == "[]":
 				return self.pickMostLikelyRecognition(response['alternative'])
 		except sr.RequestError:
