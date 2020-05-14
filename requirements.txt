@@ -75,7 +75,7 @@ sip==4.19.3
 six==1.11.0
 sklearn==0.0
 spacy==2.2.3
-SpeechRecognition==3.7.1
+SpeechRecognition==3.8.1
 sputnik==0.9.3
 tensorflow==1.15.2
 Theano==0.9.0
