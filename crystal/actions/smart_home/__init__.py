@@ -7,6 +7,24 @@ import utils
 import logging
 log = logging.getLogger(__name__)
 
+class DeviceWrapper(object):
+	def __init__(self, device):
+		super(DeviceWrapper, self).__init__()
+		self.internal_device = device
+
+	@property
+	def name(self):
+		if isinstance(self.internal_device, dict):
+			return self.internal_device["name"]
+		else:
+			return self.internal_device.name
+
+	def set_state(self, state):
+		self.internal_device.set_state(state)
+
+	def toggle(self):
+		self.internal_device.toggle()
+
 class ActionSmartHome(BaseAction):
 	"""docstring for ActionSmartHome."""
 	def __init__(self):
@@ -64,9 +82,15 @@ class ActionSmartHome(BaseAction):
 			pywemo.discovery.device_from_description(f'http://192.168.0.10:{pywemo.ouimeaux_device.probe_wemo("192.168.0.10")}/setup.xml', None),
 			pywemo.discovery.device_from_description(f'http://192.168.0.23:{pywemo.ouimeaux_device.probe_wemo("192.168.0.23")}/setup.xml', None),
 		]
-		# self.devices[0].toggle()
+		self.devices = list([DeviceWrapper(d) for d in self.devices])
 		log.info(f"found {len(self.devices)} devices")
 		self.last_device_scan = datetime.datetime.now()
+
+	@classmethod
+	def select_device(self, name: str):
+		for device in self.devices:
+			if name in device.name.lower():
+				return device
 
 	@classmethod
 	def run(self, doc):
@@ -74,11 +98,7 @@ class ActionSmartHome(BaseAction):
 		if query_type == "interact":
 			device_name, objective_state = self.parse_interact(doc)
 			log.info(f"Set {device_name}: {objective_state}")
-			target_device = None
-			for device in self.devices:
-				if device_name in device.name.lower():
-					target_device = device
-					break
+			target_device = self.select_device(device_name)
 			log.info(f"Selected: {target_device}")
 			if objective_state == "toggle":
 				target_device.toggle()

@@ -49,5 +49,26 @@ class TestActionSmartHome(unittest.TestCase):
 				self.assertEqual(device_name, expected_device_name)
 				self.assertEqual(objective_state, expected_objective_state)
 
+	def test_select_correct_device(self):
+		action_smart_home = smart_home.ActionSmartHome()
+		fake_devices = [
+			smart_home.DeviceWrapper({"name": "Carsons Lamp"}),
+			smart_home.DeviceWrapper({"name": "Carsons Room Light"}),
+			smart_home.DeviceWrapper({"name": "Pauls Room Light"}),
+		]
+		action_smart_home.devices = fake_devices
+		test_set = [
+			("carson lamp", "Carsons Lamp"),
+			("carsons lamp", "Carsons Lamp"),
+			("lamp", "Carsons Lamp"),
+			("light", "Carsons Room Light"),
+			("pauls light", "Pauls Room Light"),
+			("room light", "Carsons Room Light"),
+			("paul room light", "Pauls Room Light"),
+		]
+		for device_name_input, expected_device_name in test_set:
+			with self.subTest(device_name_input):
+				self.assertEqual(action_smart_home.select_device(device_name_input), expected_device_name)
+
 if __name__ == '__main__':
 	unittest.main()
