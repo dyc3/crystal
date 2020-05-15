@@ -87,8 +87,8 @@ class ActionSmartHome(BaseAction):
 		# we should just do our own portscan.
 		self.devices += [
 			pywemo.discovery.device_from_description(f'http://192.168.0.10:{pywemo.ouimeaux_device.probe_wemo("192.168.0.10")}/setup.xml', None),
-			pywemo.discovery.device_from_description(f'http://192.168.0.23:{pywemo.ouimeaux_device.probe_wemo("192.168.0.23")}/setup.xml', None),
 			pywemo.discovery.device_from_description(f'http://192.168.0.21:{pywemo.ouimeaux_device.probe_wemo("192.168.0.21")}/setup.xml', None),
+			pywemo.discovery.device_from_description(f'http://192.168.0.33:{pywemo.ouimeaux_device.probe_wemo("192.168.0.33")}/setup.xml', None),
 		]
 		self.devices = list([DeviceWrapper(d) for d in self.devices])
 		log.info(f"found {len(self.devices)} devices")
