@@ -11,7 +11,7 @@ Crystal is my custom virtual assistant, tailor made for my setup.
 - Deep integration with i3wm
 - Cool Star Trek sound effects
 
-These are examples of queries that Crystal can respond to accurately.
+These are examples of queries that Crystal can respond to accurately. For a more complete list, browse the unit tests.
 
 ## Date and Time
 
@@ -72,6 +72,13 @@ These are examples of queries that Crystal can respond to accurately.
 - Move this workspace up.
 - Move this workspace to the primary display.
 
+## Smart Home
+
+- Turn on the lamp
+- Turn off the room light
+- Toggle Paul's lights
+- Scan for new devices
+
 # Design
 
 There are 3 types of modules:
@@ -127,10 +134,25 @@ Here are notes for setting Crystal up on a new system (in no particular order).
 
 Requires Python >= 3.6
 
-### Ubuntu
+### Ubuntu >= 16.04
+
 ```bash
-apt install python-dev libusb-1.0-0-dev libudev-dev
+apt install python-dev libusb-1.0-0-dev libudev-dev flac
 ```
+
+### Python packages
+
+Everything should be in the `requirements.txt`, so
+```
+pip3 install -r requirements.txt
+```
+
+In order to run spacy on the gpu, the python package `thinc_gpu_ops` is required.
+```
+pip3 install thinc_gpu_ops
+```
+
+## Other
 
 Snowboy must be compiled for the version of python that is being used.
 
@@ -141,4 +163,4 @@ SUBSYSTEM=="input", GROUP="input", MODE="0666"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="27b8", ATTRS{idProduct}=="01ed", MODE:="666", GROUP="plugdev"
 KERNEL=="hidraw*", ATTRS{idVendor}=="27b8", ATTRS{idProduct}=="01ed", MODE="0666", GROUP="plugdev"
 ```
-Reload udev with `sudo udevadm control --reload-rules`. You may need to unplug/replug device for rules to take effect.
+Reload udev with `sudo udevadm control --reload-rules`. You may need to unplug/replug the device for rules to take effect.
