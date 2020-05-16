@@ -23,6 +23,12 @@ class TestActionSmartHome(unittest.TestCase):
 			("toggle the light", "interact"),
 			("scan for devices", "scan"),
 			("look for new devices", "scan"),
+			("are the lights on", "query"),
+			("how many devices have you found", "query"),
+			("how many devices are available", "query"),
+			("how many devices are available", "query"),
+			("is the lamp supposed to be on", "query"),
+			("did I leave the lights on", "query"),
 		]
 		action_smart_home = smart_home.ActionSmartHome()
 		for query, expected_query_type in test_set:

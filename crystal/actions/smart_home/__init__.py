@@ -49,8 +49,12 @@ class ActionSmartHome(BaseAction):
 	def get_query_type(self, doc):
 		if utils.find_word(doc, ["toggle", "turn"]):
 			return "interact"
-		if utils.find_word(doc, ["scan", "look"]):
+		if utils.find_word(doc, ["scan", "look", "search", "find"]):
+			if utils.find_word(doc, ["how"]):
+				return "query"
 			return "scan"
+		if utils.find_word(doc, ["should", "how", "are", "did", "is"]):
+			return "query"
 
 	def parse_interact(self, doc):
 		verb_token = utils.find_word(doc, ["toggle", "turn"])
