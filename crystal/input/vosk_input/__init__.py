@@ -50,4 +50,9 @@ class VoskInput(BaseInput):
 		self.rec = None
 		self.current_utterance = ""
 		self.__final_result = None
-		return result["text"]
+
+		full_text = result["text"]
+		# HACK: auto correct text to match domain vocabulary. Sorry.
+		full_text = full_text.replace("palace music", "pause music")
+
+		return full_text
