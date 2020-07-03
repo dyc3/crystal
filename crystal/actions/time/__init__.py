@@ -32,7 +32,7 @@ class ActionTime(BaseAction):
 
 		if command == "check":
 			current_time = datetime.datetime.now().time()
-			log.info("Time: {}".format(current_time.isoformat()))
+			log.info(f"Time: {current_time.isoformat()}")
 			return ActionResponseQuery(current_time.isoformat())
 		elif command == "set-alarm":
 			self.set_alarm(datetime.datetime.now() + datetime.timedelta(seconds=5))
