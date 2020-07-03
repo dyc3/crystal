@@ -23,6 +23,7 @@ class TestCoreIsTalkingToMe(unittest.TestCase):
 
 			("I'm talking about Crystal and she shouldn't activate", False),
 			("Working on Crystal is fun", False),
+			("it can we do that on my defend the crystal phone", False),
 		]
 
 		for query, expected_result in test_set:
