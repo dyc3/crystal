@@ -61,6 +61,7 @@ class ActionDate(BaseAction):
 		The target_date should be January 3, 2000 (the next Monday), and
 		the compare_date should be January 2, 2000 (tomorrow)
 		"""
+		# FIXME: parsedatetime sucks ass, I should probably just try to parse the dates myself.
 		target_date = None
 		compare_date = None
 
@@ -81,9 +82,15 @@ class ActionDate(BaseAction):
 			target_date_text = target_tokens.text
 			# HACK: parsedatetime doesn't parse ordinal numbers
 			if any([target_date_text.lower().startswith(x) for x in MONTHS]):
-				if " " not in target_date_text:
+				# HACK: ensure that the whole date is there, including the year
+				if " " not in target_date_text and target_tokens[0].i + 1 < len(doc):
 					target_date_text += f" {doc[target_tokens[0].i + 1]}"
+					if target_tokens[0].i + 2 < len(doc) and doc[target_tokens[0].i + 2].like_num:
+						target_date_text += f" {doc[target_tokens[0].i + 2].text}"
 				month, day, *other = target_date_text.split()
+				# HACK: make sure the year has 4 digits, because parsedatetime can't handle that
+				if other:
+					other[0] = other[0].zfill(4)
 				day = utils.ordinal_to_int(day)
 				target_date_text = " ".join([month, str(day), *other])
 			target_date, _ = cal.parseDT(target_date_text, sourceTime=today)
