@@ -1,5 +1,8 @@
 import unittest
 import spacy
+from hypothesis import given, example
+import hypothesis.strategies as st
+
 from crystal.actions import time
 
 nlp = None
@@ -23,6 +26,7 @@ class TestActionTime(unittest.TestCase):
 			("set an alarm for 9 AM", "set-alarm"),
 			("set an alarm for 7", "set-alarm"),
 			("create an alarm for 8", "set-alarm"),
+			("set a timer for 8 minutes", "set-alarm"),
 		]
 		action_time = time.ActionTime()
 		for test, expected_command in test_set:

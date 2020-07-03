@@ -4,6 +4,14 @@ what time is it in eastern standard time,time
 what time is it on the west coast,time
 what's the current military time,time
 is it still morning,time
+set an alarm,time
+set a timer,time
+set an alarm for 5pm,time
+set a timer for 5 minutes,time
+set a timer for 10 seconds,time
+create a timer for 10 seconds,time
+make a timer for 10 seconds,time
+start a timer for 10 seconds,time
 what is today's date,date
 give me the date,date
 what day of the week is it,date

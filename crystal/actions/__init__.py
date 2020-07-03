@@ -3,6 +3,7 @@ import abc
 import os
 import importlib
 import crystal.core
+import crystal.core.persistence
 
 import logging
 log = logging.getLogger(__name__)
@@ -12,6 +13,14 @@ class BaseAction(metaclass=ABCMeta):
 	def __init__(self):
 		super(BaseAction, self).__init__()
 		self.handled_classifier = None
+		self.state = None
+
+	def get_state(self):
+		self.state = crystal.core.persistence.get_state_for_module(f"action-{self.handled_classifier}")
+
+	def save_state(self):
+		if self.state != None:
+			crystal.core.persistence.save_state_for_module(f"action-{self.handled_classifier}", self.state)
 
 	@classmethod
 	@abc.abstractmethod
