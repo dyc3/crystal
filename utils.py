@@ -3,6 +3,7 @@
 import os
 from timeit import default_timer as timer
 import numpy as np
+import re
 import logging
 log = logging.getLogger(__name__)
 
@@ -38,6 +39,17 @@ def text2int(textnum, numwords={}):
 			current = 0
 
 	return result + current
+
+def ordinal_to_int(text):
+	text = text.strip(",. ")
+	match_literals = re.search(r"\d+", text)
+	if match_literals:
+		return int(match_literals[0])
+	numwords = ["first", "second", "third"]
+	if text in numwords:
+		return numwords.index(text) + 1
+	elif text.endswith("th"):
+		return text2int(text[:-2])
 
 def runAndPrint(command):
 	"""

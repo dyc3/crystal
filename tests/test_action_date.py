@@ -28,6 +28,7 @@ class TestActionDate(unittest.TestCase):
 
 			("how many days until Monday", "count"),
 			("count the days til Friday", "count"),
+			("how many days until july fourth", "count"),
 		]
 		action_date = date.ActionDate()
 		for query, expected_query_type in test_set:
@@ -51,9 +52,9 @@ class TestActionDate(unittest.TestCase):
 				doc = nlp(query)
 				sent = next(doc.sents)
 				target_date, compare_date = action_date.find_target_and_compare_dates(sent)
-				self.assertEqual(action_date.verify(target_date, compare_date), expected_result, "Date verification failed, {}".format(query))
+				self.assertEqual(action_date.verify(target_date, compare_date), expected_result, f"Date verification failed, {query}, parsed dates: target: {target_date}, compare: {compare_date}")
 
-	def test_date_count(self):
+	def test_date_count_relative(self):
 		# query, expected result
 		test_set = [
 			# test relative terms
@@ -77,6 +78,41 @@ class TestActionDate(unittest.TestCase):
 				doc = nlp(query)
 				sent = next(doc.sents)
 				target_date, compare_date = action_date.find_target_and_compare_dates(sent)
+				test_result = action_date.count(target_date, compare_date)
+				self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
+
+	def test_date_extraction(self):
+		# query, today, expected target_date, expected compare_date
+		test_set = [
+			("how many days until july fourth", datetime.datetime(2020, 7, 2), datetime.datetime(2020, 7, 4), datetime.datetime(2020, 7, 2)),
+			("how many days until friday", datetime.datetime(2020, 7, 1), datetime.datetime(2020, 7, 3), datetime.datetime(2020, 7, 1)),
+			("Is tomorrow Monday?", datetime.datetime(2000, 1, 1), datetime.datetime(2000, 1, 3), datetime.datetime(2000, 1, 2)),
+			("How many days until January 2?", datetime.datetime(2000, 1, 1), datetime.datetime(2000, 1, 2), datetime.datetime(2000, 1, 1)),
+			("was yesterday Wednesday", datetime.datetime(2020, 7, 2), datetime.datetime(2020, 7, 1), datetime.datetime(2020, 7, 1)),
+			("is tomorrow Friday", datetime.datetime(2020, 7, 2), datetime.datetime(2020, 7, 3), datetime.datetime(2020, 7, 3)),
+		]
+		action_date = date.ActionDate()
+		for query, today, expected_target_date, expected_compare_date in test_set:
+			with self.subTest(f"Testing \"{query}\" relative to {today.date()}, expecting target: {expected_target_date.date()}, compare: {expected_compare_date.date()}"):
+				doc = nlp(query)
+				sent = next(doc.sents)
+				target_date, compare_date = action_date.find_target_and_compare_dates(sent, today=today)
+				self.assertEqual(target_date, expected_target_date)
+				self.assertEqual(compare_date, expected_compare_date)
+
+	def test_date_count_absolute(self):
+		# query, today, expected count
+		test_set = [
+			("how many days until july fourth", datetime.datetime(2020, 7, 2), 2),
+			("how many days until friday", datetime.datetime(2020, 7, 1), 2),
+			("how many days until friday", datetime.datetime(2020, 7, 2), 1),
+		]
+		action_date = date.ActionDate()
+		for query, today, expected_result in test_set:
+			with self.subTest(f"Testing \"{query}\" relative to {today.date()}, expecting count: {expected_result}"):
+				doc = nlp(query)
+				sent = next(doc.sents)
+				target_date, compare_date = action_date.find_target_and_compare_dates(sent, today=today)
 				test_result = action_date.count(target_date, compare_date)
 				self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
 

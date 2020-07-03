@@ -22,6 +22,7 @@ what day is friday,date
 how many days until Monday,date
 count the days until Monday,date
 is March 14th a Sunday,date
+how many days until july fourth,date
 roll a die,roll-die
 roll 2 dice,roll-die
 roll a d6,roll-die

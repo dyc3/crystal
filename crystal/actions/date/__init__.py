@@ -3,8 +3,13 @@ from crystal.actions import BaseAction
 from crystal.actions.responses import *
 import parsedatetime
 from crystal import feedback
+import utils
 import logging
 log = logging.getLogger(__name__)
+
+MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+RELATIVE_DAYS = ["yesterday", "today", "tomorrow"]
 
 cal = parsedatetime.Calendar()
 
@@ -38,7 +43,7 @@ class ActionDate(BaseAction):
 			return "verify"
 
 	@classmethod
-	def find_target_and_compare_dates(self, sentence):
+	def find_target_and_compare_dates(self, doc, today=datetime.datetime.today()):
 		"""
 		Parses the sentence to extract 2 dates: the target date and the compare date.
 		Returns the dates in a tuple: (target_date, compare_date)
@@ -56,49 +61,37 @@ class ActionDate(BaseAction):
 		The target_date should be January 3, 2000 (the next Monday), and
 		the compare_date should be January 2, 2000 (tomorrow)
 		"""
-		# TODO: I think this method needs a total rewrite because it's super confusing.
-		# target_date and compare_date are not obvious without reading the docstring.
 		target_date = None
 		compare_date = None
 
-		# parse what we are looking in
-		target_token = [word for word in sentence if word.ent_type_ == "DATE" and word.lemma_ not in ["day", "the", "many"]][0]
-		# the entity that the target token is in might have more than one word, eg. "Jan 20"
-		# so make sure target_token has the *entire* date entity
-		if target_token.lemma_ not in ["yesterday", "today", "tomorrow"]:
-			target_token = [ent for ent in sentence.doc.ents if ent.start == target_token.i][0].merge()
-
-		parse_string = str(target_token)
-		log.debug("parsing target date: {}".format(parse_string))
-		time_struct, parse_status = cal.parse(parse_string)
-		if parse_status != 0:
-			target_date = datetime.datetime(*time_struct[:6])
+		date_ents = [ent for ent in doc.ents if ent.label_ == "DATE" and not any([tok.lemma_ in ["day", "the", "many"] for tok in ent])]
+		target_tokens = date_ents[-1]
+		# HACK: "tomorrow <WEEKDAY>" gets misclassified as one entity
+		if " " in target_tokens.lower_ and target_tokens.lower_.split()[0] == "tomorrow" and target_tokens.lower_.split()[1] in WEEKDAYS:
+			compare_date = today + datetime.timedelta(days=1)
+			target_date, _ = cal.parseDT(target_tokens.text.split()[1], sourceTime=today)
+		elif len(date_ents) == 2 and all([ent.lower_ in WEEKDAYS + RELATIVE_DAYS for ent in date_ents]):
+			compare_relative_delta = RELATIVE_DAYS.index(date_ents[0].lower_) - 1
+			compare_date = today + datetime.timedelta(days=compare_relative_delta)
+			if date_ents[0].lower_ == "tomorrow":
+				target_date, _ = cal.parseDT(target_tokens.text, sourceTime=today)
+			else:
+				target_date, _ = cal.parseDT(target_tokens.text, sourceTime=compare_date - datetime.timedelta(days=7))
 		else:
-			log.debug("parse_status: {}".format(parse_status))
+			target_date_text = target_tokens.text
+			# HACK: parsedatetime doesn't parse ordinal numbers
+			if any([target_date_text.lower().startswith(x) for x in MONTHS]):
+				month, day, *other = target_date_text.split()
+				day = utils.ordinal_to_int(day)
+				target_date_text = " ".join([month, str(day), *other])
+			target_date, _ = cal.parseDT(target_date_text, sourceTime=today)
+			if len(date_ents) > 1:
+				compare_date, _ = cal.parseDT(date_ents[0].text, sourceTime=today)
+			else:
+				compare_date = today
 
-		# parse what we are looking for
-		parse_string = str([word for word in sentence if word != target_token])
-		log.debug("parsing compare date: {}".format(parse_string))
-		# ok, I'll admit this is really janky
-		context_struct = None
-		if target_date.date() == datetime.date.today() + datetime.timedelta(days=1):
-			context_struct, _ = cal.parse("today")
-		else:
-			context_struct, _ = cal.parse("last week")
-		log.debug("context: {}".format(context_struct))
-		time_struct, parse_status = cal.parse(parse_string, sourceTime=context_struct)
-		if parse_status != 0:
-			compare_date = datetime.datetime(*time_struct[:6])
-		else:
-			log.debug("parse_status: {}".format(parse_status))
-
-		# fallback
-		if compare_date == None:
-			log.debug("fallback, compare date == today")
-			context_struct, _ = cal.parse("today")
-			time_struct, parse_status = cal.parse(parse_string, sourceTime=context_struct)
-			compare_date = datetime.datetime(*time_struct[:6])
-
+		time_reset = { "hour": 0, "minute": 0, "second": 0, "microsecond": 0 }
+		target_date, compare_date = target_date.replace(**time_reset,), compare_date.replace(**time_reset)
 		return target_date, compare_date
 
 	@classmethod
@@ -141,14 +134,14 @@ class ActionDate(BaseAction):
 			# feedback.ShowNotify("Date: {}".format(date_str))
 			return ActionResponseQuery(date_str)
 		elif query_type == "verify":
-			target_date, compare_date = self.find_target_and_compare_dates(sentence)
+			target_date, compare_date = self.find_target_and_compare_dates(doc)
 			result = self.verify(target_date, compare_date)
 			if result:
 				return ActionResponseQuery("Yes")
 			else:
 				return ActionResponseQuery("No")
 		elif query_type == "count":
-			target_date, compare_date = self.find_target_and_compare_dates(sentence)
+			target_date, compare_date = self.find_target_and_compare_dates(doc)
 			result = self.count(target_date, compare_date)
 			return ActionResponseQuery("{} days".format(result))
 		else:

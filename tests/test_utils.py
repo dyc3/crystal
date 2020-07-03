@@ -49,6 +49,14 @@ class TestUtils(unittest.TestCase):
 	# 			doc = nlp(query)
 	# 			self.assertEqual(utils.parse_duration_to_seconds(doc), expected_seconds)
 
+	def test_ordinal_to_int(self):
+		self.assertEqual(utils.ordinal_to_int("4th"), 4)
+		self.assertEqual(utils.ordinal_to_int("fourth"), 4)
+		self.assertEqual(utils.ordinal_to_int("first"), 1)
+		self.assertEqual(utils.ordinal_to_int("1st"), 1)
+		self.assertEqual(utils.ordinal_to_int("second"), 2)
+		self.assertEqual(utils.ordinal_to_int("third"), 3)
+
 
 if __name__ == '__main__':
 	unittest.main()
