@@ -54,5 +54,8 @@ class VoskInput(BaseInput):
 		full_text = result["text"]
 		# HACK: auto correct text to match domain vocabulary. Sorry.
 		full_text = full_text.replace("palace music", "pause music")
+		full_text = full_text.replace("applause music", "pause music")
+		full_text = full_text.replace("turn off the land", "turn off the lamp")
+		full_text = full_text.replace("turn off the lamb", "turn off the lamp")
 
 		return full_text
