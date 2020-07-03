@@ -31,7 +31,7 @@ def register():
 	global b1
 	try:
 		b1 = blink1.Blink1()
-	except blink1.BlinkConnectionFailed as e:
+	except blink1.Blink1ConnectionFailed as e:
 		log.exception(e)
 		return
 
