@@ -11,3 +11,4 @@ config.txt
 main.py.orig
 .vscode/tags
 .vscode/ipch
+.hypothesis/

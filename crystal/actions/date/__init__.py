@@ -81,6 +81,8 @@ class ActionDate(BaseAction):
 			target_date_text = target_tokens.text
 			# HACK: parsedatetime doesn't parse ordinal numbers
 			if any([target_date_text.lower().startswith(x) for x in MONTHS]):
+				if " " not in target_date_text:
+					target_date_text += f" {doc[target_tokens[0].i + 1]}"
 				month, day, *other = target_date_text.split()
 				day = utils.ordinal_to_int(day)
 				target_date_text = " ".join([month, str(day), *other])

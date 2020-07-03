@@ -1,6 +1,9 @@
 import unittest
 import datetime
 import spacy
+from hypothesis import given
+import hypothesis.strategies as st
+
 from crystal.actions import date
 
 nlp = None
@@ -50,8 +53,7 @@ class TestActionDate(unittest.TestCase):
 		for query, expected_result in test_set:
 			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_result)):
 				doc = nlp(query)
-				sent = next(doc.sents)
-				target_date, compare_date = action_date.find_target_and_compare_dates(sent)
+				target_date, compare_date = action_date.find_target_and_compare_dates(doc)
 				self.assertEqual(action_date.verify(target_date, compare_date), expected_result, f"Date verification failed, {query}, parsed dates: target: {target_date}, compare: {compare_date}")
 
 	def test_date_count_relative(self):
@@ -76,8 +78,7 @@ class TestActionDate(unittest.TestCase):
 		for query, expected_result in test_set:
 			with self.subTest("Testing \"{}\" relative to today's date, expecting {}".format(query, expected_result)):
 				doc = nlp(query)
-				sent = next(doc.sents)
-				target_date, compare_date = action_date.find_target_and_compare_dates(sent)
+				target_date, compare_date = action_date.find_target_and_compare_dates(doc)
 				test_result = action_date.count(target_date, compare_date)
 				self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
 
@@ -90,13 +91,13 @@ class TestActionDate(unittest.TestCase):
 			("How many days until January 2?", datetime.datetime(2000, 1, 1), datetime.datetime(2000, 1, 2), datetime.datetime(2000, 1, 1)),
 			("was yesterday Wednesday", datetime.datetime(2020, 7, 2), datetime.datetime(2020, 7, 1), datetime.datetime(2020, 7, 1)),
 			("is tomorrow Friday", datetime.datetime(2020, 7, 2), datetime.datetime(2020, 7, 3), datetime.datetime(2020, 7, 3)),
+			("count days until March 03", datetime.datetime(2000, 1, 1), datetime.datetime(2000, 3, 3), datetime.datetime(2000, 1, 1)),
 		]
 		action_date = date.ActionDate()
 		for query, today, expected_target_date, expected_compare_date in test_set:
 			with self.subTest(f"Testing \"{query}\" relative to {today.date()}, expecting target: {expected_target_date.date()}, compare: {expected_compare_date.date()}"):
 				doc = nlp(query)
-				sent = next(doc.sents)
-				target_date, compare_date = action_date.find_target_and_compare_dates(sent, today=today)
+				target_date, compare_date = action_date.find_target_and_compare_dates(doc, today=today)
 				self.assertEqual(target_date, expected_target_date)
 				self.assertEqual(compare_date, expected_compare_date)
 
@@ -111,10 +112,19 @@ class TestActionDate(unittest.TestCase):
 		for query, today, expected_result in test_set:
 			with self.subTest(f"Testing \"{query}\" relative to {today.date()}, expecting count: {expected_result}"):
 				doc = nlp(query)
-				sent = next(doc.sents)
-				target_date, compare_date = action_date.find_target_and_compare_dates(sent, today=today)
+				target_date, compare_date = action_date.find_target_and_compare_dates(doc, today=today)
 				test_result = action_date.count(target_date, compare_date)
 				self.assertEqual(test_result, expected_result, "Failed to count days (expected {}, got {}), {}".format(expected_result, test_result, query))
+
+	@given(today=st.dates(), target_date=st.dates(), query_template=st.integers(min_value=0, max_value=1))
+	def test_property_date_count_parse_compare_date_should_always_be_today(self, today, target_date, query_template):
+		today = datetime.datetime.combine(today, datetime.datetime.min.time())
+		target_date = datetime.datetime.combine(target_date, datetime.datetime.min.time())
+		query = ["how many days until {}", "count days until {}"][query_template].format(target_date.strftime('%B %d'))
+		doc = nlp(query)
+		action_date = date.ActionDate()
+		target_date, compare_date = action_date.find_target_and_compare_dates(doc, today=today)
+		self.assertEqual(today, compare_date)
 
 if __name__ == '__main__':
 	unittest.main()
