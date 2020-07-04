@@ -8,6 +8,10 @@ import logging
 log = logging.getLogger(__name__)
 
 def text2int(textnum, numwords={}):
+	match_literals = re.search(r"\d+", textnum)
+	if match_literals:
+		return int(match_literals[0])
+
 	if not numwords:
 		units = [
 			"zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
@@ -81,11 +85,17 @@ def find_word(doc, words, min_idx=0):
 
 def parse_duration_to_seconds(tokens):
 	"""
-	TODO: implement this
 	Takes a spacy span of tokens that represent a span of time.
 	Returns the duration of the time span in seconds.
 	"""
-	pass
+	result = 0
+	hours = find_word(tokens, "hour")
+	if hours: result += text2int(hours.nbor(-1).text) * 60 * 60
+	minutes = find_word(tokens, "minute")
+	if minutes: result += text2int(minutes.nbor(-1).text) * 60
+	seconds = find_word(tokens, "second")
+	if seconds: result += text2int(seconds.nbor(-1).text)
+	return result
 
 def levenshtein(seq1, seq2):
 	size_x = len(seq1) + 1

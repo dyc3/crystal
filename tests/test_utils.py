@@ -34,20 +34,19 @@ class TestUtils(unittest.TestCase):
 		self.assertIsNotNone(token)
 		self.assertEqual(token.lemma_, "fox")
 
-	# TODO: implement this utility
-	# def test_parse_duration_to_seconds(self):
-	# 	# query, seconds
-	# 	test_set = [
-	# 		("1 second", 1),
-	# 		("10 seconds", 10),
-	# 		("100 seconds", 100),
-	# 		("1 minute and 10 seconds", 70),
-	# 		("1 minute 10 seconds", 70),
-	# 	]
-	# 	for query, expected_seconds in test_set:
-	# 		with self.subTest(query):
-	# 			doc = nlp(query)
-	# 			self.assertEqual(utils.parse_duration_to_seconds(doc), expected_seconds)
+	def test_parse_duration_to_seconds(self):
+		# query, seconds
+		test_set = [
+			("1 second", 1),
+			("10 seconds", 10),
+			("100 seconds", 100),
+			("1 minute and 10 seconds", 70),
+			("1 minute 10 seconds", 70),
+		]
+		for query, expected_seconds in test_set:
+			with self.subTest(query):
+				doc = nlp(query)
+				self.assertEqual(utils.parse_duration_to_seconds(doc), expected_seconds)
 
 	def test_ordinal_to_int(self):
 		self.assertEqual(utils.ordinal_to_int("4th"), 4)

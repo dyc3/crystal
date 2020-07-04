@@ -1,5 +1,6 @@
 import unittest
 import spacy
+import datetime
 from hypothesis import given, example
 import hypothesis.strategies as st
 
@@ -33,6 +34,20 @@ class TestActionTime(unittest.TestCase):
 			doc = nlp(test)
 			result_command = action_time.parse(doc)
 			self.assertEqual(result_command, expected_command)
+
+	@given(now=st.datetimes(), hours=st.integers(min_value=0, max_value=100), minutes=st.integers(min_value=0, max_value=200), seconds=st.integers(min_value=1, max_value=200))
+	def test_property_should_extract_correct_time_relative(self, now, hours, minutes, seconds):
+		action_time = time.ActionTime()
+		query = ""
+		if hours: query += f"{hours} hours"
+		if minutes: query += f" {minutes} minutes"
+		query += f" {seconds} seconds"
+		query = query.strip()
+		query = f"set a timer for {query}"
+
+		doc = nlp(query)
+		target_time = action_time.parse_target_time(doc, now=now)
+		self.assertEqual(target_time, now + datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds))
 
 if __name__ == '__main__':
 	unittest.main()

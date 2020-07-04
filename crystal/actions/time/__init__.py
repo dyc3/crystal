@@ -2,6 +2,7 @@ import datetime
 from crystal.actions import BaseAction
 from crystal.actions.responses import *
 from crystal import feedback
+import utils
 import logging
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,13 @@ class ActionTime(BaseAction):
 				return "set-alarm"
 		return "check"
 
+	def parse_target_time(self, doc, now=datetime.datetime.now()) -> datetime.datetime:
+		all_time_ents = [ent for ent in doc.ents if ent.label_ == "TIME"]
+		start_i = all_time_ents[0][0].i
+		end_i = all_time_ents[-1][-1].i + 1
+		seconds = utils.parse_duration_to_seconds(doc[start_i:end_i])
+		return now + datetime.timedelta(seconds=seconds)
+
 	def set_alarm(self, moment: datetime.datetime):
 		self.state += [moment]
 
@@ -35,9 +43,11 @@ class ActionTime(BaseAction):
 			log.info(f"Time: {current_time.isoformat()}")
 			return ActionResponseQuery(current_time.isoformat())
 		elif command == "set-alarm":
-			self.set_alarm(datetime.datetime.now() + datetime.timedelta(seconds=5))
+			moment = self.parse_target_time(doc)
+			self.set_alarm(moment)
 			self.save_state()
-			return ActionResponseQuery("Set an alarm for 5 seconds")
+			delta = moment - datetime.datetime.now()
+			return ActionResponseQuery(f"Set an alarm for {delta}")
 
 	def update(self):
 		alarms = self.state
