@@ -6,6 +6,11 @@ import utils
 import logging
 log = logging.getLogger(__name__)
 
+ACTION_CHECK = "check"
+ACTION_SET = "set"
+TARGET_TIME = "time"
+TARGET_ALARM = "alarm"
+
 class ActionTime(BaseAction):
 	"""docstring for ActionTime."""
 	def __init__(self):
@@ -18,12 +23,20 @@ class ActionTime(BaseAction):
 			self.state = []
 
 	def parse(self, doc):
-		for word in doc:
-			if word.lemma_ in ["what", "time", "check"]:
-				return "check"
-			if word.lemma_ in ["set", "alarm", "timer"]:
-				return "set-alarm"
-		return "check"
+		action = ACTION_CHECK
+		target = TARGET_TIME
+
+		if utils.find_word(doc, ["what", "give", "check", "list", "show"]):
+			action = ACTION_CHECK
+		elif utils.find_word(doc, ["set", "create", "make", "start"]):
+			action = ACTION_SET
+
+		if utils.find_word(doc, ["time"]):
+			target = TARGET_TIME
+		elif utils.find_word(doc, ["alarm", "timer", "alert"]):
+			target = TARGET_ALARM
+
+		return action, target
 
 	def parse_target_time(self, doc, now=datetime.datetime.now()) -> datetime.datetime:
 		all_time_ents = [ent for ent in doc.ents if ent.label_ == "TIME"]
@@ -36,18 +49,31 @@ class ActionTime(BaseAction):
 		self.state += [moment]
 
 	def run(self, doc):
-		command = self.parse(doc)
+		action, target = self.parse(doc)
 
-		if command == "check":
-			current_time = datetime.datetime.now().time()
-			log.info(f"Time: {current_time.isoformat()}")
-			return ActionResponseQuery(current_time.isoformat())
-		elif command == "set-alarm":
-			moment = self.parse_target_time(doc)
-			self.set_alarm(moment)
-			self.save_state()
-			delta = moment - datetime.datetime.now()
-			return ActionResponseQuery(f"Set an alarm for {delta}")
+		if target == TARGET_TIME:
+			if action == ACTION_CHECK:
+				current_time = datetime.datetime.now().time()
+				log.info(f"Time: {current_time.isoformat()}")
+				return ActionResponseQuery(current_time.isoformat())
+			else:
+				return ActionResponseBasic(ActionResponseType.FAILURE, f"I don't know how to {action} the time.")
+		elif target == TARGET_ALARM:
+			if action == ACTION_CHECK:
+				return ActionResponseBasic(ActionResponseType.FAILURE, f"I don't know how to {action} the alarms.")
+			elif action == ACTION_SET:
+				now = datetime.datetime.now()
+				moment = self.parse_target_time(doc, now)
+				if moment < now:
+					return ActionResponseBasic(ActionResponseType.FAILURE, f"Failed to set alarm because the calculated alarm time was in the past. moment={moment}, now={now}")
+				self.set_alarm(moment)
+				self.save_state()
+				delta = moment - now
+				return ActionResponseQuery(f"Set an alarm for {delta}")
+			else:
+				return ActionResponseBasic(ActionResponseType.FAILURE, f"I don't know how to {action} the alarms.")
+		else:
+			return ActionResponseBasic(ActionResponseType.FAILURE, f"I don't know how to perform: \"{action}\" on the target \"{target}\".")
 
 	def update(self):
 		alarms = self.state

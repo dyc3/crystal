@@ -12,6 +12,9 @@ set a timer for 10 seconds,time
 create a timer for 10 seconds,time
 make a timer for 10 seconds,time
 start a timer for 10 seconds,time
+create an alert for 10pm,time
+show me the active timers,time
+list the alarms,time
 what is today's date,date
 give me the date,date
 what day of the week is it,date
