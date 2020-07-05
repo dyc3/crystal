@@ -272,7 +272,7 @@ class Rofi(object):
 
 		"""
 		# Replace newlines and turn the options into a single string.
-		optionstr = '\n'.join(option.replace('\n', ' ') for option in options)
+		optionstr = '\n'.join(str(option).replace('\n', ' ') for option in options)
 
 		# Set up arguments.
 		args = ['rofi', '-dmenu', '-p', prompt, '-format', 'i']
