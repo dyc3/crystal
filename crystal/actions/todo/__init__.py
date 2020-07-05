@@ -1,7 +1,7 @@
 import todoist.api
 
 from crystal.actions import BaseAction
-from crystal.actions.responses import ActionResponseType, ActionResponseBasic, ActionResponseQuery, ActionResponsePromptList
+from crystal.actions.responses import *
 from crystal import core, feedback
 import logging
 log = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ class ActionTodo(BaseAction):
 			log.info("Collecting all items...")
 			todo_items = self.get_all_todo_items(todo_state)
 
-			response = ActionResponsePromptList("Todo list", todo_items)
+			response = ActionResponseQueryList("Todo list", todo_items)
 			response.type = ActionResponseType.SUCCESS
 			return response
 		elif command == "add":

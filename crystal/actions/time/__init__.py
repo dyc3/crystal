@@ -60,7 +60,7 @@ class ActionTime(BaseAction):
 				return ActionResponseBasic(ActionResponseType.FAILURE, f"I don't know how to {action} the time.")
 		elif target == TARGET_ALARM:
 			if action == ACTION_CHECK:
-				return ActionResponseBasic(ActionResponseType.FAILURE, f"I don't know how to {action} the alarms.")
+				return ActionResponseQueryList("Alarms and timers", self.state)
 			elif action == ACTION_SET:
 				now = datetime.datetime.now()
 				moment = self.parse_target_time(doc, now)

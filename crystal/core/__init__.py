@@ -146,8 +146,7 @@ def core_on_action_finish(result: ActionResponseBase):
 	if result.type == ActionResponseType.SUCCESS:
 		if isinstance(result, ActionResponseQuery):
 			feedback.ShowNotify(result.message)
-		elif isinstance(result, ActionResponsePromptList):
-			# TODO: replace this with a rofi prompt
+		elif isinstance(result, ActionResponseQueryList):
 			list_text = "List Result:\n"
 			for i in result.items:
 				list_text += "* " + str(i) + "\n"
