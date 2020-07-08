@@ -1,4 +1,5 @@
 import datetime
+import parsedatetime
 from crystal.actions import BaseAction
 from crystal.actions.responses import *
 from crystal import feedback
@@ -10,6 +11,8 @@ ACTION_CHECK = "check"
 ACTION_SET = "set"
 TARGET_TIME = "time"
 TARGET_ALARM = "alarm"
+
+cal = parsedatetime.Calendar()
 
 class ActionTime(BaseAction):
 	"""docstring for ActionTime."""
@@ -39,11 +42,28 @@ class ActionTime(BaseAction):
 		return action, target
 
 	def parse_target_time(self, doc, now=datetime.datetime.now()) -> datetime.datetime:
-		all_time_ents = [ent for ent in doc.ents if ent.label_ == "TIME"]
-		start_i = all_time_ents[0][0].i
-		end_i = all_time_ents[-1][-1].i + 1
-		seconds = utils.parse_duration_to_seconds(doc[start_i:end_i])
-		return now + datetime.timedelta(seconds=seconds)
+		if utils.find_word(doc, ["hour", "minute", "second"]):
+			all_time_ents = [ent for ent in doc.ents if ent.label_ == "TIME"]
+			start_i = all_time_ents[0][0].i
+			end_i = all_time_ents[-1][-1].i + 1
+			seconds = utils.parse_duration_to_seconds(doc[start_i:end_i])
+			return now + datetime.timedelta(seconds=seconds)
+		else:
+			all_time_ents = [ent for ent in doc.ents if ent.label_ == "CARDINAL" or ent.label_ == "TIME"]
+			if len(all_time_ents) > 0:
+				start_i = all_time_ents[0][0].i
+				end_i = all_time_ents[-1][-1].i + 1
+			else:
+				num_tokens = [token for token in doc if token.like_num or token.text in ["am", "pm"]]
+				start_i = num_tokens[0].i
+				end_i = num_tokens[-1].i + 1
+			if utils.find_word(doc, ["am", "pm"]):
+				target_time, _ = cal.parseDT(doc[start_i:end_i].text, sourceTime=now)
+			else:
+				target_time = now.replace(hour=(utils.text2int(doc[start_i:end_i].text) + 12*(now.hour < 12)) % 24, minute=0, second=0, microsecond=0)
+			if target_time < now:
+				target_time += datetime.timedelta(days=1)
+			return target_time
 
 	def set_alarm(self, moment: datetime.datetime):
 		self.state += [moment]

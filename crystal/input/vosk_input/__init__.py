@@ -57,5 +57,9 @@ class VoskInput(BaseInput):
 		full_text = full_text.replace("applause music", "pause music")
 		full_text = full_text.replace("turn off the land", "turn off the lamp")
 		full_text = full_text.replace("turn off the lamb", "turn off the lamp")
+		if full_text.endswith("to pm"):
+			full_text = full_text.replace("to pm", "2 pm")
+		if full_text.endswith(" a m"):
+			full_text = full_text.replace(" a m", " am")
 
 		return full_text

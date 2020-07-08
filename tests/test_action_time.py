@@ -63,5 +63,28 @@ class TestActionTime(unittest.TestCase):
 		target_time = action_time.parse_target_time(doc, now=now)
 		self.assertGreaterEqual(target_time, now)
 
+	@given(now=st.datetimes(), clock_hour=st.integers(min_value=1, max_value=12), am_or_pm=st.sampled_from(["", "am", "pm"]))
+	def test_property_absolute_alarm_time_should_always_be_in_future(self, now, clock_hour, am_or_pm):
+		action_time = time.ActionTime()
+		query = f"set an alarm for {clock_hour} {am_or_pm}".strip()
+
+		doc = nlp(query)
+		target_time = action_time.parse_target_time(doc, now=now)
+		self.assertGreaterEqual(target_time, now)
+
+	@given(now=st.datetimes(), clock_hour=st.integers(min_value=1, max_value=12), am_or_pm=st.sampled_from(["am", "pm"]))
+	def test_property_absolute_alarm_time_should_always_match_hour(self, now, clock_hour, am_or_pm):
+		action_time = time.ActionTime()
+		query = f"set an alarm for {clock_hour} {am_or_pm}".strip()
+
+		doc = nlp(query)
+		target_time = action_time.parse_target_time(doc, now=now)
+		adjusted_clock_hour = (clock_hour + 12*(am_or_pm == "pm")) % 24
+		if adjusted_clock_hour == 12 and am_or_pm == "am":
+			adjusted_clock_hour = 0
+		elif adjusted_clock_hour == 0 and am_or_pm == "pm":
+			adjusted_clock_hour = 12
+		self.assertEqual(adjusted_clock_hour, target_time.hour)
+
 if __name__ == '__main__':
 	unittest.main()
