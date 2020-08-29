@@ -55,8 +55,10 @@ class VoskInput(BaseInput):
 		# HACK: auto correct text to match domain vocabulary. Sorry.
 		full_text = full_text.replace("palace music", "pause music")
 		full_text = full_text.replace("applause music", "pause music")
-		full_text = full_text.replace("turn off the land", "turn off the lamp")
-		full_text = full_text.replace("turn off the lamb", "turn off the lamp")
+		if "turn on" in full_text or "turn off" in full_text:
+			full_text = full_text.replace("the land", "the lamp").replace("the lamb", "the lamp")
+			if full_text.endswith("the lam"):
+				full_text = full_text.replace("the lam", "the lamp")
 		if full_text.endswith("to pm"):
 			full_text = full_text.replace("to pm", "2 pm")
 		if full_text.endswith(" a m"):
