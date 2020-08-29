@@ -61,5 +61,7 @@ class VoskInput(BaseInput):
 			full_text = full_text.replace("to pm", "2 pm")
 		if full_text.endswith(" a m"):
 			full_text = full_text.replace(" a m", " am")
+		if full_text.startswith("christo"):
+			full_text = full_text.replace("christo", "crystal")
 
 		return full_text

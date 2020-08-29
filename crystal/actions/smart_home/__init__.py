@@ -89,7 +89,7 @@ class ActionSmartHome(BaseAction):
 		self.devices = pywemo.discover_devices()
 		# HACK: because discover devices doesn't work
 		# we should just do our own portscan.
-		self.devices += [pywemo.discovery.device_from_description(f'http://{ip}:{pywemo.ouimeaux_device.probe_wemo(ip)}/setup.xml', None) for ip in ["192.168.0.35", "192.168.0.36", "192.168.0.37"]]
+		self.devices += [pywemo.discovery.device_from_description(f'http://{ip}:{pywemo.ouimeaux_device.probe_wemo(ip)}/setup.xml', None) for ip in ["192.168.0.26", "192.168.0.27", "192.168.0.28"]]
 		self.devices = list([DeviceWrapper(d) for d in self.devices])
 		log.info(f"found {len(self.devices)} devices")
 		self.last_device_scan = datetime.datetime.now()
