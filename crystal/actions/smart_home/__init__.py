@@ -55,30 +55,39 @@ class ActionSmartHome(BaseAction):
 			return "scan"
 		if utils.find_word(doc, ["should", "how", "are", "did", "is"]):
 			return "query"
+		return "interact"
 
 	def parse_interact(self, doc):
 		verb_token = utils.find_word(doc, ["toggle", "turn"])
-		if not verb_token:
-			raise Exception("Unable to find verb")
 		target_token = None
-		for token in doc[verb_token.i + 1:]:
-			if token.pos_ == "NOUN":
-				target_token = token
-				break
-		if not target_token:
-			raise Exception("Unable to find target")
+		if verb_token:
+			for token in doc[verb_token.i + 1:]:
+				if token.pos_ == "NOUN":
+					target_token = token
+					break
 
-		if verb_token.text == "toggle":
-			objective_state = "toggle"
+			if not target_token:
+				raise Exception("Unable to find target")
+
+			if verb_token.text == "toggle":
+				objective_state = "toggle"
+			else:
+				objective_state = 1 if verb_token.nbor(1).text == "on" else 0
 		else:
-			objective_state = 1 if verb_token.nbor(1).text == "on" else 0
+			log.warning("no verb found, guessing where the target is")
+			action_token = utils.find_word(doc, ["on", "off", "toggle"])
+			target_token = action_token.nbor(-1 if action_token.i == len(doc) - 1 else 1)
+			if action_token.text == "toggle":
+				objective_state = "toggle"
+			else:
+				objective_state = 1 if action_token.text == "on" else 0
 
 		device_name = target_token.text
-		target_prev_token = target_token.nbor(-1)
+		target_prev_token = target_token.nbor(-1) if target_token.i > 0 else None
 		while target_token.dep_ == "compound":
 			device_name += f" {target_token.nbor(1).text}"
 			target_token = target_token.nbor(1)
-		if target_prev_token.pos_ == "PROPN":
+		if target_prev_token and target_prev_token.pos_ == "PROPN":
 			device_name = f"{target_prev_token.text} {device_name}"
 		elif list(target_token.children)[0].dep_ == "poss":
 			device_name = f"{list(target_token.children)[0].text} {device_name}"

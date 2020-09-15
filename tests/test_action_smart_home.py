@@ -21,6 +21,7 @@ class TestActionSmartHome(unittest.TestCase):
 		test_set = [
 			("turn on the lamp", "interact"),
 			("toggle the light", "interact"),
+			("lamp on", "interact"),
 			("scan for devices", "scan"),
 			("look for new devices", "scan"),
 			("are the lights on", "query"),
@@ -48,6 +49,7 @@ class TestActionSmartHome(unittest.TestCase):
 			("toggle carson room light", "carson room light", "toggle"),
 			("turn off carson's lamp", "carson lamp", 0),
 			("turn on carson's light", "carson light", 1),
+			("lamp on", "lamp", 1),
 		]
 		action_smart_home = smart_home.ActionSmartHome()
 		for query, expected_device_name, expected_objective_state in test_set:
