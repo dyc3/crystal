@@ -28,12 +28,14 @@ class TestActionTime(unittest.TestCase):
 			("set an alarm for 7", (time.ACTION_SET, time.TARGET_ALARM)),
 			("create an alarm for 8", (time.ACTION_SET, time.TARGET_ALARM)),
 			("set a timer for 8 minutes", (time.ACTION_SET, time.TARGET_ALARM)),
+			("set a one hour timer", (time.ACTION_SET, time.TARGET_ALARM)),
 		]
 		action_time = time.ActionTime()
-		for test, expected in test_set:
-			doc = nlp(test)
-			result = action_time.parse(doc)
-			self.assertEqual(result, expected)
+		for query, expected in test_set:
+			with self.subTest(query):
+				doc = nlp(query)
+				result = action_time.parse(doc)
+				self.assertEqual(result, expected)
 
 	@given(now=st.datetimes(), hours=st.integers(min_value=0, max_value=100), minutes=st.integers(min_value=0, max_value=200), seconds=st.integers(min_value=1, max_value=200))
 	def test_should_extract_correct_time_relative(self, now, hours, minutes, seconds):
@@ -41,9 +43,25 @@ class TestActionTime(unittest.TestCase):
 		query = ""
 		if hours: query += f"{hours} hours"
 		if minutes: query += f" {minutes} minutes"
+		if hours or minutes: query += " and"
 		query += f" {seconds} seconds"
 		query = query.strip()
 		query = f"set a timer for {query}"
+
+		doc = nlp(query)
+		target_time = action_time.parse_target_time(doc, now=now)
+		self.assertEqual(target_time, now + datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds))
+
+	@given(now=st.datetimes(), hours=st.integers(min_value=0, max_value=100), minutes=st.integers(min_value=0, max_value=200), seconds=st.integers(min_value=1, max_value=200))
+	def test_should_extract_correct_time_relative_query_variation_1(self, now, hours, minutes, seconds):
+		action_time = time.ActionTime()
+		query = ""
+		if hours: query += f"{hours} hours"
+		if minutes: query += f" {minutes} minutes"
+		if hours or minutes: query += " and"
+		query += f" {seconds} seconds"
+		query = query.strip()
+		query = f"set a {query} timer"
 
 		doc = nlp(query)
 		target_time = action_time.parse_target_time(doc, now=now)
