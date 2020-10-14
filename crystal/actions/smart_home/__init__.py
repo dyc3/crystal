@@ -76,11 +76,24 @@ class ActionSmartHome(BaseAction):
 		else:
 			log.warning("no verb found, guessing where the target is")
 			action_token = utils.find_word(doc, ["on", "off", "toggle"])
-			target_token = action_token.nbor(-1 if action_token.i == len(doc) - 1 else 1)
-			if action_token.text == "toggle":
-				objective_state = "toggle"
+			if action_token:
+				target_token = action_token.nbor(-1 if action_token.i == len(doc) - 1 else 1)
+				if action_token.text == "toggle":
+					objective_state = "toggle"
+				else:
+					objective_state = 1 if action_token.text == "on" else 0
 			else:
-				objective_state = 1 if action_token.text == "on" else 0
+				# HACK: assume toggle objective because that's probably what was
+				# supposed to happen, but the speech recognition fucked up
+				log.debug("No action token, assuming toggle objective")
+				objective_state = "toggle"
+				# TODO: also assume target token
+				nouns = []
+				for token in doc:
+					if any(token.pos_ == x for x in ["NOUN", "PROPN"]):
+						nouns += [token]
+				log.debug(f"Found nouns: {nouns}")
+				target_token = nouns[-1]
 
 		device_name = target_token.text
 		target_prev_token = target_token.nbor(-1) if target_token.i > 0 else None
@@ -103,7 +116,7 @@ class ActionSmartHome(BaseAction):
 		log.info(f"found {len(self.devices)} devices")
 		self.last_device_scan = datetime.datetime.now()
 
-	def select_device(self, name: str) -> DeviceWrapper:
+	def select_device(self, name: str, objective_state: int=None) -> DeviceWrapper:
 		name_doc = crystal.core.processing.parse_nlp(name)
 		scores = {}
 		for idx, device in enumerate(self.devices):

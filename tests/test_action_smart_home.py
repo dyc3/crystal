@@ -50,6 +50,9 @@ class TestActionSmartHome(unittest.TestCase):
 			("turn off carson's lamp", "carson lamp", 0),
 			("turn on carson's light", "carson light", 1),
 			("lamp on", "lamp", 1),
+
+			# misrecognition tests
+			("crystal to man the lamp", "lamp", "toggle"),
 		]
 		action_smart_home = smart_home.ActionSmartHome()
 		for query, expected_device_name, expected_objective_state in test_set:

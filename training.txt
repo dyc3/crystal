@@ -239,3 +239,8 @@ toggle nightlight,smart-home
 toggle room lights,smart-home
 scan for devices,smart-home
 look for new devices,smart-home
+did I leave the lights on,smart-home
+are the lights on,smart-home
+how many devices are available,smart-home
+how many devices have you found,smart-home
+lamp on,smart-home
