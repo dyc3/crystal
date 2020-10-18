@@ -37,6 +37,15 @@ class TestActionTime(unittest.TestCase):
 				result = action_time.parse(doc)
 				self.assertEqual(result, expected)
 
+	def test_compound_numbers(self):
+		action_time = time.ActionTime()
+		query = f"set a forty five minute timer"
+		now = datetime.datetime.now()
+
+		doc = nlp(query)
+		target_time = action_time.parse_target_time(doc, now=now)
+		self.assertEqual(target_time, now + datetime.timedelta(minutes=45))
+
 	@given(now=st.datetimes(), hours=st.integers(min_value=0, max_value=100), minutes=st.integers(min_value=0, max_value=200), seconds=st.integers(min_value=1, max_value=200))
 	def test_should_extract_correct_time_relative(self, now, hours, minutes, seconds):
 		action_time = time.ActionTime()

@@ -83,6 +83,24 @@ def find_word(doc, words, min_idx=0):
 				return token
 	return None
 
+def is_num_word(token):
+	"""
+	Check if a token could be a part of a number in word form
+	"""
+	return (token.like_num or token.text in ["and", "point"]) and not token.is_digit
+
+def select_number_bleedy(token):
+	"""
+	Takes a token, and grabs the adjacent tokens that are numbers in word form.
+	"""
+	start_idx = token.i
+	end_idx = token.i
+	while start_idx > 0 and is_num_word(token.doc[start_idx - 1]):
+		start_idx -= 1
+	while end_idx + 1 < len(token.doc) and is_num_word(token.doc[end_idx + 1]):
+		end_idx += 1
+	return token.doc[start_idx:end_idx + 1]
+
 def parse_duration_to_seconds(tokens):
 	"""
 	Takes a spacy span of tokens that represent a span of time.
@@ -90,11 +108,11 @@ def parse_duration_to_seconds(tokens):
 	"""
 	result = 0
 	hours = find_word(tokens, "hour")
-	if hours: result += text2int(hours.nbor(-1).text) * 60 * 60
+	if hours: result += text2int(select_number_bleedy(hours.nbor(-1)).text) * 60 * 60
 	minutes = find_word(tokens, "minute")
-	if minutes: result += text2int(minutes.nbor(-1).text) * 60
+	if minutes: result += text2int(select_number_bleedy(minutes.nbor(-1)).text) * 60
 	seconds = find_word(tokens, "second")
-	if seconds: result += text2int(seconds.nbor(-1).text)
+	if seconds: result += text2int(select_number_bleedy(seconds.nbor(-1)).text)
 	return result
 
 def levenshtein(seq1, seq2):

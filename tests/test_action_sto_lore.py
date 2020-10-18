@@ -18,12 +18,12 @@ class TestActionStoLore(unittest.TestCase):
 			("volume 1 chapter 1", 1, 1),
 			("volume 24 chapter 6", 24, 6),
 			("star trek lower volume nineteen chapter four", 19, 4),
+			("star trek lower volume twenty three chapter two", 23, 2),
 		]
 		action_sto_lore = sto_lore.ActionStoLore()
 		for query, expected_volume, expected_chapter in test_set:
 			with self.subTest():
 				doc = nlp(query)
-				# sent = next(doc.sents)
 				volume, chapter = action_sto_lore.parse(doc)
 
 				self.assertEqual(volume, expected_volume, "Volume don't match, {}".format(query))

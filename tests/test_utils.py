@@ -42,6 +42,7 @@ class TestUtils(unittest.TestCase):
 			("100 seconds", 100),
 			("1 minute and 10 seconds", 70),
 			("1 minute 10 seconds", 70),
+			("a twenty three minute", 23*60),
 		]
 		for query, expected_seconds in test_set:
 			with self.subTest(query):
@@ -56,6 +57,28 @@ class TestUtils(unittest.TestCase):
 		self.assertEqual(utils.ordinal_to_int("second"), 2)
 		self.assertEqual(utils.ordinal_to_int("third"), 3)
 
+	def test_select_number_bleedy(self):
+		doc = nlp("Order twenty three grape peelers.")
+		self.assertEqual(utils.select_number_bleedy(doc[1]).text, "twenty three")
+		self.assertEqual(utils.select_number_bleedy(doc[2]).text, "twenty three")
+
+		doc = nlp("Seek and destroy one hundred and sixty five testicles.")
+		self.assertEqual(utils.select_number_bleedy(doc[3]).text, "one hundred and sixty five")
+		self.assertEqual(utils.select_number_bleedy(doc[4]).text, "one hundred and sixty five")
+		self.assertEqual(utils.select_number_bleedy(doc[5]).text, "one hundred and sixty five")
+		self.assertEqual(utils.select_number_bleedy(doc[6]).text, "one hundred and sixty five")
+		self.assertEqual(utils.select_number_bleedy(doc[7]).text, "one hundred and sixty five")
+
+		doc = nlp("thirty two gallons of blinker fluid.")
+		self.assertEqual(utils.select_number_bleedy(doc[0]).text, "thirty two")
+		self.assertEqual(utils.select_number_bleedy(doc[1]).text, "thirty two")
+
+		doc = nlp("found number thirty two")
+		self.assertEqual(utils.select_number_bleedy(doc[2]).text, "thirty two")
+		self.assertEqual(utils.select_number_bleedy(doc[3]).text, "thirty two")
+
+		doc = nlp("five balls")
+		self.assertEqual(utils.select_number_bleedy(doc[0]).text, "five")
 
 if __name__ == '__main__':
 	unittest.main()

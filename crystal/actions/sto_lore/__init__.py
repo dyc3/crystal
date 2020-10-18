@@ -32,7 +32,7 @@ class ActionStoLore(BaseAction):
 	def parse(self, doc):
 		volume_token = utils.find_word(doc, "volume")
 		chapter_token = utils.find_word(doc, "chapter")
-		nums = [volume_token.nbor(1).text, chapter_token.nbor(1).text]
+		nums = [utils.select_number_bleedy(volume_token.nbor(1)).text, utils.select_number_bleedy(chapter_token.nbor(1)).text]
 		def _to_num(text):
 			if text == "to":
 				return 2

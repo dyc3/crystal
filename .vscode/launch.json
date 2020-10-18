@@ -4,6 +4,7 @@
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
+		{"name":"Run tests","type":"python","request":"launch","module":"unittest", "args": ["-c", "tests/*"]},
 		{
 			"name": "Run (Text Mode) (Integrated Terminal)",
 			"type": "python",
