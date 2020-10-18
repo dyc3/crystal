@@ -43,9 +43,22 @@ class ActionTime(BaseAction):
 
 	def parse_target_time(self, doc, now=datetime.datetime.now()) -> datetime.datetime:
 		if utils.find_word(doc, ["hour", "minute", "second"]):
-			all_time_ents = [ent for ent in doc.ents if ent.label_ == "TIME"]
-			start_i = all_time_ents[0][0].i
-			end_i = all_time_ents[-1][-1].i + 1
+			all_time_ents = [ent for ent in doc.ents if ent.label_ in ["TIME", "CARDINAL"]]
+			if len(all_time_ents) > 0:
+				start_i = all_time_ents[0][0].i
+				end_i = all_time_ents[-1][-1].i + 1
+				if end_i < len(doc):
+					additional = utils.find_word(doc, ["hour", "minute", "second"], min_idx=end_i)
+					while additional:
+						# the entity parser didn't quite get all the tokens
+						end_i = additional.i + 1
+						additional = utils.find_word(doc, ["hour", "minute", "second"], min_idx=end_i)
+			else:
+				time_word = utils.find_word(doc, ["hour", "minute", "second"])
+				start_i = utils.select_number_bleedy(time_word.nbor(-1))[0].i
+				while time_word:
+					end_i = time_word.i + 1
+					time_word = utils.find_word(doc, ["hour", "minute", "second"], min_idx=end_i)
 			seconds = utils.parse_duration_to_seconds(doc[start_i:end_i])
 			return now + datetime.timedelta(seconds=seconds)
 		else:

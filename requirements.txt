@@ -94,3 +94,4 @@ wrapt==1.11.1
 zope.interface==4.3.3
 vosk==0.3.7
 hypothesis==5.19.0
+inflect==4.1.0
