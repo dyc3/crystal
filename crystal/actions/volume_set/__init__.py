@@ -83,8 +83,14 @@ class ActionVolumeSet(BaseAction):
 									p = str(n)
 									break
 						else:
-							p = str(prepchild)
-						percent = float(p.rstrip('%')) / 100
+							if prepchild.like_num and not prepchild.is_digit:
+								numtext = utils.select_number_bleedy(prepchild).text
+								percent = utils.text2int(numtext) / 100
+							else:
+								p = str(prepchild)
+
+						if not percent:
+							percent = float(p.rstrip('%')) / 100
 						break
 			elif child.is_digit:
 				percent = float(child.text.rstrip('%')) / 100
