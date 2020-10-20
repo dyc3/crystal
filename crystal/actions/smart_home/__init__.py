@@ -2,6 +2,9 @@ from crystal.actions import BaseAction
 from crystal.actions.responses import *
 import pywemo
 import datetime
+import requests
+import ipaddress
+from typing import Union
 from crystal import feedback
 import utils
 import crystal.core.processing
@@ -10,8 +13,12 @@ import logging
 log = logging.getLogger(__name__)
 
 class DeviceWrapper(object):
-	def __init__(self, device):
+	def __init__(self, ip: Union[str, ipaddress.IPv4Address, ipaddress.IPv6Address], device):
 		super(DeviceWrapper, self).__init__()
+		if isinstance(ip, str):
+			self.ip_address = ipaddress.ip_address(ip)
+		else:
+			self.ip_address = ip
 		self.internal_device = device
 		self._name_processed: Doc = None
 
@@ -28,11 +35,15 @@ class DeviceWrapper(object):
 			self._name_processed = crystal.core.processing.parse_nlp(self.name)
 		return self._name_processed
 
-	def set_state(self, state):
+	def set_state(self, state) -> None:
 		self.internal_device.set_state(state)
 
 	def toggle(self):
 		self.internal_device.toggle()
+
+	def health_check(self) -> bool:
+		# TODO: check if device is still there
+		return True
 
 class ActionSmartHome(BaseAction):
 	"""docstring for ActionSmartHome."""
@@ -46,18 +57,18 @@ class ActionSmartHome(BaseAction):
 		self.devices = []
 		self.last_device_scan = datetime.datetime.now() - datetime.timedelta(seconds=5*60)
 
-	def get_query_type(self, doc):
+	def get_query_type(self, doc: Doc):
 		if utils.find_word(doc, ["toggle", "turn"]):
 			return "interact"
 		if utils.find_word(doc, ["scan", "look", "search", "find"]):
 			if utils.find_word(doc, ["how"]):
 				return "query"
 			return "scan"
-		if utils.find_word(doc, ["should", "how", "are", "did", "is"]):
+		if utils.find_word(doc, ["should", "how", "are", "did", "is", "what", "list"]):
 			return "query"
 		return "interact"
 
-	def parse_interact(self, doc):
+	def parse_interact(self, doc: Doc):
 		verb_token = utils.find_word(doc, ["toggle", "turn"])
 		target_token = None
 		if verb_token:
@@ -108,11 +119,12 @@ class ActionSmartHome(BaseAction):
 		return device_name, objective_state
 
 	def scan_for_devices(self):
-		self.devices = pywemo.discover_devices()
-		# HACK: because discover devices doesn't work
-		# we should just do our own portscan.
-		self.devices += [pywemo.discovery.device_from_description(f'http://{ip}:{pywemo.ouimeaux_device.probe_wemo(ip)}/setup.xml', None) for ip in ["192.168.0.26", "192.168.0.27", "192.168.0.28"]]
-		self.devices = list([DeviceWrapper(d) for d in self.devices])
+		# NOTE: device discovery doesn't work if ufw is enabled. Idk what the firewall rule to allow the traffic is.
+		discovered_devices = pywemo.discover_devices()
+		# Manually add devices:
+		# self.devices += [pywemo.discovery.device_from_description(f'http://{ip}:{pywemo.ouimeaux_device.probe_wemo(ip)}/setup.xml', None) for ip in ["192.168.0.26", "192.168.0.27", "192.168.0.28"]]
+		self.devices = list([DeviceWrapper(d.host, d) for d in discovered_devices])
+
 		log.info(f"found {len(self.devices)} devices")
 		self.last_device_scan = datetime.datetime.now()
 
@@ -130,7 +142,7 @@ class ActionSmartHome(BaseAction):
 			scores[idx] = score
 		return self.devices[max(scores, key=scores.get)]
 
-	def run(self, doc):
+	def run(self, doc: Doc):
 		query_type = self.get_query_type(doc)
 		if query_type == "interact":
 			device_name, objective_state = self.parse_interact(doc)
@@ -150,7 +162,7 @@ class ActionSmartHome(BaseAction):
 
 	def update(self):
 		delta = datetime.datetime.now() - self.last_device_scan
-		if delta.total_seconds() < 5 * 60:
+		if delta.total_seconds() < 10 * 60:
 			return
 		self.scan_for_devices()
 

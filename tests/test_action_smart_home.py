@@ -30,6 +30,8 @@ class TestActionSmartHome(unittest.TestCase):
 			("how many devices are available", "query"),
 			("is the lamp supposed to be on", "query"),
 			("did I leave the lights on", "query"),
+			("list available devices", "query"),
+			("what devices are available", "query"),
 		]
 		action_smart_home = smart_home.ActionSmartHome()
 		for query, expected_query_type in test_set:
@@ -65,9 +67,9 @@ class TestActionSmartHome(unittest.TestCase):
 	def test_select_correct_device(self):
 		action_smart_home = smart_home.ActionSmartHome()
 		fake_devices = [
-			smart_home.DeviceWrapper({"name": "Carsons Lamp"}),
-			smart_home.DeviceWrapper({"name": "Carsons Room Light"}),
-			smart_home.DeviceWrapper({"name": "Pauls Room Light"}),
+			smart_home.DeviceWrapper("192.168.0.20", {"name": "Carsons Lamp"}),
+			smart_home.DeviceWrapper("192.168.0.21", {"name": "Carsons Room Light"}),
+			smart_home.DeviceWrapper("192.168.0.22", {"name": "Pauls Room Light"}),
 		]
 		action_smart_home.devices = fake_devices
 		test_set = [
