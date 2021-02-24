@@ -1,4 +1,4 @@
-#!.env/bin/python3
+#!/usr/bin/env python3
 import argparse
 import crystal.core
 import logging, coloredlogs
