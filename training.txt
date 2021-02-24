@@ -193,6 +193,9 @@ what is my internal IP,info-hardware
 what network devices are available,info-hardware
 how much battery is left,info-hardware
 how much charge is remaining,info-hardware
+list network devices,info-hardware
+list the available audio devices,info-hardware
+show me audio devices,info-hardware
 how many notifications are on Github,github
 check github notifications,github
 check GitHub notifications,github
@@ -244,3 +247,4 @@ are the lights on,smart-home
 how many devices are available,smart-home
 how many devices have you found,smart-home
 lamp on,smart-home
+list smart home devices,smart-home
