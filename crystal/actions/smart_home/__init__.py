@@ -159,6 +159,9 @@ class ActionSmartHome(BaseAction):
 		elif query_type == "scan":
 			self.scan_for_devices()
 			return ActionResponseQuery(f"Found {len(self.devices)} devices")
+		elif query_type == "query":
+			names = [d.name for d in self.devices]
+			return ActionResponseQueryList("Devices", names)
 		else:
 			return ActionResponseBasic(ActionResponseType.FAILURE, f"Unknown query type: {query_type}")
 
