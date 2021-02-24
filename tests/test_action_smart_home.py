@@ -31,6 +31,7 @@ class TestActionSmartHome(unittest.TestCase):
 			("is the lamp supposed to be on", "query"),
 			("did I leave the lights on", "query"),
 			("list available devices", "query"),
+			("list connected devices", "query"),
 			("what devices are available", "query"),
 		]
 		action_smart_home = smart_home.ActionSmartHome()
