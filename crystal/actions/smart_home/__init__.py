@@ -145,6 +145,8 @@ class ActionSmartHome(BaseAction):
 	def run(self, doc: Doc):
 		query_type = self.get_query_type(doc)
 		if query_type == "interact":
+			if len(self.devices) == 0:
+				return ActionResponseBasic(ActionResponseType.FAILURE, "No devices available. I haven't found any, and I haven't been told where any of them are. I can do a manual scan, just ask me to.")
 			device_name, objective_state = self.parse_interact(doc)
 			log.info(f"Set {device_name}: {objective_state}")
 			target_device = self.select_device(device_name)
