@@ -16,7 +16,9 @@ class VoskInput(BaseInput):
 		self.current_utterance = ""
 		self.realtime = True # indicates that audio can be streamed in
 
-		self.model = Model("models/vosk-model-small-en-us-0.3")
+		model_name = crystal.core.get_config('vosk_model') or 'vosk-model-small-en-us-0.3'
+		log.info(f"Using vosk model: {model_name}")
+		self.model = Model(f"models/{model_name}")
 		self.rec = None
 		self.__final_result = None
 
