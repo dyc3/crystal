@@ -1,7 +1,11 @@
+from typing import List
+import crystal.core
 from crystal.actions import BaseAction
 from crystal.actions.responses import *
 import subprocess, os, shlex, sys
+from pathlib import Path
 import logging
+import utils
 log = logging.getLogger(__name__)
 
 class ActionRunProgram(BaseAction):
@@ -64,9 +68,11 @@ class ActionRunProgram(BaseAction):
 				return "minecraft"
 			if any([w.endswith(".com") or w.endswith(".org") or w.endswith(".net") or w.endswith(".io") for w in word_strs]):
 				return word_strs[0]
+		if utils.find_word(doc, "textbook"):
+			return "textbook"
 
 	@classmethod
-	def determine_program(self, program_type: str) -> str:
+	def determine_program(self, program_type: str, doc=None) -> str:
 		"""
 		Determine the exact program to run and the exact arguments.
 		"""
@@ -110,6 +116,24 @@ class ActionRunProgram(BaseAction):
 			return "minecraft-launcher"
 		if any([program_type.endswith(s) for s in [".com", ".org", ".net", ".io"]]):
 			return f"x-www-browser {program_type}"
+		if not doc:
+			return
+		if program_type == "textbook":
+			textbook = utils.find_word(doc, "textbook")
+			specifier = textbook.nbor(-1)
+			# any hardcoded commands to open specific textbooks should go here.
+
+			# otherwise, look for textbooks that match the specifier in this folder
+			# TODO: use crystal.core.get_config("textbooks_path", optional=True)
+			search_path: Path = Path.home().joinpath("Documents/school/textbooks")
+			select = None
+			for path in search_path.glob("**/*.pdf"):
+				if specifier.text.lower() in path.name.lower():
+					select = path
+
+			if select:
+				return f"evince {shlex.quote(str(select.absolute()))}"
+			raise Exception(f"Unable to find a {specifier} textbook")
 
 	@classmethod
 	def run(self, doc):
@@ -117,7 +141,7 @@ class ActionRunProgram(BaseAction):
 		log.debug("program_type = {}".format(program_type))
 		program = None
 		if program_type:
-			program = self.determine_program(program_type)
+			program = self.determine_program(program_type, doc)
 		else:
 			log.warn("unable to determine program type, attempting heuristic")
 			# heuristic to open arbitrary programs
@@ -136,7 +160,7 @@ class ActionRunProgram(BaseAction):
 
 		# We need to spawn these processes without crystal's virtualenv, and reset the working directory
 		# We also need to spawn these processes such that Crystal is not the parent process
-		command = f"/usr/bin/env sh -c 'unset VIRTUAL_ENV; cd; {program} & disown'"
+		command = f"/usr/bin/env sh -c {shlex.quote(f'unset VIRTUAL_ENV; cd; {program} & disown')}"
 		log.debug(f"Full command: {command}")
 		subprocess.Popen(shlex.split(command),
 						stdin=subprocess.DEVNULL,
