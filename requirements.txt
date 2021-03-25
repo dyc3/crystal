@@ -62,7 +62,7 @@ PyTweening==1.0.3
 pytz==2017.2
 pyusb==1.0.0
 pywemo==0.4.41
-PyYAML==5.1
+PyYAML==5.4
 regex==2018.1.10
 requests==2.20.1
 resampy==0.1.5
