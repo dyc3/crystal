@@ -35,7 +35,7 @@ numpy==1.16.0
 parsedatetime==2.6
 pathlib==1.0.1
 pgi==0.0.11.1
-Pillow==6.2.0
+Pillow==8.3.2
 plac==0.9.6
 pocketsphinx==0.1.3
 preshed==3.0.2
